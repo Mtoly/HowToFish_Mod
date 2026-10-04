@@ -1,0 +1,20 @@
+TASK=Task 1 baseline
+COMMAND=python tests/projectile_guidance_reset_test.py
+INPUT=current decompiled-src before lifecycle changes
+LITERAL_OUTPUT=Traceback (most recent call last):
+LITERAL_OUTPUT=  File "D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\projectile_guidance_reset_test.py", line 13, in <module>
+LITERAL_OUTPUT=    assert token in guidance or token in spawn, f"missing guidance baseline field: {token}"
+LITERAL_OUTPUT=           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+LITERAL_OUTPUT=AssertionError: missing guidance baseline field: RawVelocity
+EXIT_STATUS=1
+COMMAND=python tests/projectile_guidance_test.py
+LITERAL_OUTPUT=PROJECTILE_GUIDANCE_TESTS=PASS cases=5
+EXIT_STATUS=0
+COMMAND=python tests/projectile_lifecycle_test.py
+LITERAL_OUTPUT=PROJECTILE_LIFECYCLE_TESTS=PASS cases=5
+EXIT_STATUS=0
+COMMAND=python tests/projectile_initial_velocity_test.py
+LITERAL_OUTPUT=PROJECTILE_INITIAL_VELOCITY_TESTS=PASS cases=5
+EXIT_STATUS=0
+PROJECT_DLL_SHA256=E51F5D0A7630E54B76F70DEF8FDA9E38DD1ED12067D535CCBA4187B3C0E28FA3
+DEPLOYED_DLL_SHA256=5F02EC332D300486DF22504AD2A3372828BFC60D1F47C92459F93C4BF80B9D92

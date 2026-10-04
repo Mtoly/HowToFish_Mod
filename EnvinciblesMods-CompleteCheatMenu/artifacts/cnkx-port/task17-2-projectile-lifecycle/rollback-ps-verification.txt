@@ -1,0 +1,35 @@
+RESTORED_DLL_SHA256=ED9F679FD8AE6DCF12A0171A01252DBB2CF0A3CF5C63DD2E02A4FAD6E9192B6B
+RESTORED_SOURCE_FILES=4
+CREATED_FILES_PRESENT=0
+ROLLBACK_TASK17_2=PASS
+SOURCE_MATCH decompiled-src\CompleteCheatMenu\Plugin.cs=True
+SOURCE_MATCH decompiled-src\CompleteCheatMenu\Runtime\TickDriver.cs=True
+SOURCE_MATCH decompiled-src\CompleteCheatMenu\UI\Tabs\DiagnosticsTab.cs=True
+SOURCE_MATCH docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md=True
+CREATED_FILES_PRESENT=0
+aim_scoring_test.py: AIM_SCORING_TESTS=PASS cases=9 EXIT=0
+ballistic_prediction_test.py: BALLISTIC_PREDICTION_TESTS=PASS cases=7 EXIT=0
+bone_selection_test.py: BONE_SELECTION_TESTS=PASS cases=7 EXIT=0
+client_mode_capability_test.py: CLIENT_MODE_CAPABILITY_TESTS=PASS cases=5 EXIT=0
+entity_registry_test.py: ENTITY_REGISTRY_TESTS=PASS cases=9 EXIT=0
+esp_projection_test.py: ESP_PROJECTION_TESTS=PASS cases=8 EXIT=0
+localized_ui_preset_test.py: LOCALIZED_UI_PRESET_TESTS=PASS cases=9 EXIT=0
+snapshot_isolation_test.py: SNAPSHOT_ISOLATION_TESTS=PASS cases=7 EXIT=0
+target_lock_test.py: TARGET_LOCK_TESTS=PASS cases=8 EXIT=0
+targeting_math_test.py: TARGETING_MATH_TESTS=PASS cases=10 EXIT=0
+tracking_probability_test.py: TRACKING_PROBABILITY_TESTS=PASS cases=6 EXIT=0
+visibility_ui_semantics_test.py: VISIBILITY_UI_SEMANTICS_TESTS=PASS cases=4 EXIT=0
+visible_aim_test.py: VISIBLE_AIM_TESTS=PASS cases=7 EXIT=0
+weapon_restore_test.py: WEAPON_RESTORE_TESTS=PASS cases=7 EXIT=0
+decompiled-src\CompleteCheatMenu\Targeting\BoneResolver.cs(126,37): warning CS0618: “Object.GetInstanceID()”已过时:“GetInstanceID is deprecated. Use GetEntityId instead. This will be removed in a future version.”
+decompiled-src\CompleteCheatMenu\Game\Refs.cs(188,10): warning CS0618: “Object.FindObjectOfType(Type)”已过时:“Object.FindObjectOfType has been deprecated. Use Object.FindFirstObjectByType instead or if finding any instance is acceptable the faster Object.FindAnyObjectByType”
+decompiled-src\CompleteCheatMenu\Runtime\CheatState.cs(164,22): warning CS0649: 从未对字段“CheatState.BetColorIndex”赋值，字段将一直保持其默认值 0
+BUILD_OUTPUT=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-2-projectile-lifecycle\rollback-test-ps-20260825\rollback-task17-1.raw.dll
+BUILD_SOURCE_COUNT=83
+BUILD_SHA256=0FABFB32FB0855456BB0BD3610BB60AA629716ED02227C915D713A1155540B0F
+{"changed": 261, "source_sha256": "0fabfb32fb0855456bb0bd3610bb60aa629716ed02227c915d713a1155540b0f", "modified_sha256": "159f9c607d67baf3621555e9001f6f8ce0ae86a9608f34e30290b04a18b29395"}
+ROLLBACK_RAW_SHA256=0FABFB32FB0855456BB0BD3610BB60AA629716ED02227C915D713A1155540B0F
+ROLLBACK_LOCALIZED_SHA256=159F9C607D67BAF3621555E9001F6F8CE0AE86A9608F34E30290B04A18B29395
+RESTORED_BASELINE_DLL_SHA256=ED9F679FD8AE6DCF12A0171A01252DBB2CF0A3CF5C63DD2E02A4FAD6E9192B6B
+REBUILD_HASH_NOTE=absolute CodeView/PDB path changes the rebuilt DLL hash in an independent directory
+ROLLBACK_PS_VERIFICATION=PASS

@@ -1,0 +1,9 @@
+{
+  "name": "NoSharedMoney",
+  "version_number": "1.1.0",
+  "website_url": "",
+  "description": "Money is earned and spent per player instead of from one shared pot. Everyone keeps their own wallet, saved between sessions.",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2305"
+  ]
+}

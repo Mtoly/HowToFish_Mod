@@ -1,0 +1,10 @@
+RAW_VERSION=0.7.0.0
+LOCALIZED_VERSION=0.7.0.0
+TYPESET_EQUAL=True
+METHODSET_EQUAL=True
+REQUIRED_TYPES_PRESENT=True
+REQUIRED_METHODS_PRESENT=True
+REQUIRED_TYPES=['CompleteCheatMenu.Patches.ProjectileRemove_Patch', 'CompleteCheatMenu.Patches.ProjectileUpdateScan_Patch', 'CompleteCheatMenu.Targeting.ProjectileGuidance', 'CompleteCheatMenu.Targeting.ProjectileGuidanceMath']
+LOCALIZATION_CHANGED=261
+PLACEHOLDER_MISMATCHES=0
+TASK17_4_METADATA=PASS

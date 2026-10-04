@@ -1,0 +1,48 @@
+=== aim_overlay_test.py EXIT=0 ===
+AIM_OVERLAY_TEST=PASS cases=22
+=== aim_scoring_test.py EXIT=0 ===
+AIM_SCORING_TESTS=PASS cases=9
+=== ballistic_prediction_test.py EXIT=0 ===
+BALLISTIC_PREDICTION_TESTS=PASS cases=7
+=== bone_selection_test.py EXIT=0 ===
+BONE_SELECTION_TESTS=PASS cases=7
+=== client_mode_capability_test.py EXIT=0 ===
+CLIENT_MODE_CAPABILITY_TESTS=PASS cases=5
+=== entity_registry_test.py EXIT=0 ===
+ENTITY_REGISTRY_TESTS=PASS cases=9
+=== esp_projection_test.py EXIT=0 ===
+ESP_PROJECTION_TESTS=PASS cases=8
+=== gambling_colour_localization_test.py EXIT=0 ===
+GAMBLING_COLOUR_LOCALIZATION_TEST=PASS cases=9
+=== gambling_force_runtime_test.py EXIT=0 ===
+GAMBLING_FORCE_RUNTIME_TEST=PASS
+=== localized_ui_preset_test.py EXIT=0 ===
+LOCALIZED_UI_PRESET_TESTS=PASS cases=9
+=== projectile_guidance_reset_test.py EXIT=0 ===
+PROJECTILE_GUIDANCE_RESET_SPEC=PASS cases=5
+=== projectile_guidance_state_test.py EXIT=0 ===
+PROJECTILE_GUIDANCE_STATE_TESTS=PASS cases=6
+=== projectile_guidance_test.py EXIT=0 ===
+PROJECTILE_GUIDANCE_TESTS=PASS cases=5
+=== projectile_initial_velocity_test.py EXIT=0 ===
+PROJECTILE_INITIAL_VELOCITY_TESTS=PASS cases=5
+=== projectile_lifecycle_test.py EXIT=0 ===
+PROJECTILE_LIFECYCLE_TESTS=PASS cases=5
+=== projectile_spawn_metadata_test.py EXIT=0 ===
+PROJECTILE_SPAWN_METADATA_TESTS=PASS cases=4
+=== projectile_target_lifecycle_test.py EXIT=0 ===
+PROJECTILE_TARGET_LIFECYCLE_TESTS=PASS cases=5
+=== snapshot_isolation_test.py EXIT=0 ===
+SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+=== target_lock_test.py EXIT=0 ===
+TARGET_LOCK_TESTS=PASS cases=8
+=== targeting_math_test.py EXIT=0 ===
+TARGETING_MATH_TESTS=PASS cases=10
+=== tracking_probability_test.py EXIT=0 ===
+TRACKING_PROBABILITY_TESTS=PASS cases=6
+=== visibility_ui_semantics_test.py EXIT=0 ===
+VISIBILITY_UI_SEMANTICS_TESTS=PASS cases=4
+=== visible_aim_test.py EXIT=0 ===
+VISIBLE_AIM_TESTS=PASS cases=7
+=== weapon_restore_test.py EXIT=0 ===
+WEAPON_RESTORE_TESTS=PASS cases=7

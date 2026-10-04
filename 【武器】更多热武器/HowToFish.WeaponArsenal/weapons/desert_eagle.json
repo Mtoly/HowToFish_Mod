@@ -1,0 +1,56 @@
+{
+  "id": "desert_eagle",
+  "displayName": "Desert Eagle",
+  "basePrefab": "Pistol",
+  "enabled": true,
+  "bundle": "arsenal.bundle",
+  "model": {
+    "file": "desert_eagle.glb",
+    "bundleAsset": "DesertEagle",
+    "fitToBase": true,
+    "scale": 1.15,
+    "position": [
+      0.0,
+      -0.2,
+      0.2
+    ],
+    "rotation": [
+      270.0,
+      180.0,
+      0.0
+    ],
+    "material": "model",
+    "skinning": "parts",
+    "partBones": {
+      "9": "Mag"
+    }
+  },
+  "stats": {
+    "damage": 120,
+    "timeBetweenShots": 0.2,
+    "fullAuto": false,
+    "noQueueingShots": true,
+    "canAds": true,
+    "spread": 0.6,
+    "projectileCountPerShot": 1,
+    "ammoPerMag": 7,
+    "extendedAmmoPerMag": 9
+  },
+  "sound": {
+    "fire": "desert_eagle_fire.mp3",
+    "fireAsset": "desert_eagle_fire",
+    "fireVolume": 1.0
+  },
+  "attachments": {
+    "sights": false,
+    "barrels": false,
+    "laser": false,
+    "extendedMag": true,
+    "bulletUpgradeCostMultiplier": 5.0
+  },
+  "shop": {
+    "sell": true,
+    "price": 9000
+  },
+  "credit": "Desert Eagle by Hideo_Godzila - CC-BY-4.0 - https://sketchfab.com/3d-models/desert-eagle-7be7a6cea4264df79e64b2ff1bc4c34f"
+}

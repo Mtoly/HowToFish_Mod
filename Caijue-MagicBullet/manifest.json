@@ -1,0 +1,9 @@
+{
+  "name": "MagicBullet",
+  "version_number": "1.2.2",
+  "website_url": "https://github.com/Caijue117/HowToFish-MagicBullet",
+  "description": "Silent Aim / Magic Bullet with forced headshots, target prediction, configurable targeting modes, FOV circle, target tracking line, and optional wall penetration for How to Fish. (Created with AI assistance).",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2305"
+  ]
+}

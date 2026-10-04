@@ -1,0 +1,16 @@
+/noconfig
+/nostdlib+
+/target:library
+/langversion:latest
+/nullable:enable
+/debug:portable
+/out:"D:\Code\How2fish\artifacts\tactical-slide-network-sync\modified\NetworkTickTuner.dll"
+/reference:"E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish_Data\Managed\mscorlib.dll"
+/reference:"E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish_Data\Managed\System.dll"
+/reference:"E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish_Data\Managed\System.Core.dll"
+/reference:"E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish_Data\Managed\System.Runtime.dll"
+/reference:"E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish_Data\Managed\netstandard.dll"
+/reference:"E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\core\BepInEx.dll"
+/reference:"E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish_Data\Managed\UnityEngine.dll"
+/reference:"E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish_Data\Managed\UnityEngine.CoreModule.dll"
+"D:\Code\How2fish\NetworkTickTuner\Plugin.cs"

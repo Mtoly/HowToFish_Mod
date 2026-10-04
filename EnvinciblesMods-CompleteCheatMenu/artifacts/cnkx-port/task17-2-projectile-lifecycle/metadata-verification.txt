@@ -1,0 +1,9 @@
+RAW_VERSION=0.7.0.0
+LOCALIZED_VERSION=0.7.0.0
+TYPESET_EQUAL=True
+METHODSET_EQUAL=True
+REQUIRED_TYPES_PRESENT=True
+REQUIRED_TYPES=['CompleteCheatMenu.Targeting.MagicShotContext', 'CompleteCheatMenu.Targeting.ProjectileBindings', 'CompleteCheatMenu.Targeting.ProjectileOwnership', 'CompleteCheatMenu.Targeting.ProjectileTracker']
+LOCALIZATION_CHANGED=261
+PLACEHOLDER_MISMATCHES=0
+TASK17_2_METADATA=PASS

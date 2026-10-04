@@ -1,0 +1,9 @@
+{
+    "name": "HowtoFishLocalizationAPI",
+    "version_number": "1.0.1",
+    "website_url": "https://github.com/ibox233/IceBox_Mods_Issues",
+    "description": "How to Fish Localization API is a shared dependency API for How to Fish mods. It lets compatible mods load their own language files and update their UI when the game language changes.",
+    "dependencies": [
+        "BepInEx-BepInExPack-5.4.2305"
+    ]
+}

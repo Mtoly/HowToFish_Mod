@@ -1,0 +1,5 @@
+[Network]
+Enabled = true
+TickRate = 64
+ChangeUnityFixedDeltaTime = false
+LogRuntimeValues = true

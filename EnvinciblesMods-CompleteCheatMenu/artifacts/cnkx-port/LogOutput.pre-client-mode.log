@@ -1,0 +1,215 @@
+[Message:   BepInEx] BepInEx 5.4.23.5 - How to Fish (2026/8/25 19:48:44)
+[Info   :   BepInEx] Running under Unity v6000.4.4.3542935
+[Info   :   BepInEx] CLR runtime version: 4.0.30319.42000
+[Info   :   BepInEx] Supports SRE: True
+[Info   :   BepInEx] System platform: Bits64, Windows
+[Message:   BepInEx] Preloader started
+[Info   :   BepInEx] Loaded 1 patcher method from [BepInEx.Preloader 5.4.23.5]
+[Info   :   BepInEx] 1 patcher plugin loaded
+[Info   :   BepInEx] Patching [UnityEngine.CoreModule] with [BepInEx.Chainloader]
+[Message:   BepInEx] Preloader finished
+[Message:   BepInEx] Chainloader ready
+[Message:   BepInEx] Chainloader started
+[Debug  :   BepInEx] Skipping loading E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\LDD_Team-How_To_Fish_Trainer_v2\HowToFishTrainer.dll because it's not a valid .NET assembly. Full error: Format of the executable (.exe) or library (.dll) is invalid.
+[Info   :   BepInEx] 4 plugins to load
+[Info   :   BepInEx] Loading [How To Fish - Magic Bullet 1.2.2]
+[Info   :How To Fish - Magic Bullet] [Compatibility] ProjectileManager methods verified successfully. Wall Penetration is supported.
+[Info   :How To Fish - Magic Bullet] How To Fish - Magic Bullet v1.2.2 loaded.
+[Info   :How To Fish - Magic Bullet] Target mode: Crosshair | FOV: 35° | Sticky: True | WallPen: False
+[Info   :   BepInEx] Loading [NoSharedMoney 1.1.0]
+[Info   :NoSharedMoney] SaveBackups is not installed, so wallets will not be included in save backups. Installing it is recommended, since a lost wallet file cannot be recovered any other way.
+[Info   :NoSharedMoney] Hooked 8/8 purchase paths: BuyItem, BuyBait, BuyAttachment, BuyBulletUpgrade, BuySharpnessUpgrade, BuyBoatMotor, BuyBoatRadar, UnlockPocket
+[Info   :NoSharedMoney] NoSharedMoney 1.1.0 loaded. Money is now per-player; every player needs this mod installed.
+[Info   :   BepInEx] Loading [Complete Cheat Menu 0.7.0]
+[Info   :Complete Cheat Menu] 9 method(s) patched.
+[Info   :Complete Cheat Menu] 已加载 完整作弊菜单​​​​​​​​​​​​​ 0.7.0。进入游戏后按 Insert。​​​​​​​​​​​
+[Info   :   BepInEx] Loading [Keep Inventory 1.0.0]
+[Info   :Keep Inventory] KeepInventory loaded!
+[Message:   BepInEx] Chainloader startup complete
+[Info   : Unity Log] Local User: Nico:6
+[Info   : Unity Log] No AudioManager in scene
+[Info   :Complete Cheat Menu] Type 'Player' was ambiguous (3 matches); picked Player by 'LocalPlayer'.
+[Debug  :NoSharedMoney] Registered server broadcast handler.
+[Debug  :NoSharedMoney] Registered client broadcast handler.
+[Error  : Unity Log] Failed to load the Steam App List: State = ConnectionError, Error Message = Unable to complete SSL connection
+[Info   : Unity Log] [2026.08.25 20:22:49] Local client is starting for FishySteamworks. Server IP is , port is 0.
+[Info   : Unity Log] [2026.08.25 20:22:49] Connection state changed: k_ESteamNetworkingConnectionState_Connecting - 
+[Info   : Unity Log] [2026.08.25 20:22:50] Connection state changed: k_ESteamNetworkingConnectionState_FindingRoute - 
+[Info   : Unity Log] [2026.08.25 20:22:50] Local client is started for FishySteamworks.
+[Warning:Complete Cheat Menu] 绑定失败：​​​​​​​​​​​PlayerManager.AlivePlayers
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 40°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 35°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 30°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 25°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 20°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 15°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 10°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 15°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 20°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 25°
+[Info   :How To Fish - Magic Bullet] Magic Bullet: OFF
+[Info   :How To Fish - Magic Bullet] Magic Bullet: ON
+[Info   :Complete Cheat Menu] Spawn catalogue loaded: 85 entries.
+[Info   :Complete Cheat Menu] 诊断：0/154 个绑定失败。​​​​​​​​​​​​​​​​​​​​
+[Info   :How To Fish - Magic Bullet] Magic Bullet: OFF
+[Info   :How To Fish - Magic Bullet] Magic Bullet: ON
+[Info   :Complete Cheat Menu] 击杀分数目录：24 个奖励。​​​​​​​​​​​​​​​​​​​
+[Info   :How To Fish - Magic Bullet] Magic Bullet: OFF
+[Info   :How To Fish - Magic Bullet] Magic Bullet: ON
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 30°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 35°
+[Info   : Unity Log] [2026.08.25 20:26:46] Local client is stopping for FishySteamworks.
+[Info   : Unity Log] [2026.08.25 20:26:46] Local client is stopped for FishySteamworks.
+[Info   : Unity Log] [2026.08.25 20:26:48] Local client is starting for FishySteamworks. Server IP is , port is 0.
+[Info   : Unity Log] [2026.08.25 20:26:48] Connection state changed: k_ESteamNetworkingConnectionState_Connecting - 
+[Info   : Unity Log] [2026.08.25 20:26:49] Connection state changed: k_ESteamNetworkingConnectionState_FindingRoute - 
+[Info   : Unity Log] [2026.08.25 20:26:49] Local client is started for FishySteamworks.
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 40°
+[Warning: Unity Log] [2026.08.25 20:29:18] Spawned NetworkObject was expected to exist but does not for Id 14812. This may occur if you sent a NetworkObject reference which does not exist, be it destroyed or if the client does not have visibility.
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 45°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 50°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 55°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 60°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 55°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 50°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 45°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 40°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 45°
+[Info   :How To Fish - Magic Bullet] Magic Bullet FOV: 50°
+[Warning: Unity Log] Can not play a disabled audio source
+[Warning: Unity Log] Can not play a disabled audio source
+[Warning: Unity Log] Can not play a disabled audio source
+[Warning: Unity Log] Can not play a disabled audio source
+[Info   : Unity Log] Missing clip: PlayerSpawn
+[Warning: Unity Log] Setting linear velocity of a kinematic body is not supported.
+[Warning: Unity Log] Setting angular velocity of a kinematic body is not supported.
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object.
+Stack trace:
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at <b26e25beaf774e828b36bcacccd7832c>:0)
+UnityEngine.Rigidbody.get_position () (at <76cfeeec56554e7d8dc74f9da5b78ceb>:0)
+RigidbodySync.AddBoatPos (UnityEngine.Vector3 movePos, UnityEngine.Quaternion moveRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.GiveBoatDeltaToPlayerAndItems (UnityEngine.Vector3 deltaPos, UnityEngine.Vector3 deltaEuler, UnityEngine.Quaternion deltaRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.UpdateObserverBoatVisuals () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.Update () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object.
+Stack trace:
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at <b26e25beaf774e828b36bcacccd7832c>:0)
+UnityEngine.Rigidbody.get_position () (at <76cfeeec56554e7d8dc74f9da5b78ceb>:0)
+RigidbodySync.AddBoatPos (UnityEngine.Vector3 movePos, UnityEngine.Quaternion moveRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.GiveBoatDeltaToPlayerAndItems (UnityEngine.Vector3 deltaPos, UnityEngine.Vector3 deltaEuler, UnityEngine.Quaternion deltaRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.UpdateObserverBoatVisuals () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.Update () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object.
+Stack trace:
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at <b26e25beaf774e828b36bcacccd7832c>:0)
+UnityEngine.Rigidbody.get_position () (at <76cfeeec56554e7d8dc74f9da5b78ceb>:0)
+RigidbodySync.AddBoatPos (UnityEngine.Vector3 movePos, UnityEngine.Quaternion moveRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.GiveBoatDeltaToPlayerAndItems (UnityEngine.Vector3 deltaPos, UnityEngine.Vector3 deltaEuler, UnityEngine.Quaternion deltaRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.UpdateObserverBoatVisuals () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.Update () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object.
+Stack trace:
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at <b26e25beaf774e828b36bcacccd7832c>:0)
+UnityEngine.Rigidbody.get_position () (at <76cfeeec56554e7d8dc74f9da5b78ceb>:0)
+RigidbodySync.AddBoatPos (UnityEngine.Vector3 movePos, UnityEngine.Quaternion moveRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.GiveBoatDeltaToPlayerAndItems (UnityEngine.Vector3 deltaPos, UnityEngine.Vector3 deltaEuler, UnityEngine.Quaternion deltaRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.UpdateObserverBoatVisuals () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.Update () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object.
+Stack trace:
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at <b26e25beaf774e828b36bcacccd7832c>:0)
+UnityEngine.Rigidbody.get_position () (at <76cfeeec56554e7d8dc74f9da5b78ceb>:0)
+RigidbodySync.AddBoatPos (UnityEngine.Vector3 movePos, UnityEngine.Quaternion moveRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.GiveBoatDeltaToPlayerAndItems (UnityEngine.Vector3 deltaPos, UnityEngine.Vector3 deltaEuler, UnityEngine.Quaternion deltaRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.UpdateObserverBoatVisuals () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.Update () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object.
+Stack trace:
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at <b26e25beaf774e828b36bcacccd7832c>:0)
+UnityEngine.Rigidbody.get_position () (at <76cfeeec56554e7d8dc74f9da5b78ceb>:0)
+RigidbodySync.AddBoatPos (UnityEngine.Vector3 movePos, UnityEngine.Quaternion moveRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.GiveBoatDeltaToPlayerAndItems (UnityEngine.Vector3 deltaPos, UnityEngine.Vector3 deltaEuler, UnityEngine.Quaternion deltaRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.UpdateObserverBoatVisuals () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.Update () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object.
+Stack trace:
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at <b26e25beaf774e828b36bcacccd7832c>:0)
+UnityEngine.Rigidbody.get_position () (at <76cfeeec56554e7d8dc74f9da5b78ceb>:0)
+RigidbodySync.AddBoatPos (UnityEngine.Vector3 movePos, UnityEngine.Quaternion moveRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.GiveBoatDeltaToPlayerAndItems (UnityEngine.Vector3 deltaPos, UnityEngine.Vector3 deltaEuler, UnityEngine.Quaternion deltaRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.UpdateObserverBoatVisuals () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.Update () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object.
+Stack trace:
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at <b26e25beaf774e828b36bcacccd7832c>:0)
+UnityEngine.Rigidbody.get_position () (at <76cfeeec56554e7d8dc74f9da5b78ceb>:0)
+RigidbodySync.AddBoatPos (UnityEngine.Vector3 movePos, UnityEngine.Quaternion moveRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.GiveBoatDeltaToPlayerAndItems (UnityEngine.Vector3 deltaPos, UnityEngine.Vector3 deltaEuler, UnityEngine.Quaternion deltaRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.UpdateObserverBoatVisuals () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.Update () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object.
+Stack trace:
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at <b26e25beaf774e828b36bcacccd7832c>:0)
+UnityEngine.Rigidbody.get_position () (at <76cfeeec56554e7d8dc74f9da5b78ceb>:0)
+RigidbodySync.AddBoatPos (UnityEngine.Vector3 movePos, UnityEngine.Quaternion moveRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.GiveBoatDeltaToPlayerAndItems (UnityEngine.Vector3 deltaPos, UnityEngine.Vector3 deltaEuler, UnityEngine.Quaternion deltaRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.UpdateObserverBoatVisuals () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.Update () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object.
+Stack trace:
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at <b26e25beaf774e828b36bcacccd7832c>:0)
+UnityEngine.Rigidbody.get_position () (at <76cfeeec56554e7d8dc74f9da5b78ceb>:0)
+RigidbodySync.AddBoatPos (UnityEngine.Vector3 movePos, UnityEngine.Quaternion moveRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.GiveBoatDeltaToPlayerAndItems (UnityEngine.Vector3 deltaPos, UnityEngine.Vector3 deltaEuler, UnityEngine.Quaternion deltaRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.UpdateObserverBoatVisuals () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.Update () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object.
+Stack trace:
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at <b26e25beaf774e828b36bcacccd7832c>:0)
+UnityEngine.Rigidbody.get_position () (at <76cfeeec56554e7d8dc74f9da5b78ceb>:0)
+RigidbodySync.AddBoatPos (UnityEngine.Vector3 movePos, UnityEngine.Quaternion moveRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.GiveBoatDeltaToPlayerAndItems (UnityEngine.Vector3 deltaPos, UnityEngine.Vector3 deltaEuler, UnityEngine.Quaternion deltaRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.UpdateObserverBoatVisuals () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.Update () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object.
+Stack trace:
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at <b26e25beaf774e828b36bcacccd7832c>:0)
+UnityEngine.Rigidbody.get_position () (at <76cfeeec56554e7d8dc74f9da5b78ceb>:0)
+RigidbodySync.AddBoatPos (UnityEngine.Vector3 movePos, UnityEngine.Quaternion moveRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.GiveBoatDeltaToPlayerAndItems (UnityEngine.Vector3 deltaPos, UnityEngine.Vector3 deltaEuler, UnityEngine.Quaternion deltaRot) (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.UpdateObserverBoatVisuals () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+Boat.Update () (at <5bfce772ee8240f59e5be1cd1212f3dd>:0)
+
+[Info   : Unity Log] Missing clip: PlayerSpawn
+[Info   : Unity Log] Missing clip: PlayerSpawn
+[Info   : Unity Log] Missing clip: PlayerSpawn
+[Info   : Unity Log] Missing clip: PlayerSpawn
+[Info   : Unity Log] Missing clip: PlayerSpawn
+[Warning: Unity Log] Can not play a disabled audio source
+[Info   : Unity Log] Missing clip: PlayerSpawn
+[Warning: Unity Log] Can not play a disabled audio source
+[Warning: Unity Log] [2026.08.25 20:39:13] Spawned NetworkObject was expected to exist but does not for Id 54960. This may occur if you sent a NetworkObject reference which does not exist, be it destroyed or if the client does not have visibility.
+[Warning: Unity Log] Can not play a disabled audio source
+[Warning: Unity Log] [2026.08.25 20:39:42] Spawned NetworkObject was expected to exist but does not for Id 1992. This may occur if you sent a NetworkObject reference which does not exist, be it destroyed or if the client does not have visibility.
+[Info   : Unity Log] Missing clip: PlayerSpawn
+[Info   : Unity Log] Missing clip: PlayerSpawn
+[Info   : Unity Log] Missing clip: PlayerSpawn
+[Info   : Unity Log] Cant afford idiot
+[Info   : Unity Log] Cant afford idiot
+[Info   : Unity Log] Cant afford idiot
+[Warning: Unity Log] [2026.08.25 20:43:11] Spawned NetworkObject was expected to exist but does not for Id 48098. This may occur if you sent a NetworkObject reference which does not exist, be it destroyed or if the client does not have visibility.
+[Warning: Unity Log] [2026.08.25 20:47:50] Spawned NetworkObject was expected to exist but does not for Id 11425. This may occur if you sent a NetworkObject reference which does not exist, be it destroyed or if the client does not have visibility.
+[Warning: Unity Log] [2026.08.25 20:48:22] Spawned NetworkObject was expected to exist but does not for Id 35366. This may occur if you sent a NetworkObject reference which does not exist, be it destroyed or if the client does not have visibility.
+[Warning: Unity Log] [2026.08.25 20:48:53] Spawned NetworkObject was expected to exist but does not for Id 54886. This may occur if you sent a NetworkObject reference which does not exist, be it destroyed or if the client does not have visibility.
+[Warning: Unity Log] [2026.08.25 20:50:29] Spawned NetworkObject was expected to exist but does not for Id 22830. This may occur if you sent a NetworkObject reference which does not exist, be it destroyed or if the client does not have visibility.

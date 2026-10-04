@@ -1,0 +1,43 @@
+TASK7_VERIFICATION
+DATE=2026-09-05
+
+BACKUP_COMMAND:
+  Copy-Item E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.dll artifacts/projectile-guidance-reset/game-deploy-backup-20260905/CompleteCheatMenu.dll
+BACKUP_RESULT:
+  BASELINE_SHA256=5F02EC332D300486DF22504AD2A3372828BFC60D1F47C92459F93C4BF80B9D92
+  EXIT_STATUS=0
+
+DEPLOY_COMMAND:
+  Copy-Item artifacts/projectile-guidance-reset/CompleteCheatMenu.projectile-guidance.zh-CN.dll E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.dll -Force
+DEPLOY_RESULT:
+  DEPLOYED_SHA256=140A2DED87AEF83772F764F85890F7B1D2E3BE196D19E19745659F6FC3396753
+  DEPLOY_MATCH=True
+  EXIT_STATUS=0
+
+RUNTIME_COMMAND:
+  Start-Process 'E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish.exe'; inspect BepInEx/LogOutput.log
+RUNTIME_RESULT:
+  PLUGIN_LOAD=True
+  PATCH_COUNT=True (14 method(s) patched)
+  CHAINLOADER_READY=True
+  BINDINGS_ZERO=True (诊断：0/173 个绑定失败。)
+  NO_PLUGIN_EXCEPTION=True
+  LOG_CHECKS_PASS=True
+  EXIT_STATUS=0
+
+ROLLBACK_COMMAND:
+  ROLLBACK_TASK7.sh artifacts/projectile-guidance-reset/task7-rollback-test-20260905b
+ROLLBACK_RESULT:
+  ROLLBACK_COPY_MATCH=True
+  ROLLBACK_TEST_EXIT_STATUS=0
+  Production deployment remains on the new DLL; rollback was verified on an independent copy.
+
+DEPLOYED_FILE:
+  E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.dll
+
+ARTIFACTS:
+  artifacts/projectile-guidance-reset/task7-deployment.patch
+  artifacts/projectile-guidance-reset/TASK7_VERIFICATION.txt
+  artifacts/projectile-guidance-reset/ROLLBACK_TASK7.sh
+  artifacts/projectile-guidance-reset/game-deploy-backup-20260905/CompleteCheatMenu.dll
+  artifacts/projectile-guidance-reset/task7-rollback-test-20260905b/CompleteCheatMenu.dll

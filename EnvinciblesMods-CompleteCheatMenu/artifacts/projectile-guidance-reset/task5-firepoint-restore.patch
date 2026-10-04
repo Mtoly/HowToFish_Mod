@@ -1,0 +1,116 @@
+--- task5-baseline-source/MagicShotContext.cs
++++ current/MagicShotContext.cs
+@@ -1,4 +1,5 @@
+ using CompleteCheatMenu.Game;
++using UnityEngine;
+ 
+ namespace CompleteCheatMenu.Targeting;
+ 
+@@ -12,14 +13,44 @@
+ 
+ 	internal static WeaponInfo ActiveWeaponInfo { get; private set; }
+ 
+-	internal static bool Begin(Weapon weapon, TargetSolution target)
++	internal static Transform ActiveFirePoint { get; private set; }
++
++	internal static Quaternion OriginalFirePointRotation { get; private set; }
++
++	internal static bool HasOriginalFirePointRotation { get; private set; }
++
++	internal static bool Start(Weapon weapon)
+ 	{
+ 		Clear();
+-		if (!ProjectileOwnership.IsLocalWeapon(weapon) || !ProjectileTracker.IsValidTarget(target))
++		if (!ProjectileOwnership.IsLocalWeapon(weapon))
+ 		{
+ 			return false;
+ 		}
+ 		ActiveWeapon = weapon;
++		try
++		{
++			object attachments = GameBinder.Property("Weapon", "Attachments")?.GetValue(weapon);
++			ActiveFirePoint = GameBinder.Property("Attachments", "FirePoint")?.GetValue(attachments) as Transform;
++			if (ActiveFirePoint != null)
++			{
++				OriginalFirePointRotation = ActiveFirePoint.rotation;
++				HasOriginalFirePointRotation = true;
++			}
++		}
++		catch
++		{
++			ActiveFirePoint = null;
++			HasOriginalFirePointRotation = false;
++		}
++		return HasOriginalFirePointRotation;
++	}
++
++	internal static bool Begin(Weapon weapon, TargetSolution target)
++	{
++		if (ActiveWeapon == null || !ReferenceEquals(ActiveWeapon, weapon) || !ProjectileOwnership.IsLocalWeapon(weapon) || !ProjectileTracker.IsValidTarget(target))
++		{
++			return false;
++		}
+ 		ActiveTarget = target;
+ 		GameBinder.TryGet<WeaponInfo>(ProjectileBindings.ActiveWeaponInfo, weapon, out WeaponInfo weaponInfo);
+ 		ActiveWeaponInfo = weaponInfo;
+@@ -35,6 +66,22 @@
+ 			&& ProjectileTracker.IsValidTarget(ActiveTarget);
+ 	}
+ 
++	internal static void RestoreFirePoint()
++	{
++		if (!HasOriginalFirePointRotation || ActiveFirePoint == null)
++		{
++			return;
++		}
++		try
++		{
++			ActiveFirePoint.rotation = OriginalFirePointRotation;
++		}
++		catch
++		{
++			// Preserve the original Shoot exception path if the transform disappears.
++		}
++	}
++
+ 	internal static void End()
+ 	{
+ 		Clear();
+@@ -46,5 +93,8 @@
+ 		ActiveWeapon = null;
+ 		ActiveTarget = null;
+ 		ActiveWeaponInfo = null;
++		ActiveFirePoint = null;
++		OriginalFirePointRotation = Quaternion.identity;
++		HasOriginalFirePointRotation = false;
+ 	}
+ }
+--- task5-baseline-source/WeaponShoot_Patch.cs
++++ current/WeaponShoot_Patch.cs
+@@ -27,7 +27,7 @@
+ 
+ 	private static void Prefix(Weapon __instance)
+ 	{
+-		MagicShotContext.Clear();
++		MagicShotContext.Start(__instance);
+ 		try
+ 		{
+ 			TargetSolution solution = WeaponCheats.PrepareShot(__instance);
+@@ -38,14 +38,16 @@
+ 		}
+ 		catch (Exception ex)
+ 		{
+-			MagicShotContext.Clear();
+ 			Plugin.Log.LogError((object)("Aim failed: " + ex.Message));
+ 		}
+ 	}
+ 
+ 	private static Exception Finalizer(Exception __exception)
+ 	{
++		MagicShotContext.RestoreFirePoint();
+ 		MagicShotContext.End();
+ 		return __exception;
+ 	}
+ }
++
++

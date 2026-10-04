@@ -1,0 +1,7 @@
+TASK7_DEPLOYMENT_MANIFEST
+DATE=2026-09-05
+TARGET_DLL=E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.dll
+BACKUP_DLL=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\game-deploy-backup-20260905\CompleteCheatMenu.dll
+BASELINE_SHA256=5F02EC332D300486DF22504AD2A3372828BFC60D1F47C92459F93C4BF80B9D92
+DEPLOYED_SHA256=140A2DED87AEF83772F764F85890F7B1D2E3BE196D19E19745659F6FC3396753
+DEPLOY_MATCH=True

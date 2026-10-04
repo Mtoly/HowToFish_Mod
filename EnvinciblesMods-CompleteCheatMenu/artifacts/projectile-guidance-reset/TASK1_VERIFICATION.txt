@@ -1,0 +1,54 @@
+TASK=Task 1 establish failing projectile lifecycle cases and baseline
+DATE=2026-09-04
+STATUS=PASS
+
+CHANGED_BRANCH_OR_FIELD
+- Added lifecycle specification test for RawVelocity/LaunchVelocity capture.
+- Added lifecycle specification test for IsDead/IsDestroying/isActiveAndEnabled checks.
+- Added NaturalFlight and ReturnToLaunchVelocity contract assertions.
+- Preserved local/NPC projectile ownership seam assertions.
+
+FOUR_PRIMARY_ARTIFACTS
+MODIFIED_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\projectile_guidance_reset_test.py
+MODIFIED_SHA256=182B5CE0BD8B214E5BDCDBD6AB48578415E7E9F782E9AC53055B2A9D62BD70C0
+DIFF_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\projectile-guidance-reset-test.patch
+DIFF_SHA256=A42C9EB2E5B1E81BCCAEA384E7AD52E53EDB522F96E04A7CB450DCA780AF5FA9
+VERIFICATION=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\TASK1_VERIFICATION.txt
+ROLLBACK=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\ROLLBACK_TASK1.sh
+ROLLBACK_SHA256=32089C67BDF4C279705357EAB1F2AE9F632FD9EA25A4C71E81FBC9B05A4A097E
+
+BASELINE
+COMMAND=python tests/projectile_guidance_reset_test.py
+INPUT=current source before Task 2-4 implementation
+LITERAL_OUTPUT=AssertionError: missing guidance baseline field: RawVelocity
+EXIT_STATUS=1
+COMMAND=python tests/projectile_guidance_test.py
+INPUT=current implementation regression baseline
+LITERAL_OUTPUT=PROJECTILE_GUIDANCE_TESTS=PASS cases=5
+EXIT_STATUS=0
+COMMAND=python tests/projectile_lifecycle_test.py
+INPUT=current ownership/tracker regression baseline
+LITERAL_OUTPUT=PROJECTILE_LIFECYCLE_TESTS=PASS cases=5
+EXIT_STATUS=0
+COMMAND=python tests/projectile_initial_velocity_test.py
+INPUT=current initial redirect regression baseline
+LITERAL_OUTPUT=PROJECTILE_INITIAL_VELOCITY_TESTS=PASS cases=5
+EXIT_STATUS=0
+PROJECT_DLL_SHA256=E51F5D0A7630E54B76F70DEF8FDA9E38DD1ED12067D535CCBA4187B3C0E28FA3
+DEPLOYED_DLL_SHA256=5F02EC332D300486DF22504AD2A3372828BFC60D1F47C92459F93C4BF80B9D92
+
+ROLLBACK
+COMMAND=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\ROLLBACK_TASK1.sh executed against independent copy D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\task1-rollback-test\projectile_guidance_reset_test.py
+INPUT=copy of modified test; baseline source D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\projectile_guidance_reset_test.baseline.py
+LITERAL_OUTPUT=RESTORED_SHA256=FA1F184AC4D48F9627DC9EBA4B3E4ED69F7D8BC0AA317E9061BDF102E6CF9BFA
+LITERAL_OUTPUT=EXPECTED_SHA256=FA1F184AC4D48F9627DC9EBA4B3E4ED69F7D8BC0AA317E9061BDF102E6CF9BFA
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+LITERAL_OUTPUT=ROLLBACK_EXIT=0
+EXIT_STATUS=0
+
+TASK_RESULT
+TASK1=COMPLETE
+RED_TEST=PASS_EXPECTED_FAILURE
+BASELINE_REGRESSIONS=PASS
+PRODUCTION_SOURCE_CHANGED=False
+NEXT=Task 2 extend projectile registration metadata with RawVelocity and LaunchVelocity

@@ -1,0 +1,38 @@
+{
+  "id": "pirate_cove",
+  "name": "Pirate Cove",
+  "author": "YourName",
+  "bundle": "pirate_cove",
+  "scene": "PirateCove",
+  "positionMode": "manual",
+  "position": {
+    "x": 1500,
+    "y": 0,
+    "z": 900
+  },
+  "moveScene": true,
+  "radarColor": "#55FFA8",
+  "islandSize": 85,
+  "runtime": {
+    "playerSpawn": "PlayerSpawnPoint",
+    "boatSpawn": "BoatSpawnPoint",
+    "defaultPlayerSpawn": {
+      "x": 10,
+      "y": 7,
+      "z": -5
+    },
+    "defaultBoatSpawn": {
+      "x": 0,
+      "y": 0.5,
+      "z": -65
+    }
+  },
+  "wildlife": {
+    "seagulls": true,
+    "clams": true,
+    "seagullMax": 5,
+    "seagullDelay": 45,
+    "clamMax": 4,
+    "clamDelay": 20
+  }
+}

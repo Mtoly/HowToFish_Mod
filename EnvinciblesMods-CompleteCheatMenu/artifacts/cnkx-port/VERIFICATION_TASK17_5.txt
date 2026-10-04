@@ -1,0 +1,99 @@
+TASK: Task 17.5 - Aim FOV projection circle, current-target tracer, final deployment
+DATE: 2026-08-25
+RESULT: PASS
+
+CHANGED BRANCH/FIELDS
+- Rendering branch: EspRendererV2.Draw() -> DrawAimOverlay(camera), executed before the EspEnabled early return.
+- Radius field inputs: CheatState.AimFov and CheatState.AimScreenRadius.
+- Effective radius: min(AimScreenRadius, AimOverlayMath.AngleToPixelRadius(camera.fieldOfView, Screen.width, Screen.height, AimFov)).
+- Dedicated tracer field: CheatState.EspAimTargetTracer (default true; preset key espAimTargetTracer).
+- Target endpoint: WeaponCheats.CurrentTarget.AimPoint projected by the current camera.
+- Existing EspTracers and EspDistance behavior remains unchanged.
+
+FOUR REQUIRED ARTIFACT ROLES
+MODIFIED_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-5-aim-overlay\CompleteCheatMenu.task17-5.zh-CN.dll
+MODIFIED_FILE_SHA256=A105A0E1AB2A67A252387833000BAFFFDE46E3B6FC3AA8A7A6A708CF7404D0E0
+DIFF_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-5-aim-overlay\task17-5-aim-overlay.diff
+DIFF_FILE_SHA256=391075BFDDA114C1E15B749CDA5A96EEB86ECB0A2CECA6B5F87CAFF0045C5D0E
+VERIFICATION_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK17_5.txt
+ROLLBACK_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-5-aim-overlay\ROLLBACK_TASK17_5.sh
+ROLLBACK_FILE_SHA256=32B1478B8846FAC844C0E74A3A61E95B22A6B33295D05CEF3F68C8E1A2692F6D
+ROLLBACK_PS_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-5-aim-overlay\ROLLBACK_TASK17_5.ps1
+ROLLBACK_PS_SHA256=274A01AAF9579ED56E3D956D24676E6E498D3DFB85D0773F3944F300680DCD7D
+
+BASELINE
+COMMAND=python D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\aim_overlay_test.py
+INPUT=Task 17.4 source tree without AimOverlayMath.cs and without the Task 17.5 overlay integration.
+LITERAL_OUTPUT=FileNotFoundError: [Errno 2] No such file or directory: 'D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\AimOverlayMath.cs'
+EXIT_STATUS=1
+BASELINE_GAME_DLL_SHA256=224A13AE043E203D3EBCBFF840241BB32588A7549B8F8DC8326236513A4AAB0A
+BASELINE_BEHAVIOR=The circle used only AimScreenRadius; there was no current-target center tracer.
+
+MODIFIED TESTS
+COMMAND=python tests\aim_overlay_test.py
+INPUT=Task 17.5 source tree.
+LITERAL_OUTPUT=AIM_OVERLAY_TEST=PASS cases=22
+EXIT_STATUS=0
+
+COMMAND=D:\Code\How2fish\Kai935-FishAimbot\.tools\roslyn\tasks\net472\csc.exe /nologo /target:exe /optimize+ /out:artifacts\cnkx-port\task17-5-aim-overlay\aim_overlay_harness.exe tests\aim_overlay_harness.cs decompiled-src\CompleteCheatMenu\Targeting\AimOverlayMath.cs ; artifacts\cnkx-port\task17-5-aim-overlay\aim_overlay_harness.exe
+INPUT=Production AimOverlayMath.cs with a minimal deterministic UnityEngine.Mathf harness.
+LITERAL_OUTPUT=AIM_OVERLAY_HARNESS=PASS cases=10
+EXIT_STATUS=0
+
+COMMAND=foreach tests\*_test.py: python TEST_FILE
+INPUT=18 Python regression tests covering Task 2 through Task 17.5.
+LITERAL_OUTPUT=PYTHON_TEST_SUMMARY=passed:18 failed:0 total:18
+EXIT_STATUS=0
+
+BUILD
+COMMAND=decompiled-src\build.ps1 -OutputPath artifacts\cnkx-port\task17-5-aim-overlay\CompleteCheatMenu.task17-5.dll
+INPUT=96 production C# source files and current game/BepInEx managed references.
+LITERAL_OUTPUT=BUILD_SOURCE_COUNT=96
+LITERAL_OUTPUT=BUILD_SHA256=D3B261F72AFBF81F4245DCF87AC0896937BDC66E0824BF8074C0A7F02BC0E1FF
+EXIT_STATUS=0
+
+LOCALIZATION
+COMMAND=python tools\localize_dll.py artifacts\cnkx-port\task17-5-aim-overlay\CompleteCheatMenu.task17-5.dll artifacts\cnkx-port\task17-5-aim-overlay\CompleteCheatMenu.task17-5.zh-CN.dll
+INPUT=Task 17.5 raw assembly.
+LITERAL_OUTPUT={"changed": 261, "source_sha256": "d3b261f72afbf81f4245dcf87ac0896937bdc66e0824bf8074c0a7f02bc0e1ff", "modified_sha256": "a105a0e1ab2a67a252387833000bafffde46e3b6fc3aa8a7a6a708cf7404d0e0"}
+EXIT_STATUS=0
+
+METADATA
+COMMAND=python artifacts\cnkx-port\task17-5-aim-overlay\verify_metadata.py RAW_DLL LOCALIZED_DLL
+INPUT=Raw and localized Task 17.5 assemblies.
+LITERAL_OUTPUT=RAW_VERSION=0.7.0.0; LOCALIZED_VERSION=0.7.0.0; TYPESET_EQUAL=True; METHODSET_EQUAL=True; REQUIRED_TYPES_PRESENT=True; REQUIRED_METHODS_PRESENT=True; LOCALIZATION_CHANGED=261; PLACEHOLDER_MISMATCHES=0; TASK17_5_METADATA=PASS
+EXIT_STATUS=0
+
+DEPLOYMENT
+COMMAND=Copy-Item CompleteCheatMenu.task17-5.zh-CN.dll E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.dll -Force
+INPUT=Localized Task 17.5 DLL; deployment baseline preserved at artifacts\cnkx-port\task17-5-aim-overlay\original\game\CompleteCheatMenu.dll.
+LITERAL_OUTPUT=DEPLOY_BASELINE_SHA256=224A13AE043E203D3EBCBFF840241BB32588A7549B8F8DC8326236513A4AAB0A
+LITERAL_OUTPUT=DEPLOYED_SHA256=A105A0E1AB2A67A252387833000BAFFFDE46E3B6FC3AA8A7A6A708CF7404D0E0
+LITERAL_OUTPUT=DEPLOY_COPY=PASS
+EXIT_STATUS=0
+MODIFIED_BEHAVIOR=The visible aim circle represents the smaller of the angular AimFov projection and AimScreenRadius; the current target receives a dedicated center-to-AimPoint tracer independently of EspEnabled and EspTracers.
+
+RUNTIME STARTUP
+COMMAND=Start-Process 'E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish.exe' -WorkingDirectory 'E:\SteamLibrary\steamapps\common\How to Fish\How to Fish'
+INPUT=Deployed Task 17.5 plugin.
+LITERAL_OUTPUT=[Info   :   BepInEx] Loading [Complete Cheat Menu 0.7.0]
+LITERAL_OUTPUT=[Info   :Complete Cheat Menu] 13 method(s) patched.
+LITERAL_OUTPUT=[Info   :Complete Cheat Menu] 已加载 完整作弊菜单 0.7.0。进入游戏后按 Insert。
+LITERAL_OUTPUT=[Message:   BepInEx] Chainloader startup complete
+LITERAL_OUTPUT=PLUGIN_ERROR_FATAL_COUNT=0
+EXIT_STATUS=0
+
+ROLLBACK
+COMMAND=powershell -File artifacts\cnkx-port\task17-5-aim-overlay\verify_rollback.ps1
+INPUT=Two independent copies containing the modified source set, created Task 17.5 files, and deployed Task 17.5 DLL.
+LITERAL_OUTPUT=ROLLBACK_PS_VERIFICATION=PASS SHA256=224A13AE043E203D3EBCBFF840241BB32588A7549B8F8DC8326236513A4AAB0A
+LITERAL_OUTPUT=ROLLBACK_SH_VERIFICATION=PASS SHA256=224A13AE043E203D3EBCBFF840241BB32588A7549B8F8DC8326236513A4AAB0A
+LITERAL_OUTPUT=RESTORED_SOURCE_FILES=6
+LITERAL_OUTPUT=CREATED_FILES_PRESENT=0
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Independent rollback copies returned to the Task 17.4 DLL hash, restored the original six modified source/document files, removed AimOverlayMath.cs, aim_overlay_test.py, and aim_overlay_harness.cs, and therefore restored the old pixel-only circle with no dedicated current-target tracer.
+
+FINAL DEPLOYED DLL
+PATH=E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.dll
+SHA256=A105A0E1AB2A67A252387833000BAFFFDE46E3B6FC3AA8A7A6A708CF7404D0E0
+STATUS=DEPLOYED_AND_LOADED

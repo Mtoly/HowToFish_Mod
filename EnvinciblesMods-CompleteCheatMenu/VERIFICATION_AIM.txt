@@ -1,0 +1,60 @@
+CompleteCheatMenu 0.7.0 自瞄重构验证
+
+变更分支/字段
+- Creature.Awake -> AimTargetRegistry.Register
+- WeaponCheats.FindTarget -> 缓存遍历、显式过滤、Kai935 综合评分
+- WeaponCheats.AimBeforeShot -> 保留 Weapon.Shoot Prefix 静默枪口校正
+- CheatState -> AimExcludeDead/Seagulls/HookedFish、AimPrioritizeAlbatross、权重、锁定参数
+- WeaponsTab -> 新增过滤、权重、保持时间和切换惩罚控件
+
+产物
+- MODIFIED_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.optimized.zh-CN.dll
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\aim-logic.patch
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\VERIFICATION_AIM.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\ROLLBACK_AIM.ps1
+- DEPLOYED_FILE: E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.dll
+
+BASELINE
+命令: Get-FileHash CompleteCheatMenu.pre-aim-20260825_123624.dll.bak -Algorithm SHA256
+输入: 部署前的汉化 0.6.1 DLL
+字面输出: 393E55C9BA546F68C702856508F44DBA2A3A8B50B6C75FD349349A2971BED601
+退出状态: 0
+
+MODIFIED BUILD
+命令: & decompiled-src\build.ps1; python tools\localize_dll.py artifacts\CompleteCheatMenu.dll CompleteCheatMenu.optimized.zh-CN.dll
+输入: 完整反编译源码、游戏/BepInEx/Harmony 引用、汉化映射
+字面输出: changed=325; modified_sha256=f4b5209647a60c0be7e5c49005867a4ce094feb56c03ad804aec67c35fe3ba79
+字面输出: CompleteCheatMenu, Version=0.7.0.0, Culture=neutral, PublicKeyToken=null
+退出状态: 0
+
+SCORING TEST
+命令: python tests\aim_scoring_test.py
+输入: 距离/角度、死亡、海鸥、上钩鱼、范围、锥角、信天翁、锁定用例
+字面输出: AIM_SCORING_TESTS=PASS cases=9
+退出状态: 0
+
+PERFORMANCE
+命令: D:\Code\How2fish\Kai935-FishAimbot\tests\PerformanceHarness.exe
+输入: 300 个确定性目标，720 个等价性角度，20000 次固定视角循环
+字面输出: SEMANTIC_EQUIVALENCE=PASS cases=720
+字面输出: BASELINE elapsed_ms=603 allocated_bytes=280000040
+字面输出: MODIFIED elapsed_ms=89 allocated_bytes=0
+字面输出: SPEEDUP=6.78x
+退出状态: 0
+
+STARTUP
+命令: How to Fish.exe -batchmode -nographics -logFile artifacts\startup-v070.log
+输入: 已部署 SHA256 F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+字面输出: [Info : BepInEx] Loading [Complete Cheat Menu 0.7.0]
+字面输出: [Info : Complete Cheat Menu] 8 method(s) patched.
+字面输出: [Message: BepInEx] Chainloader startup complete
+字面结果: 未匹配 Complete Cheat Menu error、HarmonyException 或 ArgumentException
+退出状态: 0
+
+ROLLBACK
+命令: .\ROLLBACK_AIM.ps1 -Destination artifacts\rollback-aim-test.dll
+输入: 回滚目标最初为 0.7.0 修改版
+字面输出: 393E55C9BA546F68C702856508F44DBA2A3A8B50B6C75FD349349A2971BED601
+字面输出: ROLLBACK_MATCH=True
+退出状态: 0
+恢复状态: 临时副本恢复为部署前的汉化 0.6.1；游戏目录继续保留 0.7.0。

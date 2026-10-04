@@ -1,0 +1,141 @@
+--- a/decompiled-src/CompleteCheatMenu/Targeting/TargetingSystem.cs
++++ b/decompiled-src/CompleteCheatMenu/Targeting/TargetingSystem.cs
+@@ -144,7 +144,7 @@
+ 		{
+ 			return;
+ 		}
+-		bool visible = !settings.RequireLineOfSight || _visibility.IsVisible(record.InstanceId, record.Transform, point, origin, now);
++		bool visible = _visibility.IsVisible(record.InstanceId, record.Transform, point, origin, now);
+ 		if (settings.RequireLineOfSight && !visible)
+ 		{
+ 			return;
+--- a/decompiled-src/CompleteCheatMenu/Targeting/VisibilityCache.cs
++++ b/decompiled-src/CompleteCheatMenu/Targeting/VisibilityCache.cs
+@@ -81,7 +81,7 @@
+ 	{
+ 		Vector3 direction = point - origin;
+ 		float distance = direction.magnitude;
+-		if (distance <= 0.0001f || !Physics.Raycast(origin, direction / distance, out var hit, distance))
++		if (distance <= 0.0001f || !Physics.Raycast(origin, direction / distance, out var hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+ 		{
+ 			return true;
+ 		}
+--- a/decompiled-src/CompleteCheatMenu/Runtime/EspRendererV2.cs
++++ b/decompiled-src/CompleteCheatMenu/Runtime/EspRendererV2.cs
+@@ -240,11 +240,6 @@
+ 
+ 	private static bool IsVisible(EntityRecord record, Camera camera, Vector3 point)
+ 	{
+-		TargetSolution current = WeaponCheats.CurrentTarget;
+-		if (current != null && (ReferenceEquals(current.Entity, record.Entity) || current.Transform == record.Transform || (current.Transform != null && (current.Transform.IsChildOf(record.Transform) || record.Transform.IsChildOf(current.Transform)))))
+-		{
+-			return current.Visible;
+-		}
+ 		float now = Time.unscaledTime;
+ 		if (EspVisibilityCache.TryGetValue(record.InstanceId, out var cached) && now <= cached.ExpiresAt)
+ 		{
+--- a/decompiled-src/CompleteCheatMenu/UI/Tabs/WeaponsTab.cs
++++ b/decompiled-src/CompleteCheatMenu/UI/Tabs/WeaponsTab.cs
+@@ -87,8 +87,9 @@
+ 		GUILayout.EndHorizontal();
+ 		CheatState.AimPrioritizeAlbatross = Widgets.ToggleRow("信天翁优先", CheatState.AimPrioritizeAlbatross, OnOff(CheatState.AimPrioritizeAlbatross));
+ 		CheatState.AimFov = Widgets.SliderRow("瞄准锥角（度）", CheatState.AimFov, 1f, 180f, "0", 35f);
+-		CheatState.AimRange = Widgets.SliderRow("最大范围", CheatState.AimRange, 10f, 600f, "0", 200f);
+-		CheatState.AimScreenRadius = Widgets.SliderRow("屏幕锁定半径", CheatState.AimScreenRadius, 10f, 1000f, "0", 250f);
++		CheatState.AimRange = Widgets.SliderRow("最大距离", CheatState.AimRange, 10f, 600f, "0", 200f);
++		CheatState.AimScreenRadius = Widgets.SliderRow("自瞄范围", CheatState.AimScreenRadius, 10f, 1000f, "0", 250f);
++		Widgets.Note("最大距离使用三维世界距离；自瞄范围使用屏幕像素半径。");
+ 		CheatState.AimHeightOffset = Widgets.SliderRow("回退瞄准高度", CheatState.AimHeightOffset, -1f, 3f, "0.##", 0.5f);
+ 		CheatState.AimDistanceWeight = Widgets.SliderRow("距离权重", CheatState.AimDistanceWeight, 0f, 3f, "0.##", 1f);
+ 		CheatState.AimAngleWeight = Widgets.SliderRow("角度权重", CheatState.AimAngleWeight, 0f, 3f, "0.##", 0.5f);
+--- a/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
++++ b/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+@@ -708,7 +708,7 @@
+ 
+ ---
+ 
+-### Task 17：移植 MagicBullet 真实弹丸追踪管线 ⏳ 待开始
++### Task 17：移植 MagicBullet 真实弹丸追踪管线 🚧 进行中
+ 
+ **目标：**
+ 
+@@ -786,3 +786,30 @@
+ 4. 可见性语义修正仍是弹丸追踪前置项，因为追踪目标状态、ESP 颜色和后续穿透判断都依赖真实 `Visible`。
+ 5. 审查结果：范围明确，无新增绑定依赖；先执行可见性与 UI 文本修正，再进入 Projectile 绑定和生命周期实现。
+ 
++#### Task 17.1：真实可见状态与自瞄文本修正 ✅ 已完成（2026-08-25）
++
++**完成记录：**
++
++- `AimRange` 的界面文本已从“最大范围”改为“最大距离”。
++- `AimScreenRadius` 的界面文本已从“屏幕锁定半径”改为“自瞄范围”，并补充“自瞄范围使用屏幕像素半径”的单位说明。
++- 字段名、默认值、滑块范围与预设键保持不变：`AimRange=200`、`AimScreenRadius=250`、`aimRange`、`aimScreenRadius`。
++- 保留唯一 `EspDistance` 与“最大绘制距离”，未新增或拆分玩家、生物、物品、容器距离字段。
++- `TargetingSystem` 现在无论 `RequireLineOfSight` 是否开启都会计算真实可见状态；只有启用视线要求且目标被遮挡时才排除候选。
++- 自瞄 Raycast 已与 ESP 统一为 `Physics.DefaultRaycastLayers + QueryTriggerInteraction.Ignore`。
++- ESP 不再复用自瞄骨骼点的 `TargetSolution.Visible`，继续使用独立 Bounds 中心缓存，避免骨骼点与包围盒中心的可见结果互相覆盖。
++- 新增 `visibility_ui_semantics_test.py`，覆盖 UI 文本、真实可见语义、统一 Raycast 策略和单一 ESP 距离四个行为边界。
++- 更新原 ESP 投影回归测试，使其要求 ESP 与自瞄可见结果保持独立。
++- RED 基线按预期失败；修改后新增测试和 Task 2–16 的 14 个 Python 回归测试全部通过。
++- 修改版程序集构建成功，源码数 83，版本保持 `0.7.0.0`；汉化版类型集和方法集一致，格式化占位符不匹配数为 0。
++- 本阶段仅生成验证构建，未替换游戏目录 DLL；部署基线保持不变。
++- 验证记录：`artifacts/cnkx-port/VERIFICATION_TASK17_1.txt`。
++
++**下一模块：**
++
++```text
++Task 17.2：Projectile 类型/方法绑定清单
++→ ProjectileTracker
++→ ProjectileOwnership
++→ MagicShotContext
++```
++
+--- /dev/null
++++ b/tests/visibility_ui_semantics_test.py
+@@ -0,0 +1,46 @@
++from pathlib import Path
++
++
++ROOT = Path(__file__).resolve().parents[1]
++SRC = ROOT / "decompiled-src" / "CompleteCheatMenu"
++
++weapons = (SRC / "UI" / "Tabs" / "WeaponsTab.cs").read_text(encoding="utf-8")
++targeting = (SRC / "Targeting" / "TargetingSystem.cs").read_text(encoding="utf-8")
++visibility = (SRC / "Targeting" / "VisibilityCache.cs").read_text(encoding="utf-8")
++esp = (SRC / "Runtime" / "EspRendererV2.cs").read_text(encoding="utf-8")
++state = (SRC / "Runtime" / "CheatState.cs").read_text(encoding="utf-8")
++presets = (SRC / "Runtime" / "Presets.cs").read_text(encoding="utf-8")
++
++# Seam 1: user-facing labels describe world distance and screen-space aim radius.
++assert 'SliderRow("最大距离", CheatState.AimRange' in weapons
++assert 'SliderRow("自瞄范围", CheatState.AimScreenRadius' in weapons
++assert 'SliderRow("最大范围", CheatState.AimRange' not in weapons
++assert 'SliderRow("屏幕锁定半径", CheatState.AimScreenRadius' not in weapons
++assert "自瞄范围使用屏幕像素半径" in weapons
++
++# Seam 2: actual visibility is measured even when occluded targets are eligible.
++assert "bool visible = _visibility.IsVisible(" in targeting
++assert "bool visible = !settings.RequireLineOfSight ||" not in targeting
++assert "if (settings.RequireLineOfSight && !visible)" in targeting
++
++# Seam 3: targeting and ESP use the same layer/trigger policy while retaining
++# independent aim-point and bounds-center caches.
++raycast_policy = "Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore"
++assert raycast_policy in visibility
++assert raycast_policy in esp
++assert "return current.Visible;" not in esp
++assert "EspVisibilityCache" in esp
++
++# Seam 4: ESP distance remains a single shared setting and preset key.
++assert "internal static float EspDistance = 150f;" in state
++for forbidden in (
++    "EspPlayerDistance",
++    "EspCreatureDistance",
++    "EspItemDistance",
++    "EspContainerDistance",
++):
++    assert forbidden not in state
++    assert forbidden not in presets
++assert presets.count('"espDistance"') >= 2
++
++print("VISIBILITY_UI_SEMANTICS_TESTS=PASS cases=4")

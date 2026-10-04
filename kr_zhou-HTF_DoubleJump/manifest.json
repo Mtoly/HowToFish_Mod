@@ -1,0 +1,11 @@
+{
+  "namespace": "HTF_DoubleJump",
+  "name": "HTF_DoubleJump",
+  "description": "Unable to dodge flying fish during jumps. Use this mod for mid‑air turning.Can perform two jumps after each landing.",
+  "version_number": "1.0.1",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2305"
+  ],
+  "website_url": "",
+  "FullName": "HTF.kr.DoubleJump"
+}

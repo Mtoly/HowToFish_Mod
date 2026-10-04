@@ -1,0 +1,36 @@
+RESTORED_DLL_SHA256=9361B9E43A3C77E9E32FD5421C23E51739BB569A099538DA024B5877E7558DB2
+RESTORED_SOURCE_FILES=7
+CREATED_FILES_PRESENT=0
+ROLLBACK_TASK17_3=PASS
+SOURCE_MATCH decompiled-src\CompleteCheatMenu\Patches\WeaponShoot_Patch.cs=True
+SOURCE_MATCH decompiled-src\CompleteCheatMenu\Cheats\WeaponCheats.cs=True
+SOURCE_MATCH decompiled-src\CompleteCheatMenu\Targeting\ProjectileBindings.cs=True
+SOURCE_MATCH decompiled-src\CompleteCheatMenu\Targeting\MagicShotContext.cs=True
+SOURCE_MATCH tests\tracking_probability_test.py=True
+SOURCE_MATCH tests\projectile_lifecycle_harness.cs=True
+SOURCE_MATCH docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md=True
+CREATED_FILES_PRESENT=0
+aim_scoring_test.py: AIM_SCORING_TESTS=PASS cases=9 EXIT=0
+ballistic_prediction_test.py: BALLISTIC_PREDICTION_TESTS=PASS cases=7 EXIT=0
+bone_selection_test.py: BONE_SELECTION_TESTS=PASS cases=7 EXIT=0
+client_mode_capability_test.py: CLIENT_MODE_CAPABILITY_TESTS=PASS cases=5 EXIT=0
+entity_registry_test.py: ENTITY_REGISTRY_TESTS=PASS cases=9 EXIT=0
+esp_projection_test.py: ESP_PROJECTION_TESTS=PASS cases=8 EXIT=0
+localized_ui_preset_test.py: LOCALIZED_UI_PRESET_TESTS=PASS cases=9 EXIT=0
+projectile_lifecycle_test.py: PROJECTILE_LIFECYCLE_TESTS=PASS cases=5 EXIT=0
+snapshot_isolation_test.py: SNAPSHOT_ISOLATION_TESTS=PASS cases=7 EXIT=0
+target_lock_test.py: TARGET_LOCK_TESTS=PASS cases=8 EXIT=0
+targeting_math_test.py: TARGETING_MATH_TESTS=PASS cases=10 EXIT=0
+tracking_probability_test.py: TRACKING_PROBABILITY_TESTS=PASS cases=6 EXIT=0
+visibility_ui_semantics_test.py: VISIBILITY_UI_SEMANTICS_TESTS=PASS cases=4 EXIT=0
+visible_aim_test.py: VISIBLE_AIM_TESTS=PASS cases=7 EXIT=0
+weapon_restore_test.py: WEAPON_RESTORE_TESTS=PASS cases=7 EXIT=0
+PROJECTILE_LIFECYCLE_HARNESS=PASS cases=29
+decompiled-src\CompleteCheatMenu\Targeting\BoneResolver.cs(126,37): warning CS0618: “Object.GetInstanceID()”已过时:“GetInstanceID is deprecated. Use GetEntityId instead. This will be removed in a future version.”
+decompiled-src\CompleteCheatMenu\Game\Refs.cs(188,10): warning CS0618: “Object.FindObjectOfType(Type)”已过时:“Object.FindObjectOfType has been deprecated. Use Object.FindFirstObjectByType instead or if finding any instance is acceptable the faster Object.FindAnyObjectByType”
+decompiled-src\CompleteCheatMenu\Runtime\CheatState.cs(164,22): warning CS0649: 从未对字段“CheatState.BetColorIndex”赋值，字段将一直保持其默认值 0
+BUILD_OUTPUT=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-3-initial-velocity\rollback-test-ps-20260825\rollback-task17-2.raw.dll
+BUILD_SOURCE_COUNT=87
+BUILD_SHA256=958C1C02BAE18014408E006955F6BCE59822B15DF6CB640AE633760536BB962B
+RESTORED_BASELINE_DLL_SHA256=9361B9E43A3C77E9E32FD5421C23E51739BB569A099538DA024B5877E7558DB2
+ROLLBACK_PS_VERIFICATION=PASS

@@ -1,0 +1,27 @@
+[Message:   BepInEx] BepInEx 5.4.23.5 - How to Fish (2026/8/25 19:48:44)
+[Info   :   BepInEx] Running under Unity v6000.4.4.3542935
+[Info   :   BepInEx] CLR runtime version: 4.0.30319.42000
+[Info   :   BepInEx] Supports SRE: True
+[Info   :   BepInEx] System platform: Bits64, Windows
+[Message:   BepInEx] Preloader started
+[Info   :   BepInEx] Loaded 1 patcher method from [BepInEx.Preloader 5.4.23.5]
+[Info   :   BepInEx] 1 patcher plugin loaded
+[Info   :   BepInEx] Patching [UnityEngine.CoreModule] with [BepInEx.Chainloader]
+[Message:   BepInEx] Preloader finished
+[Message:   BepInEx] Chainloader ready
+[Message:   BepInEx] Chainloader started
+[Info   :   BepInEx] 4 plugins to load
+[Info   :   BepInEx] Loading [How To Fish - Magic Bullet 1.2.2]
+[Info   :How To Fish - Magic Bullet] [Compatibility] ProjectileManager methods verified successfully. Wall Penetration is supported.
+[Info   :How To Fish - Magic Bullet] How To Fish - Magic Bullet v1.2.2 loaded.
+[Info   :How To Fish - Magic Bullet] Target mode: Crosshair | FOV: 20° | Sticky: True | WallPen: False
+[Info   :   BepInEx] Loading [NoSharedMoney 1.1.0]
+[Info   :NoSharedMoney] SaveBackups is not installed, so wallets will not be included in save backups. Installing it is recommended, since a lost wallet file cannot be recovered any other way.
+[Info   :NoSharedMoney] Hooked 8/8 purchase paths: BuyItem, BuyBait, BuyAttachment, BuyBulletUpgrade, BuySharpnessUpgrade, BuyBoatMotor, BuyBoatRadar, UnlockPocket
+[Info   :NoSharedMoney] NoSharedMoney 1.1.0 loaded. Money is now per-player; every player needs this mod installed.
+[Info   :   BepInEx] Loading [Complete Cheat Menu 0.7.0]
+[Info   :Complete Cheat Menu] 13 method(s) patched.
+[Info   :Complete Cheat Menu] 已加载 完整作弊菜单​​​​​​​​​​​​​ 0.7.0。进入游戏后按 Insert。​​​​​​​​​​​
+[Info   :   BepInEx] Loading [Keep Inventory 1.0.0]
+[Info   :Keep Inventory] KeepInventory loaded!
+[Message:   BepInEx] Chainloader startup complete

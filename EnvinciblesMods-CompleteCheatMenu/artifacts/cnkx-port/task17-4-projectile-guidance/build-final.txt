@@ -1,0 +1,6 @@
+decompiled-src\CompleteCheatMenu\Targeting\BoneResolver.cs(126,37): warning CS0618: “Object.GetInstanceID()”已过时:“GetInstanceID is deprecated. Use GetEntityId instead. This will be removed in a future version.”
+decompiled-src\CompleteCheatMenu\Game\Refs.cs(188,10): warning CS0618: “Object.FindObjectOfType(Type)”已过时:“Object.FindObjectOfType has been deprecated. Use Object.FindFirstObjectByType instead or if finding any instance is acceptable the faster Object.FindAnyObjectByType”
+decompiled-src\CompleteCheatMenu\Runtime\CheatState.cs(172,22): warning CS0649: 从未对字段“CheatState.BetColorIndex”赋值，字段将一直保持其默认值 0
+BUILD_OUTPUT=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-4-projectile-guidance\CompleteCheatMenu.task17-4.dll
+BUILD_SOURCE_COUNT=95
+BUILD_SHA256=6F0BB6A0E545FCAC6F317EEC625DF38401879E400423DD6525B1FC7F220AB970

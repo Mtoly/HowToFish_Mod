@@ -1,0 +1,9 @@
+{
+  "name": "HTFMapLoader",
+  "version_number": "0.2.8",
+  "website_url": "",
+  "description": "Custom island loader for How to Fish. Loads Unity 6000.4.4f1 URP AssetBundle maps with native navigation, radar, spawn points, wildlife options and Thunderstore map-pack discovery.",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2305"
+  ]
+}

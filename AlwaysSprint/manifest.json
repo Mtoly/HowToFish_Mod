@@ -1,0 +1,7 @@
+{
+  "name": "Always Sprint",
+  "version_number": "1.0.0",
+  "website_url": "",
+  "description": "Optional always-sprint setting for How to Fish.",
+  "dependencies": ["BepInEx-BepInExPack-5.4.2100"]
+}

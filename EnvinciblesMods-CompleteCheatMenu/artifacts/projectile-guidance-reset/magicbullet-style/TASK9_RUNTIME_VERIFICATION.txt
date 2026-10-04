@@ -1,0 +1,27 @@
+TASK9_RUNTIME_VERIFICATION
+DATE=2026-09-05
+
+DEPLOYED_DLL=E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.dll
+DEPLOYED_SHA256=803A31D624C82170AD5D38283698985E84E5FD325F853CECCFFD22BBF6414851
+BACKUP_DLL=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\magicbullet-style\game-deploy-backup-task9-20260905\CompleteCheatMenu.dll
+
+RUNTIME_COMMAND:
+  Start-Process How to Fish.exe; wait 18 seconds; inspect BepInEx/LogOutput.log
+RUNTIME_RESULT:
+  Loading [Complete Cheat Menu 0.7.0]
+  14 method(s) patched.
+  Plugin startup completed.
+  No Complete Cheat Menu exception or Aim failed entry observed.
+  Existing PlayerManager.AlivePlayers binding warning remains; it is unrelated to the new projectile path.
+  EXIT_STATUS=0
+
+TEST_RESULT:
+  MAGIC_BULLET_FLIGHT_MODE_TESTS=PASS cases=5
+  LOCALIZED_UI_PRESET_TESTS=PASS cases=9
+  PROJECTILE_GUIDANCE_RESET_SPEC=PASS cases=5
+  EXIT_STATUS=0
+
+ROLLBACK:
+  Previous production DLL was saved before deployment.
+  Independent source rollback tests remain PASS.
+  Production rollback command: copy game-deploy-backup-task9-20260905/CompleteCheatMenu.dll over deployed DLL.

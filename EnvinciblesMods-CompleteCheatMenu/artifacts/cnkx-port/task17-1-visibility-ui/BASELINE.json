@@ -1,0 +1,37 @@
+[
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\TargetingSystem.cs",
+    "Length": 5974,
+    "SHA256": "ED2DEED55563B711FB67EB4AB18449483ACF8DE2FB6523E1653E812ABA76DE26"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\VisibilityCache.cs",
+    "Length": 2556,
+    "SHA256": "D4D032D61F2F89B2CA647354951364CFCBB5198DD42291E91BCE8A0368FD0DE6"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Runtime\\EspRendererV2.cs",
+    "Length": 18485,
+    "SHA256": "7FCEC99A87C95B35166651DE844EFEDE0109C124A48FF97F50B4A3DC4F55199A"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\UI\\Tabs\\WeaponsTab.cs",
+    "Length": 8968,
+    "SHA256": "C128F8C73E7E3A38EA0A9F98F488D665C4E4991F93697CA226F4360C05D16F74"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\docs\\plans\\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md",
+    "Length": 48942,
+    "SHA256": "87DD4ACE4E905EA4236C81D40B860B509DDFAD9E387AEEBE87E86318B05180A3"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\CompleteCheatMenu.client-mode.zh-CN.dll",
+    "Length": 188928,
+    "SHA256": "224A13AE043E203D3EBCBFF840241BB32588A7549B8F8DC8326236513A4AAB0A"
+  },
+  {
+    "Path": "E:\\SteamLibrary\\steamapps\\common\\How to Fish\\How to Fish\\BepInEx\\plugins\\EnvinciblesMods-CompleteCheatMenu\\CompleteCheatMenu.dll",
+    "Length": 188928,
+    "SHA256": "224A13AE043E203D3EBCBFF840241BB32588A7549B8F8DC8326236513A4AAB0A"
+  }
+]

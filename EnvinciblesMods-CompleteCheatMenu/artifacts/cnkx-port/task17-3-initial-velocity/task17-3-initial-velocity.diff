@@ -1,0 +1,869 @@
+--- a/decompiled-src/CompleteCheatMenu/Patches/WeaponShoot_Patch.cs
++++ b/decompiled-src/CompleteCheatMenu/Patches/WeaponShoot_Patch.cs
+@@ -2,6 +2,7 @@
+ using System.Reflection;
+ using CompleteCheatMenu.Cheats;
+ using CompleteCheatMenu.Game;
++using CompleteCheatMenu.Targeting;
+ using HarmonyLib;
+ 
+ namespace CompleteCheatMenu.Patches;
+@@ -24,15 +25,27 @@
+ 		return num;
+ 	}
+ 
+-	private static void Prefix()
++	private static void Prefix(Weapon __instance)
+ 	{
++		MagicShotContext.Clear();
+ 		try
+ 		{
+-			WeaponCheats.PrepareShot();
++			TargetSolution solution = WeaponCheats.PrepareShot(__instance);
++			if (solution != null)
++			{
++				MagicShotContext.Begin(__instance, solution);
++			}
+ 		}
+ 		catch (Exception ex)
+ 		{
++			MagicShotContext.Clear();
+ 			Plugin.Log.LogError((object)("Aim failed: " + ex.Message));
+ 		}
+ 	}
++
++	private static Exception Finalizer(Exception __exception)
++	{
++		MagicShotContext.End();
++		return __exception;
++	}
+ }
+--- a/decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs
++++ b/decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs
+@@ -178,17 +178,17 @@
+ 		}
+ 	}
+ 
+-	internal static void PrepareShot()
++	internal static TargetSolution PrepareShot(Weapon weapon)
+ 	{
+ 		if (!CheatState.Aimbot && !CheatState.FireWhereLooking)
+ 		{
+-			return;
++			return null;
+ 		}
+ 		Camera currentCamera = Refs.CurrentCamera;
+-		Transform firePoint = FirePoint;
++		Transform firePoint = ResolveFirePoint(weapon);
+ 		if (currentCamera == null || firePoint == null)
+ 		{
+-			return;
++			return null;
+ 		}
+ 		if (CheatState.FireWhereLooking)
+ 		{
+@@ -197,10 +197,29 @@
+ 		if (CheatState.Aimbot)
+ 		{
+ 			TargetSolution solution;
+-			if (ShotRedirector.TryRedirect(_targetingSystem, currentCamera, firePoint, ResolveProjectileSpeed(HeldWeapon), out solution))
++			if (ShotRedirector.TryRedirect(_targetingSystem, currentCamera, firePoint, ResolveProjectileSpeed(weapon), out solution))
+ 			{
+ 				CurrentTarget = solution;
+-			}
++				return solution;
++			}
++		}
++		return null;
++	}
++
++	private static Transform ResolveFirePoint(Weapon weapon)
++	{
++		if (weapon == null)
++		{
++			return null;
++		}
++		try
++		{
++			object attachments = GameBinder.Property("Weapon", "Attachments")?.GetValue(weapon);
++			return GameBinder.Property("Attachments", "FirePoint")?.GetValue(attachments) as Transform;
++		}
++		catch
++		{
++			return null;
+ 		}
+ 	}
+ 
+--- a/decompiled-src/CompleteCheatMenu/Targeting/ProjectileBindings.cs
++++ b/decompiled-src/CompleteCheatMenu/Targeting/ProjectileBindings.cs
+@@ -14,6 +14,8 @@
+ 	internal static MethodInfo AddToRemoveQueue => GameBinder.Method("ProjectileManager", "AddToRemoveQueue", 1);
+ 
+ 	internal static FieldInfo PlayerProjectiles => GameBinder.Field("ProjectileManager", "_playerProjectiles");
++
++	internal static FieldInfo NextId => GameBinder.Field("ProjectileManager", "_nextId");
+ 
+ 	internal static FieldInfo CatchUpSpeed => GameBinder.Field("ProjectileManager", "_catchUpSpeed");
+ 
+@@ -33,6 +35,8 @@
+ 
+ 	internal static PropertyInfo ProjectileGravity => GameBinder.Property("WeaponInfo", "ProjectileGravity");
+ 
++	internal static FieldInfo ActiveWeaponInfo => GameBinder.Field("Weapon", "_weaponInfo");
++
+ 	internal static bool LifecycleAvailable => AddProjectile != null && AddProjectiles != null && AddToRemoveQueue != null && Id != null && Owner != null && IsLocal != null && FromNpc != null;
+ 
+ 	internal static bool GuidanceAvailable => LifecycleAvailable && UpdateProjectileScan != null && Position != null && Velocity != null && ProjectileGravity != null;
+@@ -44,6 +48,7 @@
+ 		_ = UpdateProjectileScan;
+ 		_ = AddToRemoveQueue;
+ 		_ = PlayerProjectiles;
++		_ = NextId;
+ 		_ = CatchUpSpeed;
+ 		_ = SqrMaxProjectileRange;
+ 		_ = Id;
+@@ -53,5 +58,6 @@
+ 		_ = Velocity;
+ 		_ = FromNpc;
+ 		_ = ProjectileGravity;
++		_ = ActiveWeaponInfo;
+ 	}
+ }
+--- a/decompiled-src/CompleteCheatMenu/Targeting/MagicShotContext.cs
++++ b/decompiled-src/CompleteCheatMenu/Targeting/MagicShotContext.cs
+@@ -1,3 +1,5 @@
++using CompleteCheatMenu.Game;
++
+ namespace CompleteCheatMenu.Targeting;
+ 
+ internal static class MagicShotContext
+@@ -8,6 +10,8 @@
+ 
+ 	internal static TargetSolution ActiveTarget { get; private set; }
+ 
++	internal static WeaponInfo ActiveWeaponInfo { get; private set; }
++
+ 	internal static bool Begin(Weapon weapon, TargetSolution target)
+ 	{
+ 		Clear();
+@@ -17,8 +21,18 @@
+ 		}
+ 		ActiveWeapon = weapon;
+ 		ActiveTarget = target;
++		GameBinder.TryGet<WeaponInfo>(ProjectileBindings.ActiveWeaponInfo, weapon, out WeaponInfo weaponInfo);
++		ActiveWeaponInfo = weaponInfo;
+ 		IsActive = true;
+ 		return true;
++	}
++
++	internal static bool MatchesSpawn(Player owner, WeaponInfo weaponInfo, bool isLocal, bool fromNpc)
++	{
++		return IsActive && isLocal && !fromNpc && owner != null && ActiveWeapon != null
++			&& ReferenceEquals(ActiveWeapon.Holder, owner)
++			&& ActiveWeaponInfo != null && ReferenceEquals(ActiveWeaponInfo, weaponInfo)
++			&& ProjectileTracker.IsValidTarget(ActiveTarget);
+ 	}
+ 
+ 	internal static void End()
+@@ -31,5 +45,6 @@
+ 		IsActive = false;
+ 		ActiveWeapon = null;
+ 		ActiveTarget = null;
++		ActiveWeaponInfo = null;
+ 	}
+ }
+--- a/tests/tracking_probability_test.py
++++ b/tests/tracking_probability_test.py
+@@ -43,7 +43,7 @@
+ assert "targetingSystem.Acquire(camera)" in redirector_source
+ assert "BallisticPredictor.Predict" in redirector_source
+ assert "_nextDiagnostic = Time.unscaledTime + 2f" in redirector_source
+-assert "WeaponCheats.PrepareShot()" in patch_source
++assert "WeaponCheats.PrepareShot(__instance)" in patch_source
+ assert "AlignFirePointToView" in weapon_source
+ assert "ShotRedirector.TryRedirect" in weapon_source
+ 
+--- a/tests/projectile_lifecycle_harness.cs
++++ b/tests/projectile_lifecycle_harness.cs
+@@ -1,4 +1,5 @@
+ using System;
++using System.Reflection;
+ using CompleteCheatMenu.Game;
+ using CompleteCheatMenu.Targeting;
+ using UnityEngine;
+@@ -21,7 +22,10 @@
+ internal sealed class Weapon
+ {
+ 	internal Player Holder;
++	internal WeaponInfo _weaponInfo;
+ }
++
++internal sealed class WeaponInfo { }
+ 
+ internal sealed class Projectile
+ {
+@@ -33,6 +37,15 @@
+ 
+ namespace CompleteCheatMenu.Game
+ {
++	internal static class GameBinder
++	{
++		internal static bool TryGet<T>(FieldInfo field, object instance, out T value)
++		{
++			value = field != null ? (T)field.GetValue(instance) : default;
++			return field != null;
++		}
++	}
++
+ 	internal static class Refs
+ 	{
+ 		internal static object LocalPlayer;
+@@ -43,6 +56,11 @@
+ 
+ namespace CompleteCheatMenu.Targeting
+ {
++	internal static class ProjectileBindings
++	{
++		internal static FieldInfo ActiveWeaponInfo => typeof(Weapon).GetField("_weaponInfo", BindingFlags.Instance | BindingFlags.NonPublic);
++	}
++
+ 	internal sealed class TargetSolution
+ 	{
+ 		internal object Entity;
+@@ -78,8 +96,9 @@
+ 		Player remote = new Player { Owner = new NetworkConnection { IsLocalClient = false } };
+ 		Refs.LocalPlayer = local;
+ 
+-		Weapon localWeapon = new Weapon { Holder = local };
+-		Weapon remoteWeapon = new Weapon { Holder = remote };
++		WeaponInfo localInfo = new WeaponInfo();
++		Weapon localWeapon = new Weapon { Holder = local, _weaponInfo = localInfo };
++		Weapon remoteWeapon = new Weapon { Holder = remote, _weaponInfo = new WeaponInfo() };
+ 		Check(ProjectileOwnership.IsLocalWeapon(localWeapon), "local weapon accepted");
+ 		Check(!ProjectileOwnership.IsLocalWeapon(remoteWeapon), "remote weapon rejected");
+ 
+@@ -93,6 +112,10 @@
+ 		TargetSolution target = Target();
+ 		Check(MagicShotContext.Begin(localWeapon, target), "context begins");
+ 		Check(MagicShotContext.IsActive && ReferenceEquals(MagicShotContext.ActiveTarget, target), "context exposes target");
++		Check(MagicShotContext.MatchesSpawn(local, localInfo, true, false), "context accepts active local spawn");
++		Check(!MagicShotContext.MatchesSpawn(remote, localInfo, true, false), "context rejects remote owner");
++		Check(!MagicShotContext.MatchesSpawn(local, localInfo, false, false), "context rejects non-local spawn");
++		Check(!MagicShotContext.MatchesSpawn(local, localInfo, true, true), "context rejects npc spawn");
+ 		MagicShotContext.End();
+ 		Check(!MagicShotContext.IsActive && MagicShotContext.ActiveTarget == null, "context ends");
+ 
+--- a/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
++++ b/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+@@ -835,3 +835,27 @@
+ Task 17.3：Weapon.Shoot Finalizer + AddProjectile/AddProjectiles 初始速度注入
+ ```
+ 
++#### Task 17.3：发射上下文与真实初始速度注入 ✅ 已完成（2026-08-25）
++
++**完成记录：**
++
++- `Weapon.Shoot` Prefix 现在使用实际 `Weapon __instance` 获取一次目标，并仅在本地武器、有效目标和追踪概率均满足时开启 `MagicShotContext`。
++- 新增 Harmony Finalizer，无论原始射击正常返回还是抛出异常，都会执行 `MagicShotContext.End()`，避免上下文泄漏到后续射击。
++- `WeaponCheats.PrepareShot` 改为返回本次发射使用的 `TargetSolution`，并按传入武器解析 FirePoint 和实际弹速；原有 FirePoint 旋转路径继续作为兼容回退。
++- 新增 `InitialVelocityRedirector`：单弹丸和多弹丸均直接替换真实 `velocity`/`velocities[]` 方向，同时保持每颗弹丸原始速度模长。
++- 多弹丸注入使用数组副本，不修改调用方原始速度数组；零弹速、NaN/Infinity、无目标和重合瞄点均保持原始速度并安全退出。
++- 启用弹道预测时，初始速度注入复用 `BallisticPredictor` 的目标速度提前量与重力补偿，不进行第二次追踪概率抽取。
++- 新增 `WeaponAddProjectile_Patch` 与 `WeaponAddProjectiles_Patch`，分别覆盖单弹丸和多弹丸真实创建入口。
++- 新增 `_nextId` 和 `Weapon._weaponInfo` 绑定；Prefix 在游戏递增 `_nextId` 前捕获本地有效基础 ID。
++- 新增 `ProjectileSpawnRegistration`，从 `_playerProjectiles[owner.Owner][id]` 找回真实生成弹丸，并在 Postfix 中注册到 `ProjectileTracker`。
++- `MagicShotContext.MatchesSpawn` 要求激活上下文、相同本地持有者、相同 WeaponInfo、`isLocal=true` 且非 NPC，远端/NPC/其他武器弹丸不会消费当前上下文。
++- 初始速度 Harness 19 项、生成注册 Harness 10 项、扩展生命周期 Harness 33 项全部通过；Task 2–17.3 共 16 个 Python 回归测试全部通过。
++- 源码程序集和汉化程序集构建成功，版本均为 `0.7.0.0`；类型集、方法集、新增类型/方法和格式化占位符检查全部通过。
++- 本阶段已经修改真实初始弹丸速度并建立生成后注册，但尚未在飞行中持续修正速度；尚未部署游戏目录。
++
++**下一模块：**
++
++```text
++Task 17.4：ProjectileGuidance + UpdateProjectileScan 飞行中持续制导 + AddToRemoveQueue 清理
++```
++
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Targeting/InitialVelocityRedirector.cs
+@@ -0,0 +1,75 @@
++using UnityEngine;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal static class InitialVelocityRedirector
++{
++	internal static bool TryRedirect(Vector3 origin, Vector3 originalVelocity, TargetSolution target, bool usePrediction, bool compensateGravity, out Vector3 redirectedVelocity)
++	{
++		redirectedVelocity = originalVelocity;
++		if (target == null || !IsFinite(origin) || !IsFinite(originalVelocity))
++		{
++			return false;
++		}
++		float speed = originalVelocity.magnitude;
++		if (!IsFinite(speed) || speed <= 0.0001f)
++		{
++			return false;
++		}
++		Vector3 point = target.AimPoint;
++		if (usePrediction)
++		{
++			point = BallisticPredictor.Predict(origin, point, target.Velocity, speed, compensateGravity);
++		}
++		if (!IsFinite(point))
++		{
++			return false;
++		}
++		Vector3 direction = point - origin;
++		if (!IsFinite(direction) || direction.sqrMagnitude <= 0.0001f)
++		{
++			return false;
++		}
++		Vector3 redirected = direction.normalized * speed;
++		if (!IsFinite(redirected))
++		{
++			return false;
++		}
++		redirectedVelocity = redirected;
++		return true;
++	}
++
++	internal static bool TryRedirectAll(Vector3 origin, Vector3[] velocities, TargetSolution target, bool usePrediction, bool compensateGravity, out Vector3[] redirectedVelocities)
++	{
++		redirectedVelocities = velocities;
++		if (velocities == null || velocities.Length == 0 || target == null)
++		{
++			return false;
++		}
++		Vector3[] copy = (Vector3[])velocities.Clone();
++		bool changed = false;
++		for (int i = 0; i < copy.Length; i++)
++		{
++			if (TryRedirect(origin, copy[i], target, usePrediction, compensateGravity, out Vector3 redirected))
++			{
++				copy[i] = redirected;
++				changed = true;
++			}
++		}
++		if (changed)
++		{
++			redirectedVelocities = copy;
++		}
++		return changed;
++	}
++
++	private static bool IsFinite(Vector3 value)
++	{
++		return IsFinite(value.x) && IsFinite(value.y) && IsFinite(value.z);
++	}
++
++	private static bool IsFinite(float value)
++	{
++		return !float.IsNaN(value) && !float.IsInfinity(value);
++	}
++}
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Targeting/ProjectileSpawnRegistration.cs
+@@ -0,0 +1,79 @@
++using System;
++using System.Collections;
++using CompleteCheatMenu.Game;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal struct ProjectileSpawnState
++{
++	internal bool Active;
++
++	internal Player Owner;
++
++	internal uint BaseId;
++
++	internal int Count;
++
++	internal TargetSolution Target;
++}
++
++internal static class ProjectileSpawnRegistration
++{
++	internal static uint CaptureBaseId(ProjectileManager manager, bool isLocal, uint suppliedId)
++	{
++		if (isLocal && manager != null && GameBinder.TryGet<uint>(ProjectileBindings.NextId, manager, out uint nextId))
++		{
++			return nextId;
++		}
++		return suppliedId;
++	}
++
++	internal static bool RegisterCreated(ProjectileManager manager, Player owner, uint id, TargetSolution target)
++	{
++		if (!TryFind(manager, owner, id, out Projectile projectile))
++		{
++			return false;
++		}
++		return ProjectileTracker.Register(projectile, target);
++	}
++
++	internal static int RegisterCreatedRange(ProjectileManager manager, Player owner, uint baseId, int count, TargetSolution target)
++	{
++		int registered = 0;
++		for (int i = 0; i < Math.Max(0, count); i++)
++		{
++			if (RegisterCreated(manager, owner, unchecked(baseId + (uint)i), target))
++			{
++				registered++;
++			}
++		}
++		return registered;
++	}
++
++	internal static bool TryFind(ProjectileManager manager, Player owner, uint id, out Projectile projectile)
++	{
++		projectile = null;
++		if (manager == null || owner == null || owner.Owner == null || ProjectileBindings.PlayerProjectiles == null)
++		{
++			return false;
++		}
++		try
++		{
++			if (ProjectileBindings.PlayerProjectiles.GetValue(manager) is not IDictionary players || !players.Contains(owner.Owner))
++			{
++				return false;
++			}
++			if (players[owner.Owner] is not IDictionary projectiles || !projectiles.Contains(id))
++			{
++				return false;
++			}
++			projectile = projectiles[id] as Projectile;
++			return projectile != null;
++		}
++		catch
++		{
++			projectile = null;
++			return false;
++		}
++	}
++}
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Patches/WeaponAddProjectile_Patch.cs
+@@ -0,0 +1,62 @@
++using System;
++using System.Reflection;
++using CompleteCheatMenu.Game;
++using CompleteCheatMenu.Runtime;
++using CompleteCheatMenu.Targeting;
++using HarmonyLib;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Patches;
++
++[HarmonyPatch]
++internal static class WeaponAddProjectile_Patch
++{
++	private static MethodBase TargetMethod()
++	{
++		return GameBinder.Method("ProjectileManager", "AddProjectile", 8);
++	}
++
++	private static bool Prepare()
++	{
++		return TargetMethod() != null;
++	}
++
++	private static void Prefix(ProjectileManager __instance, Player owner, WeaponInfo weaponInfo, bool isLocal, Vector3 pos, ref Vector3 velocity, uint id, bool fromNpc, out ProjectileSpawnState __state)
++	{
++		__state = default;
++		try
++		{
++			if (!MagicShotContext.MatchesSpawn(owner, weaponInfo, isLocal, fromNpc))
++			{
++				return;
++			}
++			TargetSolution target = MagicShotContext.ActiveTarget;
++			uint baseId = ProjectileSpawnRegistration.CaptureBaseId(__instance, isLocal, id);
++			if (!InitialVelocityRedirector.TryRedirect(pos, velocity, target, CheatState.AimPrediction, CheatState.AimGravityCompensation, out Vector3 redirected))
++			{
++				return;
++			}
++			velocity = redirected;
++			__state = new ProjectileSpawnState
++			{
++				Active = true,
++				Owner = owner,
++				BaseId = baseId,
++				Count = 1,
++				Target = target
++			};
++		}
++		catch (Exception ex)
++		{
++			Plugin.Log.LogError((object)("单弹丸初始速度注入失败：" + ex.Message));
++		}
++	}
++
++	private static void Postfix(ProjectileManager __instance, ProjectileSpawnState __state)
++	{
++		if (__state.Active)
++		{
++			ProjectileSpawnRegistration.RegisterCreated(__instance, __state.Owner, __state.BaseId, __state.Target);
++		}
++	}
++}
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Patches/WeaponAddProjectiles_Patch.cs
+@@ -0,0 +1,62 @@
++using System;
++using System.Reflection;
++using CompleteCheatMenu.Game;
++using CompleteCheatMenu.Runtime;
++using CompleteCheatMenu.Targeting;
++using HarmonyLib;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Patches;
++
++[HarmonyPatch]
++internal static class WeaponAddProjectiles_Patch
++{
++	private static MethodBase TargetMethod()
++	{
++		return GameBinder.Method("ProjectileManager", "AddProjectiles", 8);
++	}
++
++	private static bool Prepare()
++	{
++		return TargetMethod() != null;
++	}
++
++	private static void Prefix(ProjectileManager __instance, Player owner, WeaponInfo weaponInfo, bool isLocal, Vector3 pos, ref Vector3[] velocities, uint id, bool canHitOwner, out ProjectileSpawnState __state)
++	{
++		__state = default;
++		try
++		{
++			if (!MagicShotContext.MatchesSpawn(owner, weaponInfo, isLocal, canHitOwner))
++			{
++				return;
++			}
++			TargetSolution target = MagicShotContext.ActiveTarget;
++			uint baseId = ProjectileSpawnRegistration.CaptureBaseId(__instance, isLocal, id);
++			if (!InitialVelocityRedirector.TryRedirectAll(pos, velocities, target, CheatState.AimPrediction, CheatState.AimGravityCompensation, out Vector3[] redirected))
++			{
++				return;
++			}
++			velocities = redirected;
++			__state = new ProjectileSpawnState
++			{
++				Active = true,
++				Owner = owner,
++				BaseId = baseId,
++				Count = redirected.Length,
++				Target = target
++			};
++		}
++		catch (Exception ex)
++		{
++			Plugin.Log.LogError((object)("多弹丸初始速度注入失败：" + ex.Message));
++		}
++	}
++
++	private static void Postfix(ProjectileManager __instance, ProjectileSpawnState __state)
++	{
++		if (__state.Active)
++		{
++			ProjectileSpawnRegistration.RegisterCreatedRange(__instance, __state.Owner, __state.BaseId, __state.Count, __state.Target);
++		}
++	}
++}
+--- /dev/null
++++ b/tests/projectile_initial_velocity_test.py
+@@ -0,0 +1,60 @@
++from pathlib import Path
++
++
++ROOT = Path(__file__).resolve().parents[1]
++SRC = ROOT / "decompiled-src" / "CompleteCheatMenu"
++
++redirector_path = SRC / "Targeting" / "InitialVelocityRedirector.cs"
++registration_path = SRC / "Targeting" / "ProjectileSpawnRegistration.cs"
++single_patch_path = SRC / "Patches" / "WeaponAddProjectile_Patch.cs"
++multi_patch_path = SRC / "Patches" / "WeaponAddProjectiles_Patch.cs"
++
++for path in (redirector_path, registration_path, single_patch_path, multi_patch_path):
++    assert path.exists(), path
++
++redirector = redirector_path.read_text(encoding="utf-8")
++registration = registration_path.read_text(encoding="utf-8")
++single_patch = single_patch_path.read_text(encoding="utf-8")
++multi_patch = multi_patch_path.read_text(encoding="utf-8")
++shoot_patch = (SRC / "Patches" / "WeaponShoot_Patch.cs").read_text(encoding="utf-8")
++weapon_cheats = (SRC / "Cheats" / "WeaponCheats.cs").read_text(encoding="utf-8")
++bindings = (SRC / "Targeting" / "ProjectileBindings.cs").read_text(encoding="utf-8")
++context = (SRC / "Targeting" / "MagicShotContext.cs").read_text(encoding="utf-8")
++
++# Seam 1: Weapon.Shoot owns a scoped target context and clears it in a Harmony Finalizer.
++assert "Prefix(Weapon __instance)" in shoot_patch
++assert "WeaponCheats.PrepareShot(__instance)" in shoot_patch
++assert "MagicShotContext.Begin(__instance, solution)" in shoot_patch
++assert "Finalizer(Exception __exception)" in shoot_patch
++assert "MagicShotContext.End();" in shoot_patch
++assert "return __exception;" in shoot_patch
++assert "TargetSolution PrepareShot(Weapon weapon)" in weapon_cheats
++
++# Seam 2: single and multi projectile entry points rewrite the real velocity arguments.
++assert 'GameBinder.Method("ProjectileManager", "AddProjectile", 8)' in single_patch
++assert "ref Vector3 velocity" in single_patch
++assert "InitialVelocityRedirector.TryRedirect" in single_patch
++assert "ProjectileSpawnRegistration.RegisterCreated" in single_patch
++assert 'GameBinder.Method("ProjectileManager", "AddProjectiles", 8)' in multi_patch
++assert "ref Vector3[] velocities" in multi_patch
++assert "InitialVelocityRedirector.TryRedirectAll" in multi_patch
++assert "ProjectileSpawnRegistration.RegisterCreatedRange" in multi_patch
++
++# Seam 3: the redirector preserves speed, clones multi-shot arrays, and rejects invalid vectors.
++for token in ("originalVelocity.magnitude", "direction.normalized * speed", "velocities.Clone()", "IsFinite"):
++    assert token in redirector, token
++
++# Seam 4: registration captures the effective local base ID before the game increments _nextId.
++assert 'GameBinder.Field("ProjectileManager", "_nextId")' in bindings
++assert 'GameBinder.Field("Weapon", "_weaponInfo")' in bindings
++assert "CaptureBaseId" in registration
++assert "ProjectileBindings.PlayerProjectiles" in registration
++assert "owner.Owner" in registration
++assert "ProjectileTracker.Register" in registration
++
++# Seam 5: only the active local weapon spawn can consume the context.
++assert "MatchesSpawn" in context
++for token in ("isLocal", "fromNpc", "ActiveWeapon.Holder", "ActiveWeaponInfo"):
++    assert token in context, token
++
++print("PROJECTILE_INITIAL_VELOCITY_TESTS=PASS cases=5")
+--- /dev/null
++++ b/tests/projectile_initial_velocity_harness.cs
+@@ -0,0 +1,125 @@
++using System;
++using CompleteCheatMenu.Targeting;
++using UnityEngine;
++
++namespace UnityEngine
++{
++	internal struct Vector3
++	{
++		internal float x;
++		internal float y;
++		internal float z;
++
++		internal Vector3(float x, float y, float z)
++		{
++			this.x = x;
++			this.y = y;
++			this.z = z;
++		}
++
++		internal static Vector3 zero => new Vector3(0f, 0f, 0f);
++
++		internal float sqrMagnitude => x * x + y * y + z * z;
++
++		internal float magnitude => (float)Math.Sqrt(sqrMagnitude);
++
++		internal Vector3 normalized
++		{
++			get
++			{
++				float length = magnitude;
++				return length <= 0.000001f ? zero : new Vector3(x / length, y / length, z / length);
++			}
++		}
++
++		public static Vector3 operator +(Vector3 left, Vector3 right) => new Vector3(left.x + right.x, left.y + right.y, left.z + right.z);
++
++		public static Vector3 operator -(Vector3 left, Vector3 right) => new Vector3(left.x - right.x, left.y - right.y, left.z - right.z);
++
++		public static Vector3 operator *(Vector3 value, float scale) => new Vector3(value.x * scale, value.y * scale, value.z * scale);
++
++		public static bool operator ==(Vector3 left, Vector3 right) => left.x == right.x && left.y == right.y && left.z == right.z;
++
++		public static bool operator !=(Vector3 left, Vector3 right) => !(left == right);
++
++		public override bool Equals(object value) => value is Vector3 other && this == other;
++
++		public override int GetHashCode() => x.GetHashCode() ^ (y.GetHashCode() * 397) ^ z.GetHashCode();
++	}
++}
++
++namespace CompleteCheatMenu.Targeting
++{
++	internal sealed class TargetSolution
++	{
++		internal Vector3 AimPoint;
++		internal Vector3 Velocity;
++	}
++
++	internal static class BallisticPredictor
++	{
++		internal static int Calls;
++
++		internal static Vector3 Predict(Vector3 origin, Vector3 currentPoint, Vector3 velocity, float projectileSpeed, bool compensateGravity)
++		{
++			Calls++;
++			return currentPoint + velocity;
++		}
++	}
++}
++
++internal static class ProjectileInitialVelocityHarness
++{
++	private static int _cases;
++
++	private static void Check(bool condition, string name)
++	{
++		_cases++;
++		if (!condition)
++		{
++			throw new InvalidOperationException(name);
++		}
++	}
++
++	private static bool Close(float left, float right)
++	{
++		return Math.Abs(left - right) <= 0.0001f;
++	}
++
++	public static int Main()
++	{
++		TargetSolution target = new TargetSolution { AimPoint = new Vector3(0f, 10f, 0f) };
++		Vector3 source = new Vector3(3f, 4f, 0f);
++		Check(InitialVelocityRedirector.TryRedirect(Vector3.zero, source, target, false, false, out Vector3 redirected), "single redirect succeeds");
++		Check(Close(redirected.magnitude, 5f), "single speed preserved");
++		Check(Close(redirected.x, 0f) && Close(redirected.y, 5f) && Close(redirected.z, 0f), "single direction replaced");
++
++		Check(!InitialVelocityRedirector.TryRedirect(Vector3.zero, Vector3.zero, target, false, false, out Vector3 zero), "zero speed rejected");
++		Check(zero == Vector3.zero, "zero speed unchanged");
++		Check(!InitialVelocityRedirector.TryRedirect(Vector3.zero, source, null, false, false, out Vector3 noTarget), "null target rejected");
++		Check(noTarget == source, "null target unchanged");
++
++		TargetSolution coincident = new TargetSolution { AimPoint = Vector3.zero };
++		Check(!InitialVelocityRedirector.TryRedirect(Vector3.zero, source, coincident, false, false, out Vector3 samePoint), "coincident point rejected");
++		Check(samePoint == source, "coincident point unchanged");
++
++		TargetSolution moving = new TargetSolution { AimPoint = new Vector3(0f, 10f, 0f), Velocity = new Vector3(10f, 0f, 0f) };
++		Check(InitialVelocityRedirector.TryRedirect(Vector3.zero, source, moving, true, true, out Vector3 predicted), "prediction redirect succeeds");
++		Check(BallisticPredictor.Calls == 1, "prediction seam called once");
++		Check(predicted.x > 0f && predicted.y > 0f && Close(predicted.magnitude, 5f), "predicted direction and speed");
++
++		Vector3[] velocities = { new Vector3(10f, 0f, 0f), new Vector3(0f, 0f, 20f) };
++		Check(InitialVelocityRedirector.TryRedirectAll(Vector3.zero, velocities, target, false, false, out Vector3[] redirectedAll), "multi redirect succeeds");
++		Check(!ReferenceEquals(velocities, redirectedAll), "multi array cloned");
++		Check(velocities[0] == new Vector3(10f, 0f, 0f) && velocities[1] == new Vector3(0f, 0f, 20f), "caller array unchanged");
++		Check(Close(redirectedAll[0].magnitude, 10f) && Close(redirectedAll[1].magnitude, 20f), "multi speeds preserved");
++		Check(redirectedAll[0].y > 0f && redirectedAll[1].y > 0f, "multi directions replaced");
++
++		Vector3[] invalid = { Vector3.zero, new Vector3(float.NaN, 0f, 0f) };
++		Check(!InitialVelocityRedirector.TryRedirectAll(Vector3.zero, invalid, target, false, false, out Vector3[] invalidResult), "all invalid rejected");
++		Check(ReferenceEquals(invalid, invalidResult), "all invalid array unchanged");
++
++		Console.WriteLine($"PROJECTILE_INITIAL_VELOCITY_HARNESS=PASS cases={_cases}");
++		return 0;
++	}
++}
+--- /dev/null
++++ b/tests/projectile_spawn_registration_harness.cs
+@@ -0,0 +1,100 @@
++using System;
++using System.Collections.Generic;
++using System.Reflection;
++using CompleteCheatMenu.Targeting;
++
++internal sealed class Player
++{
++	internal object Owner;
++}
++
++internal sealed class Projectile
++{
++	internal uint Id;
++}
++
++internal sealed class ProjectileManager
++{
++	internal uint _nextId;
++	internal Dictionary<object, Dictionary<uint, Projectile>> _playerProjectiles = new Dictionary<object, Dictionary<uint, Projectile>>();
++}
++
++namespace CompleteCheatMenu.Game
++{
++	internal static class GameBinder
++	{
++		internal static bool TryGet<T>(FieldInfo field, object instance, out T value)
++		{
++			value = field != null ? (T)field.GetValue(instance) : default;
++			return field != null;
++		}
++	}
++}
++
++namespace CompleteCheatMenu.Targeting
++{
++	internal sealed class TargetSolution { }
++
++	internal static class ProjectileBindings
++	{
++		internal static FieldInfo NextId => typeof(ProjectileManager).GetField("_nextId", BindingFlags.Instance | BindingFlags.NonPublic);
++		internal static FieldInfo PlayerProjectiles => typeof(ProjectileManager).GetField("_playerProjectiles", BindingFlags.Instance | BindingFlags.NonPublic);
++	}
++
++	internal static class ProjectileTracker
++	{
++		internal static readonly List<Projectile> Registered = new List<Projectile>();
++
++		internal static bool Register(Projectile projectile, TargetSolution target)
++		{
++			if (projectile == null || target == null)
++			{
++				return false;
++			}
++			Registered.Add(projectile);
++			return true;
++		}
++	}
++}
++
++internal static class ProjectileSpawnRegistrationHarness
++{
++	private static int _cases;
++
++	private static void Check(bool condition, string name)
++	{
++		_cases++;
++		if (!condition)
++		{
++			throw new InvalidOperationException(name);
++		}
++	}
++
++	public static int Main()
++	{
++		object connection = new object();
++		Player owner = new Player { Owner = connection };
++		ProjectileManager manager = new ProjectileManager { _nextId = 100 };
++		manager._playerProjectiles[connection] = new Dictionary<uint, Projectile>
++		{
++			[100] = new Projectile { Id = 100 },
++			[101] = new Projectile { Id = 101 },
++			[102] = new Projectile { Id = 102 }
++		};
++		TargetSolution target = new TargetSolution();
++
++		Check(ProjectileSpawnRegistration.CaptureBaseId(manager, true, 7) == 100, "local base id captured from manager");
++		Check(ProjectileSpawnRegistration.CaptureBaseId(manager, false, 7) == 7, "remote supplied id retained");
++		Check(ProjectileSpawnRegistration.TryFind(manager, owner, 100, out Projectile found) && found.Id == 100, "nested dictionary lookup");
++		Check(!ProjectileSpawnRegistration.TryFind(manager, new Player { Owner = new object() }, 100, out _), "wrong owner rejected");
++		Check(!ProjectileSpawnRegistration.TryFind(manager, owner, 999, out _), "missing id rejected");
++		Check(ProjectileSpawnRegistration.RegisterCreated(manager, owner, 100, target), "single registration");
++		Check(ProjectileTracker.Registered.Count == 1 && ProjectileTracker.Registered[0].Id == 100, "single registered exact projectile");
++		Check(ProjectileSpawnRegistration.RegisterCreatedRange(manager, owner, 100, 3, target) == 3, "range registration count");
++		Check(ProjectileTracker.Registered.Count == 4, "range registered all projectiles");
++		Check(ProjectileSpawnRegistration.RegisterCreatedRange(manager, owner, 101, 5, target) == 2, "range skips missing ids");
++
++		Console.WriteLine($"PROJECTILE_SPAWN_REGISTRATION_HARNESS=PASS cases={_cases}");
++		return 0;
++	}
++}

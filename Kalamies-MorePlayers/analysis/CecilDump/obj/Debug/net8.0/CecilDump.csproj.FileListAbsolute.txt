@@ -1,0 +1,17 @@
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\obj\Debug\net8.0\CecilDump.csproj.AssemblyReference.cache
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\obj\Debug\net8.0\CecilDump.GeneratedMSBuildEditorConfig.editorconfig
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\obj\Debug\net8.0\CecilDump.AssemblyInfoInputs.cache
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\obj\Debug\net8.0\CecilDump.AssemblyInfo.cs
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\obj\Debug\net8.0\CecilDump.csproj.CoreCompileInputs.cache
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\bin\Debug\net8.0\CecilDump.exe
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\bin\Debug\net8.0\CecilDump.deps.json
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\bin\Debug\net8.0\CecilDump.runtimeconfig.json
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\bin\Debug\net8.0\CecilDump.dll
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\bin\Debug\net8.0\CecilDump.pdb
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\bin\Debug\net8.0\Mono.Cecil.dll
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\obj\Debug\net8.0\CecilDump.csproj.Up2Date
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\obj\Debug\net8.0\CecilDump.dll
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\obj\Debug\net8.0\refint\CecilDump.dll
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\obj\Debug\net8.0\CecilDump.pdb
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\obj\Debug\net8.0\CecilDump.genruntimeconfig.cache
+D:\Code\How2fish\Kalamies-MorePlayers\analysis\CecilDump\obj\Debug\net8.0\ref\CecilDump.dll

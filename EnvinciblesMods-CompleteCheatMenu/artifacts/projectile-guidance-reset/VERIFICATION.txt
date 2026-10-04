@@ -1,0 +1,51 @@
+TASK=CompleteCheatMenu projectile guidance lifecycle and return plan
+DATE=2026-09-05
+STATUS=PASS
+
+CHANGED_BRANCH_OR_FIELD
+- docs/plans/2026-09-05-complete-cheat-menu-projectile-guidance-reset-plan.md
+- ProjectileGuidance state: RawVelocity, LaunchVelocity, InvalidatedAt, Mode, ReturnStartVelocity
+- ProjectileTracker lifecycle checks: IsDead, IsDestroying, isActiveAndEnabled
+- WeaponShoot FirePoint snapshot/restore
+- Default target-invalid behavior: NaturalFlight; optional LaunchVelocity return
+
+FOUR_PRIMARY_ARTIFACTS
+MODIFIED_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-09-05-complete-cheat-menu-projectile-guidance-reset-plan.md
+MODIFIED_SHA256=D6E20E9FCF77BF26D18A58F77B8A98BC6878D9C274DD914ACE87E10ACC399B70
+DIFF_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\projectile-guidance-reset.patch
+DIFF_SHA256=340F66E82FC3058CC0291C3944F8399A7DCC1C622B6E84E8CF700BF7B4496A55
+VERIFICATION=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\VERIFICATION.txt
+ROLLBACK=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\ROLLBACK.sh
+ROLLBACK_SHA256=972FAA902948CEC422769FC555B35B30325417E9424ACD97CEB9925DAFFFCDD2
+
+BASELINE
+COMMAND=Get-FileHash D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\baseline-plan.md -Algorithm SHA256
+INPUT=baseline placeholder before plan creation
+LITERAL_OUTPUT=BASELINE_EXISTS=True
+LITERAL_OUTPUT=BASELINE_SHA256=05333BEBB01B9CF79D1C2357EA8A4C32F23357D0E7DE7AA6CF2FB1168A01845E
+EXIT_STATUS=0
+
+MODIFIED_REVIEW
+COMMAND=PowerShell required-section validation over D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-09-05-complete-cheat-menu-projectile-guidance-reset-plan.md
+INPUT=14 required headings, file paths, and task markers
+LITERAL_OUTPUT=REQUIRED_COUNT=14
+LITERAL_OUTPUT=MISSING_COUNT=0
+LITERAL_OUTPUT=MODIFIED_REVIEW=PASS
+EXIT_STATUS=0
+
+ROLLBACK
+COMMAND=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\ROLLBACK.sh executed against independent copy D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\rollback-test\plan.md
+INPUT=copy of modified plan; baseline source D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\baseline-plan.md
+LITERAL_OUTPUT=RESTORED_SHA256=05333BEBB01B9CF79D1C2357EA8A4C32F23357D0E7DE7AA6CF2FB1168A01845E
+LITERAL_OUTPUT=EXPECTED_SHA256=05333BEBB01B9CF79D1C2357EA8A4C32F23357D0E7DE7AA6CF2FB1168A01845E
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+LITERAL_OUTPUT=ROLLBACK_EXIT=0
+EXIT_STATUS=0
+
+PLAN_REVIEW
+RESULT=PASS
+FINDINGS=The plan separates one-time spawn redirect from continuous flight guidance; checks death/despawn before target position or velocity reads; keeps NaturalFlight as default; makes LaunchVelocity return opt-in; excludes mid-flight retargeting from phase one; includes multi-projectile, ownership, performance, localization, deployment, and rollback gates.
+OPEN_ITEMS=Implementation Task 1 is not started; no production source files were changed in this turn.
+
+RESTORED_STATUS
+Independent rollback copy restored the exact baseline placeholder SHA-256. The modified plan remains at D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-09-05-complete-cheat-menu-projectile-guidance-reset-plan.md with SHA-256 D6E20E9FCF77BF26D18A58F77B8A98BC6878D9C274DD914ACE87E10ACC399B70.

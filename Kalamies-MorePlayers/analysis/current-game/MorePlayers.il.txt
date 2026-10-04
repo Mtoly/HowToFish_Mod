@@ -1,0 +1,176 @@
+Assembly: MorePlayers, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null
+Path: D:\Code\How2fish\Kalamies-MorePlayers\MorePlayers.dll
+Filter: plugin
+Matched types: 3
+
+TYPE MorePlayers.Plugin
+  ATTRIBUTE BepInEx.BepInPlugin("kalamies.MorePlayers", "MorePlayers", "0.1.0")
+  FIELD Public, Static, Literal, HasDefault System.String Guid
+  FIELD Public, Static, Literal, HasDefault System.String Name
+  FIELD Public, Static, Literal, HasDefault System.String Version
+  FIELD Assembly, Static BepInEx.Logging.ManualLogSource Log
+  FIELD Assembly, Static BepInEx.Configuration.ConfigEntry`1<System.Int32> MaxPlayers
+
+  METHOD System.Int32 MorePlayers.Plugin::get_Limit()
+    ATTRIBUTES Public, Static, HideBySig, SpecialName
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: ldsfld       BepInEx.Configuration.ConfigEntry`1<System.Int32> MorePlayers.Plugin::MaxPlayers
+      IL_0005: callvirt     !0 BepInEx.Configuration.ConfigEntry`1<System.Int32>::get_Value()
+      IL_000A: ret
+
+  METHOD System.Void MorePlayers.Plugin::Awake()
+    ATTRIBUTES Private, HideBySig
+    LOCALS init=True maxstack=7
+    IL
+      IL_0000: ldarg.0
+      IL_0001: call         BepInEx.Logging.ManualLogSource BepInEx.BaseUnityPlugin::get_Logger()
+      IL_0006: stsfld       BepInEx.Logging.ManualLogSource MorePlayers.Plugin::Log
+      IL_000B: ldarg.0
+      IL_000C: call         BepInEx.Configuration.ConfigFile BepInEx.BaseUnityPlugin::get_Config()
+      IL_0011: ldstr        "General"
+      IL_0016: ldstr        "MaxPlayers"
+      IL_001B: ldc.i4.s     32
+      IL_001D: ldstr        "How many players can be in a lobby you host, counting you."
+      IL_0022: ldc.i4.2
+      IL_0023: ldc.i4       250
+      IL_0028: newobj       System.Void BepInEx.Configuration.AcceptableValueRange`1<System.Int32>::.ctor(!0,!0)
+      IL_002D: call         !!0[] System.Array::Empty<System.Object>()
+      IL_0032: newobj       System.Void BepInEx.Configuration.ConfigDescription::.ctor(System.String,BepInEx.Configuration.AcceptableValueBase,System.Object[])
+      IL_0037: callvirt     BepInEx.Configuration.ConfigEntry`1<!!0> BepInEx.Configuration.ConfigFile::Bind<System.Int32>(System.String,System.String,!!0,BepInEx.Configuration.ConfigDescription)
+      IL_003C: stsfld       BepInEx.Configuration.ConfigEntry`1<System.Int32> MorePlayers.Plugin::MaxPlayers
+      IL_0041: ldstr        "kalamies.MorePlayers"
+      IL_0046: newobj       System.Void HarmonyLib.Harmony::.ctor(System.String)
+      IL_004B: call         System.Void HarmonyLib.Harmony::PatchAll()
+      IL_0050: ldsfld       BepInEx.Logging.ManualLogSource MorePlayers.Plugin::Log
+      IL_0055: ldstr        "{0} {1} loaded. MaxPlayers={2}"
+      IL_005A: ldstr        "MorePlayers"
+      IL_005F: ldstr        "0.1.0"
+      IL_0064: ldsfld       BepInEx.Configuration.ConfigEntry`1<System.Int32> MorePlayers.Plugin::MaxPlayers
+      IL_0069: callvirt     !0 BepInEx.Configuration.ConfigEntry`1<System.Int32>::get_Value()
+      IL_006E: box          System.Int32
+      IL_0073: call         System.String System.String::Format(System.String,System.Object,System.Object,System.Object)
+      IL_0078: callvirt     System.Void BepInEx.Logging.ManualLogSource::LogInfo(System.Object)
+      IL_007D: ret
+
+  METHOD System.Void MorePlayers.Plugin::.ctor()
+    ATTRIBUTES Public, HideBySig, SpecialName, RTSpecialName
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: ldarg.0
+      IL_0001: call         System.Void BepInEx.BaseUnityPlugin::.ctor()
+      IL_0006: ret
+
+TYPE MorePlayers.CreateLobby_Patch
+  ATTRIBUTE HarmonyLib.HarmonyPatch(SteamManager, "CreateLobby")
+  FIELD Assembly, Static System.Boolean Rewrote
+
+  METHOD System.Collections.Generic.IEnumerable`1<HarmonyLib.CodeInstruction> MorePlayers.CreateLobby_Patch::Transpiler(System.Collections.Generic.IEnumerable`1<HarmonyLib.CodeInstruction>)
+    ATTRIBUTES Private, Static, HideBySig
+    LOCALS init=True maxstack=6
+      V_0: System.Collections.Generic.List`1<HarmonyLib.CodeInstruction>
+      V_1: System.Reflection.MethodInfo
+      V_2: System.Int32
+    IL
+      IL_0000: ldarg.0
+      IL_0001: newobj       System.Void System.Collections.Generic.List`1<HarmonyLib.CodeInstruction>::.ctor(System.Collections.Generic.IEnumerable`1<!0>)
+      IL_0006: stloc.0
+      IL_0007: ldtoken      Steamworks.SteamMatchmaking
+      IL_000C: call         System.Type System.Type::GetTypeFromHandle(System.RuntimeTypeHandle)
+      IL_0011: ldstr        "CreateLobby"
+      IL_0016: ldc.i4.2
+      IL_0017: newarr       System.Type
+      IL_001C: dup
+      IL_001D: ldc.i4.0
+      IL_001E: ldtoken      Steamworks.ELobbyType
+      IL_0023: call         System.Type System.Type::GetTypeFromHandle(System.RuntimeTypeHandle)
+      IL_0028: stelem.ref
+      IL_0029: dup
+      IL_002A: ldc.i4.1
+      IL_002B: ldtoken      System.Int32
+      IL_0030: call         System.Type System.Type::GetTypeFromHandle(System.RuntimeTypeHandle)
+      IL_0035: stelem.ref
+      IL_0036: ldnull
+      IL_0037: call         System.Reflection.MethodInfo HarmonyLib.AccessTools::Method(System.Type,System.String,System.Type[],System.Type[])
+      IL_003C: stloc.1
+      IL_003D: ldc.i4.1
+      IL_003E: stloc.2
+      IL_003F: br.s         IL_0093
+      IL_0041: ldloc.0
+      IL_0042: ldloc.2
+      IL_0043: callvirt     !0 System.Collections.Generic.List`1<HarmonyLib.CodeInstruction>::get_Item(System.Int32)
+      IL_0048: ldloc.1
+      IL_0049: call         System.Boolean HarmonyLib.CodeInstructionExtensions::Calls(HarmonyLib.CodeInstruction,System.Reflection.MethodInfo)
+      IL_004E: brfalse.s    IL_008F
+      IL_0050: ldloc.0
+      IL_0051: ldloc.2
+      IL_0052: ldc.i4.1
+      IL_0053: sub
+      IL_0054: callvirt     !0 System.Collections.Generic.List`1<HarmonyLib.CodeInstruction>::get_Item(System.Int32)
+      IL_0059: call         System.Boolean HarmonyLib.CodeInstructionExtensions::LoadsConstant(HarmonyLib.CodeInstruction)
+      IL_005E: brfalse.s    IL_008F
+      IL_0060: ldloc.0
+      IL_0061: ldloc.2
+      IL_0062: ldc.i4.1
+      IL_0063: sub
+      IL_0064: ldsfld       System.Reflection.Emit.OpCode System.Reflection.Emit.OpCodes::Call
+      IL_0069: ldtoken      MorePlayers.Plugin
+      IL_006E: call         System.Type System.Type::GetTypeFromHandle(System.RuntimeTypeHandle)
+      IL_0073: ldstr        "Limit"
+      IL_0078: call         System.Reflection.MethodInfo HarmonyLib.AccessTools::PropertyGetter(System.Type,System.String)
+      IL_007D: newobj       System.Void HarmonyLib.CodeInstruction::.ctor(System.Reflection.Emit.OpCode,System.Object)
+      IL_0082: callvirt     System.Void System.Collections.Generic.List`1<HarmonyLib.CodeInstruction>::set_Item(System.Int32,!0)
+      IL_0087: ldc.i4.1
+      IL_0088: stsfld       System.Boolean MorePlayers.CreateLobby_Patch::Rewrote
+      IL_008D: br.s         IL_00A5
+      IL_008F: ldloc.2
+      IL_0090: ldc.i4.1
+      IL_0091: add
+      IL_0092: stloc.2
+      IL_0093: ldloc.1
+      IL_0094: ldnull
+      IL_0095: call         System.Boolean System.Reflection.MethodInfo::op_Inequality(System.Reflection.MethodInfo,System.Reflection.MethodInfo)
+      IL_009A: brfalse.s    IL_00A5
+      IL_009C: ldloc.2
+      IL_009D: ldloc.0
+      IL_009E: callvirt     System.Int32 System.Collections.Generic.List`1<HarmonyLib.CodeInstruction>::get_Count()
+      IL_00A3: blt.s        IL_0041
+      IL_00A5: ldsfld       System.Boolean MorePlayers.CreateLobby_Patch::Rewrote
+      IL_00AA: brtrue.s     IL_00BB
+      IL_00AC: ldsfld       BepInEx.Logging.ManualLogSource MorePlayers.Plugin::Log
+      IL_00B1: ldstr        "Could not rewrite the lobby size in SteamManager.CreateLobby; falling back to resizing the lobby once it exists."
+      IL_00B6: callvirt     System.Void BepInEx.Logging.ManualLogSource::LogWarning(System.Object)
+      IL_00BB: ldloc.0
+      IL_00BC: ret
+
+TYPE MorePlayers.CreateOnlineLobby_Patch
+  ATTRIBUTE HarmonyLib.HarmonyPatch(ConnectionManager, "CreateOnlineLobby")
+
+  METHOD System.Void MorePlayers.CreateOnlineLobby_Patch::Prefix(System.Int32&)
+    ATTRIBUTES Private, Static, HideBySig
+    LOCALS init=True maxstack=3
+      V_0: Steamworks.CSteamID
+    IL
+      IL_0000: ldarg.0
+      IL_0001: call         System.Int32 MorePlayers.Plugin::get_Limit()
+      IL_0006: stind.i4
+      IL_0007: ldsfld       System.Boolean MorePlayers.CreateLobby_Patch::Rewrote
+      IL_000C: brfalse.s    IL_000F
+      IL_000E: ret
+      IL_000F: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0014: stloc.0
+      IL_0015: ldloc.0
+      IL_0016: ldsfld       Steamworks.CSteamID Steamworks.CSteamID::Nil
+      IL_001B: call         System.Boolean Steamworks.CSteamID::op_Inequality(Steamworks.CSteamID,Steamworks.CSteamID)
+      IL_0020: brfalse.s    IL_004D
+      IL_0022: ldloc.0
+      IL_0023: call         System.Int32 MorePlayers.Plugin::get_Limit()
+      IL_0028: call         System.Boolean Steamworks.SteamMatchmaking::SetLobbyMemberLimit(Steamworks.CSteamID,System.Int32)
+      IL_002D: brtrue.s     IL_004D
+      IL_002F: ldsfld       BepInEx.Logging.ManualLogSource MorePlayers.Plugin::Log
+      IL_0034: ldstr        "Steam refused a member limit of {0}."
+      IL_0039: call         System.Int32 MorePlayers.Plugin::get_Limit()
+      IL_003E: box          System.Int32
+      IL_0043: call         System.String System.String::Format(System.String,System.Object)
+      IL_0048: callvirt     System.Void BepInEx.Logging.ManualLogSource::LogWarning(System.Object)
+      IL_004D: ret

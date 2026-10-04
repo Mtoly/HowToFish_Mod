@@ -1,0 +1,53 @@
+TASK5_VERIFICATION
+DATE=2026-09-05
+
+BASELINE_COMMAND:
+  python tests/projectile_guidance_reset_test.py
+BASELINE_RESULT:
+  Existing guidance reset suite passed before FirePoint changes; no FirePoint snapshot/restore assertions existed.
+  EXIT_STATUS=0
+
+MODIFIED_COMMAND:
+  python %TEMP%/firepoint_test.py
+  python tests/projectile_guidance_reset_test.py
+  python tests/projectile_guidance_state_test.py
+  python tests/projectile_lifecycle_test.py
+  python tests/projectile_target_lifecycle_test.py
+  python tests/projectile_spawn_metadata_test.py
+  python tests/projectile_initial_velocity_test.py
+MODIFIED_RESULT:
+  FIREPOINT_RESTORE_STATIC_TESTS=PASS cases=6
+  PROJECTILE_GUIDANCE_RESET_SPEC=PASS cases=5
+  PROJECTILE_GUIDANCE_STATE_TESTS=PASS cases=6
+  PROJECTILE_LIFECYCLE_TESTS=PASS cases=5
+  PROJECTILE_TARGET_LIFECYCLE_TESTS=PASS cases=5
+  PROJECTILE_SPAWN_METADATA_TESTS=PASS cases=4
+  PROJECTILE_INITIAL_VELOCITY_TESTS=PASS cases=5
+  EXIT_STATUS=0
+
+BUILD_COMMAND:
+  powershell -NoProfile -ExecutionPolicy Bypass -File decompiled-src/build.ps1 -OutputPath artifacts/projectile-guidance-reset/CompleteCheatMenu.task5.dll
+BUILD_RESULT:
+  BUILD_SOURCE_COUNT=97
+  BUILD_SHA256=8A3134A3E2C3AB0370A4B128A133FCE7642DCD198F06D577955B2AD02EDE625F
+  Compiler warnings: Unity deprecated API warnings and existing BetColorIndex warning only.
+  EXIT_STATUS=0
+
+ROLLBACK_COMMAND:
+  ROLLBACK_TASK5.sh artifacts/projectile-guidance-reset/task5-rollback-test
+ROLLBACK_RESULT:
+  Targeting/MagicShotContext.cs=True
+  Patches/WeaponShoot_Patch.cs=True
+  EXIT_STATUS=0
+
+CHANGED_BEHAVIOR:
+  Prefix snapshots the FirePoint Transform rotation before PrepareShot.
+  Finalizer restores the snapshot after original Weapon.Shoot completes, then clears context.
+  Restore errors are swallowed so the original Shoot exception path remains intact.
+  Active target and projectile spawn matching remain unchanged.
+
+ARTIFACTS:
+  artifacts/projectile-guidance-reset/task5-firepoint-restore.patch
+  artifacts/projectile-guidance-reset/CompleteCheatMenu.task5.dll
+  artifacts/projectile-guidance-reset/ROLLBACK_TASK5.sh
+  artifacts/projectile-guidance-reset/task5-rollback-test/

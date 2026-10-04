@@ -1,0 +1,35 @@
+TASK8_MAGICBULLET_STYLE_VERIFICATION
+DATE=2026-09-05
+
+CHANGED_FILES:
+  decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs
+  decompiled-src/CompleteCheatMenu/Targeting/ShotRedirector.cs
+
+BEHAVIOR:
+  PrepareShot no longer rotates FirePoint.
+  ShotRedirector only selects/caches target.
+  AddProjectile and AddProjectiles redirect actual projectile velocity before spawn.
+
+BUILD:
+  CompleteCheatMenu.magicbullet-style.dll SHA256=85D641548B25C9009A35CF0C413BE50FDE65550EEA1261BFF8860A8501118A05
+  CompleteCheatMenu.magicbullet-style.zh-CN.dll SHA256=1DEAAC15E1ED717CFA817D82593F79068078447BED35871128803CC708DB6AB0
+  BUILD_SOURCE_COUNT=97
+  EXIT_STATUS=0
+
+TESTS:
+  MAGIC_BULLET_STYLE_TESTS=PASS cases=6
+  PROJECTILE_GUIDANCE_RESET_SPEC=PASS cases=5
+  PROJECTILE_GUIDANCE_STATE_TESTS=PASS cases=6
+  PROJECTILE_LIFECYCLE_TESTS=PASS cases=5
+  PROJECTILE_TARGET_LIFECYCLE_TESTS=PASS cases=5
+  PROJECTILE_INITIAL_VELOCITY_TESTS=PASS cases=5
+  LOCALIZED_UI_PRESET_TESTS=PASS cases=9
+  EXIT_STATUS=0
+
+ROLLBACK:
+  ROLLBACK_WEAPON=True
+  ROLLBACK_REDIRECTOR=True
+  EXIT_STATUS=0
+
+DEPLOYMENT:
+  Not deployed; runtime deployment waits for the next phase that removes continuous in-flight velocity writes.

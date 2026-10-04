@@ -1,0 +1,32 @@
+[
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Plugin.cs",
+    "Length": 3828,
+    "SHA256": "B28923EC058A8B157ACF5EEB30A51793D7B38536C4C2CED8CF77E5419BF2E179"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Runtime\\TickDriver.cs",
+    "Length": 1515,
+    "SHA256": "104F7497E958409C08312FE3221880DD4421E721DCE3905EBBB2BB19BFD08927"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\UI\\Tabs\\DiagnosticsTab.cs",
+    "Length": 9011,
+    "SHA256": "FE18FD685572470551296A8B438A3087E07A18B735B3E609E0E982C14B2FBAFF"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\docs\\plans\\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md",
+    "Length": 50812,
+    "SHA256": "506C526B77F95CC29B18374E71DFC6CAD8B8523B7A45FD31D9F2EEF6DB1B0D55"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\cnkx-port\\task17-1-visibility-ui\\CompleteCheatMenu.task17-1.zh-CN.dll",
+    "Length": 188928,
+    "SHA256": "ED9F679FD8AE6DCF12A0171A01252DBB2CF0A3CF5C63DD2E02A4FAD6E9192B6B"
+  },
+  {
+    "Path": "E:\\SteamLibrary\\steamapps\\common\\How to Fish\\How to Fish\\BepInEx\\plugins\\EnvinciblesMods-CompleteCheatMenu\\CompleteCheatMenu.dll",
+    "Length": 188928,
+    "SHA256": "224A13AE043E203D3EBCBFF840241BB32588A7549B8F8DC8326236513A4AAB0A"
+  }
+]

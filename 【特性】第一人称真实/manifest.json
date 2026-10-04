@@ -1,0 +1,9 @@
+{
+  "name": "SeaLegs",
+  "version_number": "1.0.2",
+  "website_url": "https://discord.gg/pdHgy6Bsng",
+  "description": "Everyone else sees your whole body, why shouldn't you? See your own body in first person. Legs, torso, arms and whatever you're holding, exactly the way everyone else sees you.",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2305"
+  ]
+}

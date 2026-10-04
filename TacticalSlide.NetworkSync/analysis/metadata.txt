@@ -1,0 +1,36 @@
+Task 1 baseline and static analysis
+Date: 2026-09-05
+
+ORIGINAL_DLL
+Path: E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\战术滑铲\com.atomic.tacticalslide.dll
+SHA256: C0C51C0A7890A6159CF206D1940ECD985B23DFC301BD65D2BB00062D00DCAA9C
+Version: 1.0.0
+
+BASELINE_ARTIFACTS
+DLL: D:\Code\How2fish\artifacts\tactical-slide-network-sync\baseline\com.atomic.tacticalslide.dll
+Config: D:\Code\How2fish\artifacts\tactical-slide-network-sync\baseline\com.atomic.tacticalslide.cfg
+Hash: D:\Code\How2fish\artifacts\tactical-slide-network-sync\baseline\sha256.txt
+
+STATIC_FINDINGS
+1. TacticalSlideMod.SlideController is a DontDestroyOnLoad MonoBehaviour singleton.
+2. IsSliding, SlideProgress, and CurrentSlideDir are static process-wide state.
+3. SlideController.Update reads input and calls UpdateVisualInterpolation.
+4. StartSlide sets IsSliding, local timer, direction, audio and particle effects.
+5. ApplySlidePhysics subtracts Time.fixedDeltaTime, computes boost/slope boost, and writes Rigidbody.linearVelocity every movement pass.
+6. OnSlideHop writes Rigidbody.linearVelocity and ends sliding locally.
+7. EndSlide and CancelSlide only clear local state; no explicit network state event is present.
+8. PlayerMovementPatch gates input/physics on Owner.IsLocalClient for FixedUpdate, Move, and Jump.
+9. Crouch visual/collider handling checks sliding state without an explicit owner gate.
+10. The plugin references FishNet.Runtime, but the decompiled TacticalSlide code has no visible ServerRpc, ObserversRpc, Broadcast, SyncVar, or NetworkBehaviour state component for sliding.
+11. Game PlayerMovement derives from FishNet.NetworkBehaviour and writes _rig.linearVelocity in its own FixedUpdate/Move path.
+12. Game PlayerMovement has a TargetRpc for knockback only; no slide state field or slide RPC was found in the exported PlayerMovement source.
+
+RUNTIME_VALUES
+FishNet TimeManager.TickRate: not present in current BepInEx log and not statically serialized in the inspected plugin config.
+Player NetworkTransform SynchronizeEvery: not identified in the exported PlayerMovement source; requires runtime object/component inspection.
+
+IMPLEMENTATION_IMPLICATIONS
+- NetworkTickTuner must set and verify TimeManager.TickRate after FishNet initialization on host and clients.
+- TacticalSlide must separate authoritative physics from remote visual state.
+- Because current plugin has no source and no slide network component, implementation requires a decompiled/rebuilt project and a confirmed player network-object integration path.
+- First pass should use Broadcast or an existing network component integration if the player prefab cannot accept a new NetworkBehaviour.

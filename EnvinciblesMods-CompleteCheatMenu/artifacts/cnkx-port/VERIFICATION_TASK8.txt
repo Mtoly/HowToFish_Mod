@@ -1,0 +1,135 @@
+CompleteCheatMenu cnKX port - Task 8 verification
+DATE=2026-08-25
+TASK=实现移动速度估计与弹道预测
+STATUS=COMPLETE
+
+CHANGED_BRANCH_OR_FIELD
+- VelocityTracker.SampleCapacity=4: 每个实体使用固定容量时间戳位置环形样本。
+- VelocityTracker.Observe: 过滤过短采样间隔；传送位移或异常速度触发样本重置；超过 5 秒未见的轨迹定期清理。
+- BallisticPredictor.Predict: Unity 世界单位/秒；两次飞行时间迭代；弹速无效或结果非有限时返回当前点。
+- BallisticPredictor.SanitizeVelocity: 非有限或超过 AimMaxTargetSpeed 的速度归零。
+- BallisticPredictor gravity branch: 可选使用 Physics.gravity、AimGravityCompensation 和 AimGravityScale 补偿，默认关闭。
+- TargetingSystem.AddCandidate: 调用 VelocityTracker.Observe 并写入 TargetCandidate.Velocity。
+- CheatState: 新增 AimPrediction/AimVelocityMinInterval/AimTeleportDistance/AimMaxTargetSpeed/AimGravityCompensation/AimGravityScale。
+
+ARTIFACTS
+- MODIFIED_FILE_1: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\VelocityTracker.cs
+- MODIFIED_FILE_2: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\BallisticPredictor.cs
+- MODIFIED_FILE_3: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\CheatState.cs
+- MODIFIED_FILE_4: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\TargetingSystem.cs
+- MODIFIED_FILE_5: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\cnkx_math_impl.py
+- TEST_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\ballistic_prediction_test.py
+- MODIFIED_DLL: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\CompleteCheatMenu.dll
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task8-ballistic-prediction.diff
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK8.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK8.sh
+- WINDOWS_ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK8.ps1
+- ORIGINAL_SOURCE_DIR: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task8-original-src
+
+RED_TEST
+COMMAND=python .\tests\ballistic_prediction_test.py
+INPUT=Task 7 完成源码；predict_point/sanitize_velocity 尚不存在
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+
+BASELINE
+COMMAND=Get-FileHash -Algorithm SHA256 .\artifacts\CompleteCheatMenu.dll
+INPUT=Task 7 完成版程序集
+LITERAL_OUTPUT=SHA256 123741A9E5C1735C69227C85FD2ABEECBAABE9CF76085F5282A5790F39900B26
+EXIT_STATUS=0
+
+MODIFIED_BALLISTIC_TEST
+COMMAND=python .\tests\ballistic_prediction_test.py
+INPUT=静止、横向移动、接近、远离、零弹速、异常速度及生产源码结构
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+OBSERVED_RESULT=100 单位距离/100 单位每秒弹速下，10 单位每秒横移产生约 10.05 提前量；接近点位于 90 到 91，远离点位于 111 到 112。
+
+REGRESSION_TESTS
+COMMAND=python .\tests\target_lock_test.py
+LITERAL_OUTPUT=TARGET_LOCK_TESTS=PASS cases=8
+EXIT_STATUS=0
+COMMAND=python .\tests\bone_selection_test.py
+LITERAL_OUTPUT=BONE_SELECTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\targeting_math_test.py
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=PASS cases=10
+EXIT_STATUS=0
+COMMAND=python .\tests\snapshot_isolation_test.py
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\entity_registry_test.py
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+EXIT_STATUS=0
+COMMAND=python .\tests\aim_scoring_test.py
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Task 3-7 的实体注册、目标快照、评分、骨骼、可见性与锁定行为继续通过。
+
+EXPECTED_FUTURE_RED_TEST
+COMMAND=python .\tests\tracking_probability_test.py
+INPUT=Task 9 尚未实现的 should_track
+LITERAL_OUTPUT=TRACKING_PROBABILITY_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+RESULT=EXPECTED_RED; 留给 Task 9。
+
+MODIFIED_BUILD
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File .\decompiled-src\build.ps1
+INPUT=VelocityTracker、BallisticPredictor、目标速度接入和预测配置
+LITERAL_OUTPUT=0 compiler errors
+LITERAL_OUTPUT=MODIFIED_BUILD_EXIT=0
+LITERAL_OUTPUT=MODIFIED_DLL_SHA256=988A3476230FC4570B6B3870CE0AD0BF29E269B6474C28E40FABE2BCAA9DD2F8
+EXIT_STATUS=0
+
+ASSEMBLY_TYPE_CHECK
+COMMAND=dnfile TypeDef inspection on artifacts\CompleteCheatMenu.dll
+INPUT=修改版程序集
+LITERAL_OUTPUT=TYPE_VelocityTracker=True
+LITERAL_OUTPUT=TYPE_BallisticPredictor=True
+EXIT_STATUS=0
+
+ROLLBACK_POWERSHELL
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK8.ps1 -DestinationRoot .\artifacts\cnkx-port\rollback-task8-test-20260825a
+INPUT=包含全部 Task 8 修改文件的独立目录
+LITERAL_OUTPUT=CHEATSTATE_SHA256=9761A9E2E295B6D44BFCDF87C4D9ED6EBD1FDDF11D4C3AB142B9B1E2481840E6
+LITERAL_OUTPUT=TARGETING_SYSTEM_SHA256=139C1E8A5F58B8BE4C5432BBC1359A07395059E9DCF0B30D62309DC41DDDC747
+LITERAL_OUTPUT=MATH_IMPL_SHA256=5C2F5F73F5861A5C2AEA2BAD50C97C9EA101647BE8D3D0679E2CA53920D8E929
+LITERAL_OUTPUT=BALLISTIC_TEST_SHA256=1C1819893C1F93891F66CA94A878367B97048D3ADF0E6345E2167C8AD928F258
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=四个既有文件恢复 Task 7 字节，两个 Task 8 新文件被移除；工作目录继续保留修改版。
+
+ROLLBACK_BASH
+COMMAND=ROLLBACK_TASK8.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-task8-test-sh-20260825a
+INPUT=第二个独立修改副本
+LITERAL_OUTPUT=CHEATSTATE_SHA256=9761A9E2E295B6D44BFCDF87C4D9ED6EBD1FDDF11D4C3AB142B9B1E2481840E6
+LITERAL_OUTPUT=TARGETING_SYSTEM_SHA256=139C1E8A5F58B8BE4C5432BBC1359A07395059E9DCF0B30D62309DC41DDDC747
+LITERAL_OUTPUT=MATH_IMPL_SHA256=5C2F5F73F5861A5C2AEA2BAD50C97C9EA101647BE8D3D0679E2CA53920D8E929
+LITERAL_OUTPUT=BALLISTIC_TEST_SHA256=1C1819893C1F93891F66CA94A878367B97048D3ADF0E6345E2167C8AD928F258
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+
+MODIFIED_SOURCE_HASHES
+- VelocityTracker.cs=D0ECCF81D50B371D8923E79AC460584A0AFE044B92AF6B3DDB79D459C68E16FE
+- BallisticPredictor.cs=AACFEAC3510651F237EF2B9BD3A99C357D3B242FF20EFB0703C4C6D45930F803
+- CheatState.cs=3DE73E553C2DC03615E73453A2C088F8F5484E560E6AADC5E585642224F5C386
+- TargetingSystem.cs=DA694AE460A3D6663D5AB1CE311D0F40C657D157518C46A92603EF058386566D
+- cnkx_math_impl.py=DD15D856193D6C8F18D3BF221ED7FBFD7921FED7BBDA9AFDF841A53F19728EED
+- ballistic_prediction_test.py=058487C45D08A56060F156FDC1DFC5BD08051FC508B706C5EEC50CA35767C682
+
+DIFF
+LINES=311
+SHA256=D6F7BBB3CB901B090C7375F514DAEDA499DECAFB244C022AA0CF298273A7CADD
+
+PLAN_MARK
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+RESULT=Task 8 marked complete with evidence path.
+
+DEPLOYMENT
+RESULT=NOT_DEPLOYED_GATE_A_IN_PROGRESS
+DEPLOYED_DLL_UNCHANGED_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+
+GIT
+RESULT=SKIPPED_NOT_A_GIT_REPOSITORY

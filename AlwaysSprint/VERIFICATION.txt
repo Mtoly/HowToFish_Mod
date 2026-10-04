@@ -1,0 +1,22 @@
+BASELINE_SHA256=ABSENT
+MODIFIED_SHA256=374C2A7D8CDE46ACCF7E9AFFA6CC76976FF5C6C361CB17A8089065D99D05D5C7
+BASELINE_COMMAND=Test-Path 'E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\AlwaysSprint\AlwaysSprint.dll' before install => False
+MODIFIED_COMMAND=Get-FileHash 'E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\AlwaysSprint\AlwaysSprint.dll' -Algorithm SHA256 => 374C2A7D8CDE46ACCF7E9AFFA6CC76976FF5C6C361CB17A8089065D99D05D5C7
+BUILD_COMMAND=dotnet build D:\Code\How2fish\AlwaysSprint\AlwaysSprint.csproj -c Release -o D:\Code\How2fish\AlwaysSprint\bin
+BUILD_EXIT=0
+BUILD_OUTPUT=  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  AlwaysSprint -> D:\Code\How2fish\AlwaysSprint\bin\AlwaysSprint.dll
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:00.43
+
+ROLLBACK_COMMAND=powershell -ExecutionPolicy Bypass -File 'D:\Code\How2fish\AlwaysSprint\ROLLBACK.ps1' -Target 'D:\Code\How2fish\AlwaysSprint\rollback-test\AlwaysSprint.dll'
+ROLLBACK_RESULT=rollback=removed-new-plugin; restored_test_exists=False
+MODIFIED_FILE=E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\AlwaysSprint\AlwaysSprint.dll
+DIFF_FILE=D:\Code\How2fish\AlwaysSprint\AlwaysSprint.diff.txt
+VERIFICATION_FILE=D:\Code\How2fish\AlwaysSprint\VERIFICATION.txt
+ROLLBACK_FILE=D:\Code\How2fish\AlwaysSprint\ROLLBACK.ps1

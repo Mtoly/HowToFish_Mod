@@ -1,0 +1,6 @@
+EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Game\Refs.cs(188,10): warning CS0618: “Object.FindObjectOfType(Type)”已过时:“Object.FindObjectOfType has been deprecated. Use Object.FindFirstObjectByType instead or if finding any instance is acceptable the faster Object.FindAnyObjectByType”
+EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\BoneResolver.cs(126,37): warning CS0618: “Object.GetInstanceID()”已过时:“GetInstanceID is deprecated. Use GetEntityId instead. This will be removed in a future version.”
+EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\CheatState.cs(164,22): warning CS0649: 从未对字段“CheatState.BetColorIndex”赋值，字段将一直保持其默认值 0
+BUILD_OUTPUT=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-1-visibility-ui\CompleteCheatMenu.task17-1.dll
+BUILD_SOURCE_COUNT=83
+BUILD_SHA256=CB40C8A9523A1487B916718EC7B4CEE75887B71E058B28AC8226BA03082F8A00

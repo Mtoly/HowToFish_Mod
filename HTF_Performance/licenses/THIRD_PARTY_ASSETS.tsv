@@ -1,0 +1,10 @@
+name	type	length	sha256	url
+BepInEx_win_x64_5.4.23.5.zip	loader	639118	82f9878551030f54657792c0740d9d51a09500eeae1fba21106b0c441e6732c4	https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip
+BepInEx-MIT.txt	license	1062	e6e534ef6f4347b6449407ee046a3d09cb0174c6f688c996ad0bed94b74b3933	https://raw.githubusercontent.com/BepInEx/BepInEx/v5.4.23.5/LICENSE
+BepInEx.Harmony-MIT.txt	license	1057	feb87a2e0c305de3464cc44077da5393c52d8ca6362d37427157d04ec6f4510d	https://raw.githubusercontent.com/BepInEx/BepInEx.Harmony/d4cdcb4cdeac14a0b77012165f5f5a9f5032a9fa/LICENSE
+HarmonyX-MIT.txt	license	1063	7e54ab4766ef78637a05fb3454663a66de6bb960dbd4c7088890ed76b0844f36	https://raw.githubusercontent.com/BepInEx/HarmonyX/v2.9.0/LICENSE
+Harmony-MIT.txt	license	1072	27e65b8adeedd73c2f76088346efa3756a00e4e88cca5ace0c196ce1733ef570	https://raw.githubusercontent.com/BepInEx/HarmonyX/v2.9.0/LICENSE.Harmony
+MonoMod-MIT.txt	license	1080	0b64833222e3c6a426ad29362d26334619fe02eaf2b89ea9c37805521896c920	https://raw.githubusercontent.com/MonoMod/MonoMod/v22.01.29.01/LICENSE
+Mono.Cecil-MIT.txt	license	1098	13d58ecbed676511c0c4c4009bff107025e50007ff5e7901dc562700ec62509e	https://raw.githubusercontent.com/jbevain/cecil/0.10.4/LICENSE.txt
+UnityDoorstop-LGPL-2.1.txt	license	26526	20c17d8b8c48a600800dfd14f95d5cb9ff47066a9641ddeab48dc54aec96e331	https://raw.githubusercontent.com/NeighTools/UnityDoorstop/v4.5.0/LICENSE
+UnityDoorstop-v4.5.0-source.zip	source	109881	7f0c963104aa08bf5fefef8ff85e7fecd8306838f5af3101487d9db4e9188d63	https://codeload.github.com/NeighTools/UnityDoorstop/zip/refs/tags/v4.5.0

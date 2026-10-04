@@ -1,0 +1,514 @@
+--- a/decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
++++ b/decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
+@@ -37,6 +37,10 @@
+ 	internal static bool FastBullets;
+ 
+ 	internal static float ProjectileSpeed = 300f;
++
++	internal static bool InstantHit;
++
++	internal static float InstantHitProjectileSpeed = 10000f;
+ 
+ 	internal static bool FireWhereLooking;
+ 
+--- a/decompiled-src/CompleteCheatMenu/Plugin.cs
++++ b/decompiled-src/CompleteCheatMenu/Plugin.cs
+@@ -70,6 +70,7 @@
+ 
+ 	private void OnDestroy()
+ 	{
++		SafeRun(WeaponCheats.RestoreAllWeapons, "restore weapons");
+ 		if (VisualCheats.FreeCamActive)
+ 		{
+ 			VisualCheats.ToggleFreeCam(on: false);
+--- a/decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs
++++ b/decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs
+@@ -1,4 +1,3 @@
+-using System.Collections.Generic;
+ using System.Reflection;
+ using CompleteCheatMenu.Game;
+ using CompleteCheatMenu.Runtime;
+@@ -9,7 +8,9 @@
+ 
+ internal static class WeaponCheats
+ {
+-	private static readonly Dictionary<object, Dictionary<string, object>> _originals = new Dictionary<object, Dictionary<string, object>>();
++	private static readonly WeaponStateStore _stateStore = new WeaponStateStore();
++
++	private static object _lastWeapon;
+ 
+ 	private static float _nextTargetPreview;
+ 
+@@ -109,19 +110,14 @@
+ 
+ 	internal static bool HasOriginals
+ 	{
+-		get
+-		{
+-			if (HeldWeapon != null && _originals.TryGetValue(HeldWeapon, out var value))
+-			{
+-				return value.Count > 0;
+-			}
+-			return false;
+-		}
++		get { return _stateStore.HasOriginals(HeldWeapon); }
+ 	}
+ 
+ 	internal static void Tick()
+ 	{
+ 		object heldWeapon = HeldWeapon;
++		RestorePreviousWeapon(heldWeapon);
++		RestoreDisabledFields();
+ 		if (heldWeapon != null)
+ 		{
+ 			if (CheatState.InfiniteAmmo)
+@@ -130,23 +126,27 @@
+ 			}
+ 			if (CheatState.NoSpread)
+ 			{
+-				Set(heldWeapon, "_spread", 0f);
++				SetExact(heldWeapon, "_spread", 0f);
+ 			}
+ 			if (CheatState.ZeroRecoil)
+ 			{
+-				Set(heldWeapon, "_recoilKnockback", 0);
++				SetExact(heldWeapon, "_recoilKnockback", 0);
+ 			}
+ 			if (CheatState.RapidFire)
+ 			{
+-				Set(heldWeapon, "_timeBetweenShots", Mathf.Max(0.01f, CheatState.FireInterval));
++				SetExact(heldWeapon, "_timeBetweenShots", Mathf.Max(0.01f, CheatState.FireInterval));
+ 			}
+ 			if (CheatState.MultiShot)
+ 			{
+-				Set(heldWeapon, "_projectileCountPerShot", Mathf.RoundToInt(CheatState.ProjectileCount));
+-			}
+-			if (CheatState.FastBullets)
+-			{
+-				Set(heldWeapon, "_projSpeed", CheatState.ProjectileSpeed);
++				SetExact(heldWeapon, "_projectileCountPerShot", Mathf.RoundToInt(CheatState.ProjectileCount));
++			}
++			if (CheatState.InstantHit)
++			{
++				SetExact(heldWeapon, "_projSpeed", Mathf.Max(1f, CheatState.InstantHitProjectileSpeed));
++			}
++			else if (CheatState.FastBullets)
++			{
++				SetExact(heldWeapon, "_projSpeed", Mathf.Max(1f, CheatState.ProjectileSpeed));
+ 			}
+ 			if (!CheatState.Aimbot)
+ 			{
+@@ -224,6 +224,10 @@
+ 
+ 	private static float ResolveProjectileSpeed(object weapon)
+ 	{
++		if (CheatState.InstantHit)
++		{
++			return CheatState.InstantHitProjectileSpeed;
++		}
+ 		if (CheatState.FastBullets)
+ 		{
+ 			return CheatState.ProjectileSpeed;
+@@ -248,17 +252,10 @@
+ 		}
+ 	}
+ 
+-	private static void Set(object target, string field, object value, string typeName = "Weapon")
+-	{
+-		if (typeName == "Weapon")
+-		{
+-			Remember(target, field);
+-		}
+-		FieldInfo fieldInfo = GameBinder.Field(typeName, field);
+-		if (fieldInfo != null)
+-		{
+-			GameBinder.TrySet(fieldInfo, target, value);
+-		}
++	private static bool SetExact(object target, string fieldName, object value)
++	{
++		FieldInfo field = GameBinder.Field("Weapon", fieldName);
++		return _stateStore.Set(target, field, value);
+ 	}
+ 
+ 	internal static bool RefillAmmo()
+@@ -296,50 +293,48 @@
+ 		return GameBinder.TryInvoke(GameBinder.Method("Server", "BuyAttachment", 2), Refs.Server, heldWeapon, index);
+ 	}
+ 
+-	private static void Remember(object weapon, string field)
+-	{
+-		if (!_originals.TryGetValue(weapon, out var value))
+-		{
+-			value = (_originals[weapon] = new Dictionary<string, object>());
+-		}
+-		if (value.ContainsKey(field))
+-		{
+-			return;
+-		}
+-		FieldInfo fieldInfo = GameBinder.Field("Weapon", field);
+-		if (fieldInfo == null)
+-		{
+-			return;
+-		}
+-		try
+-		{
+-			value[field] = fieldInfo.GetValue(weapon);
+-		}
+-		catch
+-		{
++	private static void RestorePreviousWeapon(object currentWeapon)
++	{
++		if (_lastWeapon != null && !ReferenceEquals(_lastWeapon, currentWeapon))
++		{
++			_stateStore.RestoreWeapon(_lastWeapon);
++		}
++		_lastWeapon = currentWeapon;
++	}
++
++	private static void RestoreDisabledFields()
++	{
++		if (!CheatState.NoSpread)
++		{
++			_stateStore.RestoreFieldAll(GameBinder.Field("Weapon", "_spread"));
++		}
++		if (!CheatState.ZeroRecoil)
++		{
++			_stateStore.RestoreFieldAll(GameBinder.Field("Weapon", "_recoilKnockback"));
++		}
++		if (!CheatState.RapidFire)
++		{
++			_stateStore.RestoreFieldAll(GameBinder.Field("Weapon", "_timeBetweenShots"));
++		}
++		if (!CheatState.MultiShot)
++		{
++			_stateStore.RestoreFieldAll(GameBinder.Field("Weapon", "_projectileCountPerShot"));
++		}
++		if (!CheatState.FastBullets && !CheatState.InstantHit)
++		{
++			_stateStore.RestoreFieldAll(GameBinder.Field("Weapon", "_projSpeed"));
+ 		}
+ 	}
+ 
+ 	internal static bool ResetHeldWeapon()
+ 	{
+ 		object heldWeapon = HeldWeapon;
+-		if (heldWeapon == null)
+-		{
+-			return false;
+-		}
+-		if (!_originals.TryGetValue(heldWeapon, out var value) || value.Count == 0)
+-		{
+-			return false;
+-		}
+-		foreach (KeyValuePair<string, object> item in value)
+-		{
+-			FieldInfo fieldInfo = GameBinder.Field("Weapon", item.Key);
+-			if (fieldInfo != null)
+-			{
+-				GameBinder.TrySet(fieldInfo, heldWeapon, item.Value);
+-			}
+-		}
+-		value.Clear();
+-		return true;
++		return _stateStore.RestoreWeapon(heldWeapon);
++	}
++
++	internal static void RestoreAllWeapons()
++	{
++		_stateStore.RestoreAll();
++		_lastWeapon = null;
+ 	}
+ }
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Cheats/WeaponStateStore.cs
+@@ -0,0 +1,145 @@
++using System;
++using System.Collections.Generic;
++using System.Reflection;
++using System.Runtime.CompilerServices;
++
++namespace CompleteCheatMenu.Cheats;
++
++internal sealed class WeaponStateStore
++{
++	private sealed class ReferenceComparer : IEqualityComparer<object>
++	{
++		internal static readonly ReferenceComparer Instance = new ReferenceComparer();
++
++		public new bool Equals(object x, object y)
++		{
++			return ReferenceEquals(x, y);
++		}
++
++		public int GetHashCode(object obj)
++		{
++			return RuntimeHelpers.GetHashCode(obj);
++		}
++	}
++
++	private readonly Dictionary<object, Dictionary<FieldInfo, object>> _originals = new Dictionary<object, Dictionary<FieldInfo, object>>(ReferenceComparer.Instance);
++
++	internal bool HasOriginals(object weapon)
++	{
++		return weapon != null && _originals.TryGetValue(weapon, out var fields) && fields.Count > 0;
++	}
++
++	internal bool Set(object weapon, FieldInfo field, object value)
++	{
++		if (weapon == null || field == null || field.IsStatic || !field.DeclaringType.IsInstanceOfType(weapon))
++		{
++			return false;
++		}
++		if (!_originals.TryGetValue(weapon, out var fields))
++		{
++			fields = new Dictionary<FieldInfo, object>();
++			_originals[weapon] = fields;
++		}
++		try
++		{
++			if (!fields.ContainsKey(field))
++			{
++				fields[field] = field.GetValue(weapon);
++			}
++			object converted = ConvertValue(value, field.FieldType);
++			field.SetValue(weapon, converted);
++			return true;
++		}
++		catch
++		{
++			if (fields.Count == 0)
++			{
++				_originals.Remove(weapon);
++			}
++			return false;
++		}
++	}
++
++	internal bool RestoreWeapon(object weapon)
++	{
++		if (weapon == null || !_originals.TryGetValue(weapon, out var fields))
++		{
++			return false;
++		}
++		foreach (KeyValuePair<FieldInfo, object> pair in fields)
++		{
++			TryRestore(weapon, pair.Key, pair.Value);
++		}
++		_originals.Remove(weapon);
++		return true;
++	}
++
++	internal int RestoreFieldAll(FieldInfo field)
++	{
++		if (field == null)
++		{
++			return 0;
++		}
++		int restored = 0;
++		List<object> empty = null;
++		foreach (KeyValuePair<object, Dictionary<FieldInfo, object>> weaponEntry in _originals)
++		{
++			if (weaponEntry.Value.TryGetValue(field, out var original))
++			{
++				TryRestore(weaponEntry.Key, field, original);
++				weaponEntry.Value.Remove(field);
++				restored++;
++			}
++			if (weaponEntry.Value.Count == 0)
++			{
++				if (empty == null)
++				{
++					empty = new List<object>();
++				}
++				empty.Add(weaponEntry.Key);
++			}
++		}
++		if (empty != null)
++		{
++			for (int i = 0; i < empty.Count; i++)
++			{
++				_originals.Remove(empty[i]);
++			}
++		}
++		return restored;
++	}
++
++	internal int RestoreAll()
++	{
++		int restoredWeapons = _originals.Count;
++		foreach (KeyValuePair<object, Dictionary<FieldInfo, object>> weaponEntry in _originals)
++		{
++			foreach (KeyValuePair<FieldInfo, object> fieldEntry in weaponEntry.Value)
++			{
++				TryRestore(weaponEntry.Key, fieldEntry.Key, fieldEntry.Value);
++			}
++		}
++		_originals.Clear();
++		return restoredWeapons;
++	}
++
++	private static void TryRestore(object weapon, FieldInfo field, object value)
++	{
++		try
++		{
++			field.SetValue(weapon, value);
++		}
++		catch
++		{
++		}
++	}
++
++	private static object ConvertValue(object value, Type targetType)
++	{
++		if (value == null || targetType.IsInstanceOfType(value))
++		{
++			return value;
++		}
++		return Convert.ChangeType(value, targetType);
++	}
++}
+--- /dev/null
++++ b/tests/cnkx_weapon_store_impl.py
+@@ -0,0 +1,63 @@
++class WeaponStateStoreModel:
++    def __init__(self, allowed_fields):
++        self.allowed_fields = set(allowed_fields)
++        self.entries = {}
++
++    def _entry(self, weapon, create=False):
++        key = id(weapon)
++        entry = self.entries.get(key)
++        if entry is None and create:
++            entry = {"weapon": weapon, "originals": {}}
++            self.entries[key] = entry
++        return entry
++
++    def set(self, weapon, field, value):
++        if weapon is None or field not in self.allowed_fields or field not in weapon:
++            return False
++        entry = self._entry(weapon, create=True)
++        if field not in entry["originals"]:
++            entry["originals"][field] = weapon[field]
++        weapon[field] = value
++        return True
++
++    def original(self, weapon, field):
++        entry = self._entry(weapon)
++        return None if entry is None else entry["originals"].get(field)
++
++    def restore_weapon(self, weapon):
++        entry = self.entries.pop(id(weapon), None)
++        if entry is None:
++            return False
++        for field, value in entry["originals"].items():
++            weapon[field] = value
++        return True
++
++    def restore_field_all(self, field):
++        restored = 0
++        empty = []
++        for key, entry in self.entries.items():
++            originals = entry["originals"]
++            if field in originals:
++                entry["weapon"][field] = originals.pop(field)
++                restored += 1
++            if not originals:
++                empty.append(key)
++        for key in empty:
++            self.entries.pop(key, None)
++        return restored
++
++    def restore_all(self):
++        count = len(self.entries)
++        for entry in list(self.entries.values()):
++            for field, value in entry["originals"].items():
++                entry["weapon"][field] = value
++        self.entries.clear()
++        return count
++
++
++def projectile_speed(fast_enabled, instant_enabled, fast_speed, instant_speed):
++    if instant_enabled:
++        return instant_speed
++    if fast_enabled:
++        return fast_speed
++    return None
+--- /dev/null
++++ b/tests/weapon_restore_test.py
+@@ -0,0 +1,76 @@
++import sys
++from pathlib import Path
++
++TESTS = Path(__file__).resolve().parent
++PROJECT = TESTS.parent
++sys.path.insert(0, str(TESTS))
++
++try:
++    from cnkx_weapon_store_impl import WeaponStateStoreModel, projectile_speed
++except (ImportError, ModuleNotFoundError):
++    print("WEAPON_RESTORE_TESTS=FAIL missing implementation")
++    raise SystemExit(1)
++
++
++weapon_a = {"_projSpeed": 80.0, "_spread": 1.5, "adjacent": 777}
++weapon_b = {"_projSpeed": 120.0, "_spread": 2.0, "adjacent": 888}
++store = WeaponStateStoreModel(allowed_fields={"_projSpeed", "_spread"})
++
++# 每个武器实例独立保存首次原值。
++assert store.set(weapon_a, "_projSpeed", 300.0)
++assert store.set(weapon_a, "_projSpeed", 500.0)
++assert store.set(weapon_b, "_projSpeed", 600.0)
++assert store.original(weapon_a, "_projSpeed") == 80.0
++assert store.original(weapon_b, "_projSpeed") == 120.0
++
++# 切换武器时只恢复上一件武器，不把 A 的原值写入 B。
++store.restore_weapon(weapon_a)
++assert weapon_a["_projSpeed"] == 80.0
++assert weapon_b["_projSpeed"] == 600.0
++store.restore_weapon(weapon_b)
++assert weapon_b["_projSpeed"] == 120.0
++
++# 高速子弹与瞬击使用独立开关和值，瞬击优先但关闭后可回到高速子弹值。
++assert projectile_speed(False, False, 300.0, 10000.0) is None
++assert projectile_speed(True, False, 300.0, 10000.0) == 300.0
++assert projectile_speed(False, True, 300.0, 10000.0) == 10000.0
++assert projectile_speed(True, True, 300.0, 10000.0) == 10000.0
++
++# 关闭字段功能后精确恢复该字段，其他字段和相邻值不变。
++store.set(weapon_a, "_spread", 0.0)
++assert weapon_a["adjacent"] == 777
++assert store.restore_field_all("_spread") == 1
++assert weapon_a["_spread"] == 1.5
++assert weapon_a["adjacent"] == 777
++
++# 未解析字段不会保存、写入或尝试相邻字段。
++snapshot = dict(weapon_a)
++assert not store.set(weapon_a, "_missing", 1)
++assert weapon_a == snapshot
++
++# 插件卸载时恢复全部仍被修改的武器。
++store.set(weapon_a, "_projSpeed", 999.0)
++store.set(weapon_b, "_spread", 0.0)
++assert store.restore_all() == 2
++assert weapon_a["_projSpeed"] == 80.0
++assert weapon_b["_spread"] == 2.0
++
++# 生产实现只允许解析后的 FieldInfo 精确写入，并在插件销毁时 RestoreAll。
++store_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Cheats/WeaponStateStore.cs"
++).read_text(encoding="utf-8")
++weapon_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs"
++).read_text(encoding="utf-8")
++plugin_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Plugin.cs"
++).read_text(encoding="utf-8")
++assert "Dictionary<object, Dictionary<FieldInfo, object>>" in store_source
++assert "field.SetValue(weapon" in store_source
++assert "Marshal" not in store_source
++assert "IntPtr" not in store_source
++assert "RestorePreviousWeapon" in weapon_source
++assert "CheatState.InstantHit" in weapon_source
++assert "WeaponCheats.RestoreAllWeapons" in plugin_source
++
++print("WEAPON_RESTORE_TESTS=PASS cases=7")

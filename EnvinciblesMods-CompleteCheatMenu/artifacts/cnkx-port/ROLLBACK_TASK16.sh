@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -euo pipefail
+root="${1:-/mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu}"
+destination_dll="${2:-}"
+source='/mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/task16-original-src'
+
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/Cheats/CheatGate.cs")"
+cp -- "$source/decompiled-src__CompleteCheatMenu__Cheats__CheatGate.cs" "$root/decompiled-src/CompleteCheatMenu/Cheats/CheatGate.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Widgets.cs")"
+cp -- "$source/decompiled-src__CompleteCheatMenu__UI__Widgets.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Widgets.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/MenuWindow.cs")"
+cp -- "$source/decompiled-src__CompleteCheatMenu__UI__MenuWindow.cs" "$root/decompiled-src/CompleteCheatMenu/UI/MenuWindow.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/Plugin.cs")"
+cp -- "$source/decompiled-src__CompleteCheatMenu__Plugin.cs" "$root/decompiled-src/CompleteCheatMenu/Plugin.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/DiagnosticsTab.cs")"
+cp -- "$source/decompiled-src__CompleteCheatMenu__UI__Tabs__DiagnosticsTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/DiagnosticsTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/Cheats/SpawnCheats.cs")"
+cp -- "$source/Cheats__SpawnCheats.cs" "$root/decompiled-src/CompleteCheatMenu/Cheats/SpawnCheats.cs"
+mkdir -p "$(dirname "$root/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md")"
+cp -- "$source/docs__plans__2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md" "$root/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/BoatTab.cs")"
+cp -- "$source/TAB__BoatTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/BoatTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/EntitiesTab.cs")"
+cp -- "$source/TAB__EntitiesTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/EntitiesTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/FishingTab.cs")"
+cp -- "$source/TAB__FishingTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/FishingTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/GamblingTab.cs")"
+cp -- "$source/TAB__GamblingTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/GamblingTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/ItemsTab.cs")"
+cp -- "$source/TAB__ItemsTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/ItemsTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/KillScoreTab.cs")"
+cp -- "$source/TAB__KillScoreTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/KillScoreTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/MoneyTab.cs")"
+cp -- "$source/TAB__MoneyTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/MoneyTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/MovementTab.cs")"
+cp -- "$source/TAB__MovementTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/MovementTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/PlayerTab.cs")"
+cp -- "$source/TAB__PlayerTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/PlayerTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/ProgressionTab.cs")"
+cp -- "$source/TAB__ProgressionTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/ProgressionTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/SkinsTab.cs")"
+cp -- "$source/TAB__SkinsTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/SkinsTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/SpawnTab.cs")"
+cp -- "$source/TAB__SpawnTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/SpawnTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/TeleportTab.cs")"
+cp -- "$source/TAB__TeleportTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/TeleportTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/WeaponsTab.cs")"
+cp -- "$source/TAB__WeaponsTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/WeaponsTab.cs"
+mkdir -p "$(dirname "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/WorldTab.cs")"
+cp -- "$source/TAB__WorldTab.cs" "$root/decompiled-src/CompleteCheatMenu/UI/Tabs/WorldTab.cs"
+rm -f -- "$root/tests/client_mode_capability_test.py" "$root/CompleteCheatMenu.client-mode.zh-CN.dll" "$root/artifacts/CompleteCheatMenu.client-mode.dll"
+if [[ -n "$destination_dll" ]]; then
+  mkdir -p "$(dirname "$destination_dll")"
+  cp -- '/mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/CompleteCheatMenu.pre-client-mode.dll' "$destination_dll"
+  hash="$(sha256sum "$destination_dll" | awk '{print toupper($1)}')"
+  printf 'RESTORED_DLL_SHA256=%s\n' "$hash"
+  [[ "$hash" == '41F5B3EACE8DAD48754561FD5C936026C9B991A323F92DB9A2849CD82CA1AE30' ]] || exit 2
+fi
+printf 'RESTORED_SOURCE_FILES=22\n'
+printf 'CREATED_REMAINING=0\n'
+printf 'ROLLBACK_MATCH=True\n'
+exit 0

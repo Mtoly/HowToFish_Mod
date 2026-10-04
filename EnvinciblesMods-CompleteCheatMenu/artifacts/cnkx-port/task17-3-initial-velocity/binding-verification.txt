@@ -1,0 +1,4 @@
+BINDING Weapon._weaponInfo=True
+BINDING ProjectileManager._playerProjectiles=True
+BINDING ProjectileManager._nextId=True
+TASK17_3_BINDINGS=PASS

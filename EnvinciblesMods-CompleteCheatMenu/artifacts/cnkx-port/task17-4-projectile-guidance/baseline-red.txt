@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\projectile_guidance_test.py", line 13, in <module>
+    assert path.exists(), path
+           ~~~~~~~~~~~^^
+AssertionError: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\ProjectileGuidance.cs
+RED_EXIT=1

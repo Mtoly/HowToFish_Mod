@@ -1,0 +1,62 @@
+Fish Aimbot performance optimization verification
+Date: 2026-08-25 Asia/Shanghai
+
+Changed branch/field
+- Harmony postfix: PlayerCamera.ApplyAimAssist
+- Target discovery: per-frame Object.FindObjectsByType<Creature> replaced by a Creature.Awake registry
+- Target classification: per-candidate string.ToLower allocations replaced by cached ordinal-ignore-case flags
+- Target math: distance magnitude is computed once and reused for normalization and scoring
+- Preserved behavior: mouse button 2, 180-degree FOV, dead/attached/seagull exclusions,
+  albatross score, nearest/angle score, and PlayerCamera._rot pitch/yaw writes
+
+Artifacts
+- MODIFIED_FILE: D:\Code\How2fish\Kai935-FishAimbot\AimbotRevised.optimized.dll
+- DIFF_FILE: D:\Code\How2fish\Kai935-FishAimbot\artifacts\performance.patch
+- VERIFICATION: D:\Code\How2fish\Kai935-FishAimbot\VERIFICATION.txt
+- ROLLBACK: D:\Code\How2fish\Kai935-FishAimbot\ROLLBACK.sh
+- ORIGINAL_BACKUP: D:\Code\How2fish\Kai935-FishAimbot\artifacts\AimbotRevised.original.dll
+- DEPLOYED_FILE: E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\Kai935-FishAimbot\AimbotRevised.dll
+
+Hashes
+- ORIGINAL_SHA256=F779756D916863675EF2DA7372616B8D64DB1736505409B8CC0D41A5A575B47D
+- MODIFIED_SHA256=949AB4722425AB9147F3DC990C181FA6DC49FD942937C42C2384D83AB95D7F03
+- DEPLOYED_SHA256=949AB4722425AB9147F3DC990C181FA6DC49FD942937C42C2384D83AB95D7F03
+
+BASELINE
+Command: Start-Process 'E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish.exe' -ArgumentList '-batchmode','-nographics','-logFile','D:\Code\How2fish\Kai935-FishAimbot\artifacts\baseline-unity.log'
+Input: original AimbotRevised.dll SHA256 F779756D916863675EF2DA7372616B8D64DB1736505409B8CC0D41A5A575B47D
+Literal result: [Info   :   BepInEx] Loading [Fish Aimbot 1.0.1]
+Literal result: [Message:   BepInEx] Chainloader startup complete
+Exit status: 0
+
+MODIFIED BUILD AND PERFORMANCE TEST
+Command: powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1; csc /optimize+ /out:tests\PerformanceHarness.exe tests\PerformanceHarness.cs; .\tests\PerformanceHarness.exe
+Input: 300 deterministic targets, seed 935, 720 rotating-view equivalence cases, 20000 fixed-view benchmark frames
+Literal output: SEMANTIC_EQUIVALENCE=PASS cases=720
+Literal output: BASELINE elapsed_ms=593 allocated_bytes=280000040
+Literal output: MODIFIED elapsed_ms=88 allocated_bytes=0
+Literal output: SPEEDUP=6.74x
+Exit status: 0
+
+MODIFIED IL CHECK
+Command: dotnet ilspycmd.dll -il -r GAME_MANAGED AimbotRevised.optimized.dll
+Input: AimbotRevised.optimized.dll SHA256 949AB4722425AB9147F3DC990C181FA6DC49FD942937C42C2384D83AB95D7F03
+Literal result: FishTargeting.GetBestTarget contains 0 FindObjectsByType calls and 0 String.ToLower calls
+Literal result: FishTargeting.Initialize contains the only FindObjectsByType call
+Literal result: CreatureRegistryPatch and AimAssistPatch are present; AimAssistPatch calls GetBestTarget
+Exit status: 0
+
+MODIFIED STARTUP
+Command: copy optimized DLL to DEPLOYED_FILE; start How to Fish.exe -batchmode -nographics -logFile artifacts\modified-unity.log; inspect BepInEx\LogOutput.log
+Input: deployed SHA256 949AB4722425AB9147F3DC990C181FA6DC49FD942937C42C2384D83AB95D7F03
+Literal result: [Info   :   BepInEx] Loading [Fish Aimbot 1.1.0]
+Literal result: [Message:   BepInEx] Chainloader startup complete
+Literal result: no Fish Aimbot error, exception, or HarmonyException matched
+Exit status: 0
+
+ROLLBACK
+Command: bash.exe ./ROLLBACK.sh /mnt/d/Code/How2fish/Kai935-FishAimbot/artifacts/rollback-test.dll
+Input: rollback-test.dll initially held modified SHA256 949AB4722425AB9147F3DC990C181FA6DC49FD942937C42C2384D83AB95D7F03
+Literal output: ROLLBACK_SHA256=F779756D916863675EF2DA7372616B8D64DB1736505409B8CC0D41A5A575B47D
+Exit status: 0
+Restored behavior/status: rollback-test.dll is byte-identical to the original 1.0.1 plugin; the deployed game DLL remains the modified 1.1.0 build.

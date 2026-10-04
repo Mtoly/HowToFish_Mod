@@ -1,0 +1,45 @@
+--- original/WeaponCheats.cs
++++ current/WeaponCheats.cs
+@@ -190,10 +190,8 @@
+ 		{
+ 			return null;
+ 		}
+-		if (CheatState.FireWhereLooking)
+-		{
+-			AlignFirePointToView(currentCamera, firePoint);
+-		}
++		// Magic Bullet mode redirects Projectile.Velocity in AddProjectile prefixes;
++		// do not rotate FirePoint, so the next shot never inherits a prior redirect.
+ 		if (CheatState.Aimbot)
+ 		{
+ 			TargetSolution solution;
+@@ -232,15 +230,6 @@
+ 		VisibleAimController.Step(HeldWeapon, Refs.LocalCamera, Refs.CurrentCamera, CurrentTarget, deltaTime);
+ 	}
+ 
+-	private static void AlignFirePointToView(Camera camera, Transform firePoint)
+-	{
+-		Vector3 forward = camera.transform.forward;
+-		if (forward.sqrMagnitude > 0.0001f)
+-		{
+-			firePoint.rotation = Quaternion.LookRotation(forward, Vector3.up);
+-		}
+-	}
+-
+ 	private static float ResolveProjectileSpeed(object weapon)
+ 	{
+ 		if (CheatState.InstantHit)
+--- original/ShotRedirector.cs
++++ current/ShotRedirector.cs
+@@ -35,8 +35,9 @@
+ 		{
+ 			return false;
+ 		}
+-		firePoint.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+-		LogLimited("发射方向已更新到当前目标解算点。");
++		// Magic Bullet style: AddProjectile prefixes redirect the actual velocity.
++		// This method only selects and caches the target; it never rotates the FirePoint.
++		LogLimited("已缓存当前目标，弹丸将在生成前重定向速度。");
+ 		return true;
+ 	}
+ 

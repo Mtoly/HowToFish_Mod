@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-1-visibility-ui\red-baseline\tests\visibility_ui_semantics_test.py", line 15, in <module>
+    assert 'SliderRow("最大距离", CheatState.AimRange' in weapons
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

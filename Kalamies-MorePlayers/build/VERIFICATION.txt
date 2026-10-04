@@ -1,0 +1,69 @@
+CHANGE
+Branch/field: MorePlayers.CreateLobby_Patch.Transpiler; CodeInstruction.opcode and CodeInstruction.operand.
+Original behavior: replaces the ldc.i4.8 instruction with a new CodeInstruction and loses its branch label.
+Modified behavior: mutates the existing instruction in place, retaining labels and exception blocks.
+
+ARTIFACTS
+MODIFIED_FILE=D:\Code\How2fish\Kalamies-MorePlayers\build\MorePlayers.fixed.dll
+DIFF_FILE=D:\Code\How2fish\Kalamies-MorePlayers\build\MorePlayers.patch.diff
+VERIFICATION_FILE=D:\Code\How2fish\Kalamies-MorePlayers\build\VERIFICATION.txt
+ROLLBACK_FILE=D:\Code\How2fish\Kalamies-MorePlayers\build\ROLLBACK.ps1
+
+BASELINE
+Command: D:\Code\How2fish\Kalamies-MorePlayers\analysis\HarmonyVerifier.exe D:\Code\How2fish\Kalamies-MorePlayers\MorePlayers.dll
+Input: original MorePlayers.dll, SHA256 082648207F272DC7EFBFFCA69933A5D48ABC903A30A711CA2E1399490C5AFC72
+Literal output/result:
+PLUGIN=D:\Code\How2fish\Kalamies-MorePlayers\MorePlayers.dll
+RESULT=FAIL_HARMONY_PATCHALL
+ERROR_TYPE=HarmonyLib.HarmonyException
+ERROR_MESSAGE=IL Compile Error (unknown location)
+Inner result: System.ArgumentException: ILGenerator 中的错误标签内容。
+Exit status: 1
+
+MODIFIED
+Command: D:\Code\How2fish\Kalamies-MorePlayers\analysis\HarmonyVerifier.exe D:\Code\How2fish\Kalamies-MorePlayers\build\MorePlayers.fixed.dll
+Input: fixed MorePlayers.dll, SHA256 1CF59B23A4288D880B1179CFBB32E7AB381F1AC9E4F72479746C18C5CF1188E5
+Literal output/result:
+PLUGIN=D:\Code\How2fish\Kalamies-MorePlayers\build\MorePlayers.fixed.dll
+RESULT=PASS_HARMONY_PATCHALL
+Exit status: 0
+
+STATIC MODIFIED
+Command: pwsh -NoProfile -File D:\Code\How2fish\Kalamies-MorePlayers\analysis\Verify-PreserveLabels.ps1 -PluginDll D:\Code\How2fish\Kalamies-MorePlayers\build\MorePlayers.fixed.dll
+Input: fixed MorePlayers.dll
+Literal output/result:
+NEW_CODEINSTRUCTION_COUNT=0
+OPCODE_IN_PLACE_WRITES=1
+OPERAND_IN_PLACE_WRITES=1
+RESULT=PASS_LABELS_PRESERVED_BY_IN_PLACE_MUTATION
+Exit status: 0
+
+ROLLBACK
+Command: pwsh -NoProfile -File D:\Code\How2fish\Kalamies-MorePlayers\build\ROLLBACK.ps1 -InstalledPlugin D:\Code\How2fish\Kalamies-MorePlayers\build\rollback-test\MorePlayers.dll
+Input: a separate copy of MorePlayers.fixed.dll
+Literal output/result:
+RESTORED=D:\Code\How2fish\Kalamies-MorePlayers\build\rollback-test\MorePlayers.dll
+SHA256=082648207F272DC7EFBFFCA69933A5D48ABC903A30A711CA2E1399490C5AFC72
+ROLLBACK_MATCH=True
+Exit status: 0
+Restored behavior/status: the rollback copy exactly matches the preserved original plugin hash and therefore restores the original Transpiler behavior.
+
+INSTALLED STARTUP
+Command: Start-Process -FilePath "E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish.exe" -WorkingDirectory "E:\SteamLibrary\steamapps\common\How to Fish\How to Fish" -WindowStyle Hidden -PassThru
+Input: fixed DLL installed as BepInEx\plugins\Kalamies-MorePlayers\MorePlayers.dll; configured MaxPlayers=32
+Literal output/result from BepInEx\LogOutput.log:
+[Info   :   BepInEx] Loading [MorePlayers 0.1.0]
+[Info   :MorePlayers] MorePlayers 0.1.0 loaded. MaxPlayers=32
+[Message:   BepInEx] Chainloader startup complete
+Error scan result: no Label #2, ArgumentException, HarmonyException, or IL Compile Error.
+Process result: started as PID 32408 and exited on its own within 20 seconds.
+
+ROLLBACK ABSENT BASELINE
+Command: pwsh -NoProfile -File D:\Code\How2fish\Kalamies-MorePlayers\build\ROLLBACK.ps1 -InstalledPlugin D:\Code\How2fish\Kalamies-MorePlayers\build\rollback-absent-test\Kalamies-MorePlayers\MorePlayers.dll -BaselineAbsent
+Input: an independent installed-directory copy of MorePlayers.fixed.dll
+Literal output/result:
+RESTORED_ABSENT=D:\Code\How2fish\Kalamies-MorePlayers\build\rollback-absent-test\Kalamies-MorePlayers
+ROLLBACK_ABSENT_EXIT=0
+DIRECTORY_EXISTS=False
+Exit status: 0
+Restored behavior/status: the test installation directory is absent, matching the pre-install game state.

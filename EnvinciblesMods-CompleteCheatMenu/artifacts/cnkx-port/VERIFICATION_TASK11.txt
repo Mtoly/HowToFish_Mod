@@ -1,0 +1,139 @@
+CompleteCheatMenu cnKX port - Task 11 verification
+DATE=2026-08-25
+TASK=实现安全的瞬击和武器原值恢复
+STATUS=COMPLETE
+
+CHANGED_BRANCH_OR_FIELD
+- WeaponStateStore.Set: 按武器对象引用 + 已解析 FieldInfo 保存第一次修改前的原值，再通过该 FieldInfo 精确写入。
+- WeaponStateStore.RestoreWeapon: 只恢复指定武器实例，不把上一件武器的值写入当前武器。
+- WeaponStateStore.RestoreFieldAll: 功能关闭时只恢复对应字段，并清理空的武器状态记录。
+- WeaponStateStore.RestoreAll: 插件卸载时恢复全部仍被跟踪的武器字段。
+- WeaponCheats.Tick: InstantHit 使用 InstantHitProjectileSpeed，FastBullets 使用 ProjectileSpeed；同时开启时 InstantHit 优先。
+- WeaponCheats.RestorePreviousWeapon: 检测引用切换并恢复上一件武器。
+- WeaponCheats.RestoreDisabledFields: NoSpread/ZeroRecoil/RapidFire/MultiShot/FastBullets/InstantHit 分字段恢复。
+- WeaponCheats.ResetHeldWeapon: 只恢复当前武器。
+- Plugin.OnDestroy: 调用 WeaponCheats.RestoreAllWeapons。
+- SAFETY_BOUNDARY: 不使用 Marshal、IntPtr、偏移或相邻字段；未解析 FieldInfo 时 Set 返回 false。
+
+ARTIFACTS
+- MODIFIED_FILE_1: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Cheats\WeaponStateStore.cs
+- MODIFIED_FILE_2: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Cheats\WeaponCheats.cs
+- MODIFIED_FILE_3: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\CheatState.cs
+- MODIFIED_FILE_4: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Plugin.cs
+- TEST_HELPER: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\cnkx_weapon_store_impl.py
+- TEST_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\weapon_restore_test.py
+- MODIFIED_DLL: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\CompleteCheatMenu.dll
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task11-weapon-state-store.diff
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK11.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK11.sh
+- WINDOWS_ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK11.ps1
+- ORIGINAL_SOURCE_DIR: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task11-original-src
+
+RED_TEST
+COMMAND=python .\tests\weapon_restore_test.py
+INPUT=测试已创建；WeaponStateStore 和恢复逻辑尚不存在
+LITERAL_OUTPUT=WEAPON_RESTORE_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+
+BASELINE
+COMMAND=Get-FileHash -Algorithm SHA256 .\artifacts\CompleteCheatMenu.dll
+INPUT=Task 10 完成版程序集
+LITERAL_OUTPUT=SHA256 62D81A92ED140746C6363AAB0D0F7B2D5B60B7BD607A5A90BF63A95B04B65ADF
+EXIT_STATUS=0
+
+MODIFIED_WEAPON_RESTORE_TEST
+COMMAND=python .\tests\weapon_restore_test.py
+INPUT=武器 A/B 原值独立、首次原值、切换恢复、瞬击优先、精确字段恢复、未解析字段拒绝、卸载恢复
+LITERAL_OUTPUT=WEAPON_RESTORE_TESTS=PASS cases=7
+EXIT_STATUS=0
+OBSERVED_RESULT=武器 A/B 原值分别恢复；同一字段只保留第一次原值；关闭字段功能只恢复该字段；瞬击速度优先于高速子弹；未解析字段无写入；卸载恢复所有保存状态。
+
+REGRESSION_TESTS
+COMMAND=python .\tests\visible_aim_test.py
+LITERAL_OUTPUT=VISIBLE_AIM_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\tracking_probability_test.py
+LITERAL_OUTPUT=TRACKING_PROBABILITY_TESTS=PASS cases=6
+EXIT_STATUS=0
+COMMAND=python .\tests\ballistic_prediction_test.py
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\target_lock_test.py
+LITERAL_OUTPUT=TARGET_LOCK_TESTS=PASS cases=8
+EXIT_STATUS=0
+COMMAND=python .\tests\bone_selection_test.py
+LITERAL_OUTPUT=BONE_SELECTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\targeting_math_test.py
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=PASS cases=10
+EXIT_STATUS=0
+COMMAND=python .\tests\snapshot_isolation_test.py
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\entity_registry_test.py
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+EXIT_STATUS=0
+COMMAND=python .\tests\aim_scoring_test.py
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Task 3-10 的注册、快照、评分、骨骼、可见性、预测、发射追踪和可见拉枪行为全部继续通过。
+
+MODIFIED_BUILD
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File .\decompiled-src\build.ps1
+INPUT=WeaponStateStore、瞬击独立速度、字段关闭恢复、武器切换恢复与卸载恢复
+LITERAL_OUTPUT=0 compiler errors
+LITERAL_OUTPUT=BUILD_EXIT=0
+LITERAL_OUTPUT=MODIFIED_DLL_SHA256=BAB0A9EECDD228F152F4B4B7D8E6F8E504C33ACE3E324CBB2C4771A9586B44D9
+EXIT_STATUS=0
+
+ASSEMBLY_TYPE_CHECK
+COMMAND=dnfile TypeDef inspection on artifacts\CompleteCheatMenu.dll
+INPUT=修改版程序集
+LITERAL_OUTPUT=TYPE_WeaponStateStore=True
+LITERAL_OUTPUT=TYPE_WeaponCheats=True
+EXIT_STATUS=0
+
+ROLLBACK_POWERSHELL
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK11.ps1 -DestinationRoot .\artifacts\cnkx-port\rollback-task11-test-20260825b
+INPUT=包含全部 Task 11 修改文件的独立目录
+LITERAL_OUTPUT=CHEATSTATE_SHA256=11BC1B747042BD019FC1B5126084FFB5D00CEE4770C093BF21E4FE97176CB5D5
+LITERAL_OUTPUT=PLUGIN_SHA256=86A84F114A2E0AC657F0B53D9354C97D6652F9D6310061F0EEEAD9705BD8FBFC
+LITERAL_OUTPUT=WEAPON_SHA256=C5E2A322C2B0BF65A57E52C44F8D09A574936DF026D78480858CDC4DB868732F
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=三个既有文件恢复 Task 10 字节，三个 Task 11 新文件被移除；工作目录继续保留修改版。
+
+ROLLBACK_BASH
+COMMAND=ROLLBACK_TASK11.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-task11-test-sh-20260825b
+INPUT=第二个独立修改副本
+LITERAL_OUTPUT=CHEATSTATE_SHA256=11BC1B747042BD019FC1B5126084FFB5D00CEE4770C093BF21E4FE97176CB5D5
+LITERAL_OUTPUT=PLUGIN_SHA256=86A84F114A2E0AC657F0B53D9354C97D6652F9D6310061F0EEEAD9705BD8FBFC
+LITERAL_OUTPUT=WEAPON_SHA256=C5E2A322C2B0BF65A57E52C44F8D09A574936DF026D78480858CDC4DB868732F
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=第二个独立目录恢复到 Task 10 字节；工作目录未回滚。
+
+MODIFIED_SOURCE_HASHES
+- CheatState.cs=E028F72E3B5EDDC98786DBD89D322CD7B2DAA5F44C763ECC4D092284AF78640D
+- Plugin.cs=DAF9983F40DCAFCD2EFB936D346EABDEBFFCAC088E5F208E459D79594FA45BEC
+- WeaponCheats.cs=2B832E621BCDB03802768C0A0D8AE4D912676902DCFBDF67EFB292E2E831F544
+- WeaponStateStore.cs=54E48A5163F52A7E4A9397BDB6FC6068BF40E240C6485D6D93B966693A0E9C20
+- cnkx_weapon_store_impl.py=256431DBD312C51DD398C2DF6EB088885D53FAB55C8D5E069C0D7CB079C58FED
+- weapon_restore_test.py=56512289437177423F826DB3D681B787C467D3E96A7DB8C5BCF9C07940BF8701
+
+DIFF
+LINES=514
+SHA256=97BF564C6730AA9FAB3387E72AD7FF949ABC4AA6C5B4DB7DF263AA328130683E
+
+PLAN_MARK
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+RESULT=Task 11 marked complete with evidence path.
+
+DEPLOYMENT
+RESULT=NOT_DEPLOYED_GATE_A_IN_PROGRESS
+DEPLOYED_DLL_UNCHANGED_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+
+GIT
+RESULT=SKIPPED_NOT_A_GIT_REPOSITORY

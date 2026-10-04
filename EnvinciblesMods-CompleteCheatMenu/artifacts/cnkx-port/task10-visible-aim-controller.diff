@@ -1,0 +1,321 @@
+diff --git artifacts/cnkx-port/task10-original-src/WeaponCheats.cs decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs
+index cddc8cc..000260b 100644
+--- artifacts/cnkx-port/task10-original-src/WeaponCheats.cs
++++ decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs
+@@ -204,6 +204,15 @@ internal static class WeaponCheats
+ 		}
+ 	}
+ 
++	internal static void VisibleAimTick(float deltaTime)
++	{
++		if (!CheatState.AimVisibleAssist || !CheatState.Aimbot)
++		{
++			return;
++		}
++		VisibleAimController.Step(HeldWeapon, Refs.LocalCamera, Refs.CurrentCamera, CurrentTarget, deltaTime);
++	}
++
+ 	private static void AlignFirePointToView(Camera camera, Transform firePoint)
+ 	{
+ 		Vector3 forward = camera.transform.forward;
+diff --git artifacts/cnkx-port/task10-original-src/CheatState.cs decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
+index cb2da13..8b89db9 100644
+--- artifacts/cnkx-port/task10-original-src/CheatState.cs
++++ decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
+@@ -94,6 +94,16 @@ internal static class CheatState
+ 
+ 	internal static bool AimTrackingDiagnostics;
+ 
++	internal static bool AimVisibleAssist;
++
++	internal static float AimVisibleResponse = 8f;
++
++	internal static float AimDistanceDropPerUnit;
++
++	internal static bool AimRecoilCompensation;
++
++	internal static float AimRecoilCompensationStrength = 1f;
++
+ 	internal static bool KillScoreOverride;
+ 
+ 	internal static float KillFlatMultiplier = 1f;
+diff --git artifacts/cnkx-port/task10-original-src/TickDriver.cs decompiled-src/CompleteCheatMenu/Runtime/TickDriver.cs
+index 48cf22b..954a5be 100644
+--- artifacts/cnkx-port/task10-original-src/TickDriver.cs
++++ decompiled-src/CompleteCheatMenu/Runtime/TickDriver.cs
+@@ -46,6 +46,7 @@ internal static class TickDriver
+ 
+ 	internal static void Tick()
+ 	{
++		WeaponCheats.VisibleAimTick(Time.unscaledDeltaTime);
+ 		if (Time.unscaledTime >= _nextRegistryPrune)
+ 		{
+ 			_nextRegistryPrune = Time.unscaledTime + 1f;
+diff --git decompiled-src/CompleteCheatMenu/Targeting/VisibleAimController.cs decompiled-src/CompleteCheatMenu/Targeting/VisibleAimController.cs
+new file mode 100644
+index 0000000..1361392
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Targeting/VisibleAimController.cs
+@@ -0,0 +1,125 @@
++using System.Reflection;
++using CompleteCheatMenu.Game;
++using CompleteCheatMenu.Runtime;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal static class VisibleAimController
++{
++	private static FieldInfo _holdingFireInput;
++	private static FieldInfo _cameraRotation;
++	private static FieldInfo _recoilCurrent;
++	private static FieldInfo _recoilMultiplier;
++	private static bool _resolved;
++
++	internal static bool Step(object weapon, object playerCamera, Camera camera, TargetSolution target, float deltaTime)
++	{
++		if (!CheatState.AimVisibleAssist || !CheatState.Aimbot || weapon == null || playerCamera == null || camera == null || target == null || target.Transform == null)
++		{
++			return false;
++		}
++		Resolve();
++		if (!IsFiring(weapon) || _cameraRotation == null || deltaTime <= 0f)
++		{
++			return false;
++		}
++		Vector3 point = target.AimPoint;
++		float drop = Mathf.Max(0f, target.Distance) * Mathf.Max(0f, CheatState.AimDistanceDropPerUnit);
++		point -= Vector3.up * drop;
++		Vector3 direction = point - camera.transform.position;
++		if (direction.sqrMagnitude <= 0.0001f)
++		{
++			return false;
++		}
++		Vector3 currentAngles;
++		try
++		{
++			currentAngles = (Vector3)_cameraRotation.GetValue(playerCamera);
++		}
++		catch
++		{
++			return false;
++		}
++		Quaternion rootRotation = Quaternion.identity;
++		if (Refs.LocalPlayer is Component playerComponent && playerComponent != null)
++		{
++			rootRotation = playerComponent.transform.rotation;
++		}
++		Quaternion desiredWorld = Quaternion.LookRotation(direction.normalized, Vector3.up);
++		Quaternion desiredLocal = Quaternion.Inverse(rootRotation) * desiredWorld;
++		Vector3 desiredAngles = NormalizeEuler(desiredLocal.eulerAngles);
++		ApplyRecoilCompensation(playerCamera, ref desiredAngles);
++		desiredLocal = Quaternion.Euler(desiredAngles);
++		Quaternion currentLocal = Quaternion.Euler(currentAngles);
++		float response = Mathf.Max(0f, CheatState.AimVisibleResponse);
++		float alpha = 1f - Mathf.Exp(-response * deltaTime);
++		Quaternion smoothed = Quaternion.Slerp(currentLocal, desiredLocal, Mathf.Clamp01(alpha));
++		Vector3 result = NormalizeEuler(smoothed.eulerAngles);
++		result.x = Mathf.Clamp(result.x, -90f, 90f);
++		result.z = 0f;
++		try
++		{
++			_cameraRotation.SetValue(playerCamera, result);
++			return true;
++		}
++		catch
++		{
++			return false;
++		}
++	}
++
++	private static void Resolve()
++	{
++		if (_resolved)
++		{
++			return;
++		}
++		_resolved = true;
++		_holdingFireInput = GameBinder.Field("Weapon", "_holdingFireInput");
++		_cameraRotation = GameBinder.Field("PlayerCamera", "_rot");
++		_recoilCurrent = GameBinder.Field("PlayerCamera", "_recoilCur");
++		_recoilMultiplier = GameBinder.Field("PlayerCamera", "_screenShakeRotMulti");
++	}
++
++	private static bool IsFiring(object weapon)
++	{
++		return GameBinder.TryGet<bool>(_holdingFireInput, weapon, out var firing) && firing;
++	}
++
++	private static void ApplyRecoilCompensation(object playerCamera, ref Vector3 desiredAngles)
++	{
++		if (!CheatState.AimRecoilCompensation || CheatState.ZeroRecoil || _recoilCurrent == null)
++		{
++			return;
++		}
++		try
++		{
++			Vector2 recoil = (Vector2)_recoilCurrent.GetValue(playerCamera);
++			float cameraMultiplier = 1f;
++			if (_recoilMultiplier != null)
++			{
++				cameraMultiplier = (float)_recoilMultiplier.GetValue(playerCamera);
++			}
++			float strength = Mathf.Max(0f, CheatState.AimRecoilCompensationStrength) * cameraMultiplier;
++			desiredAngles.x += recoil.y * strength;
++			desiredAngles.y -= recoil.x * strength;
++		}
++		catch
++		{
++		}
++	}
++
++	private static Vector3 NormalizeEuler(Vector3 value)
++	{
++		value.x = NormalizeAngle(value.x);
++		value.y = NormalizeAngle(value.y);
++		value.z = NormalizeAngle(value.z);
++		return value;
++	}
++
++	private static float NormalizeAngle(float value)
++	{
++		return Mathf.Repeat(value + 180f, 360f) - 180f;
++	}
++}
+diff --git tests/cnkx_visible_aim_impl.py tests/cnkx_visible_aim_impl.py
+new file mode 100644
+index 0000000..c513932
+--- /dev/null
++++ tests/cnkx_visible_aim_impl.py
+@@ -0,0 +1,34 @@
++import math
++
++
++def simulate_error(initial_error, response, fps, seconds, firing):
++    if not firing:
++        return initial_error
++    error = float(initial_error)
++    delta_time = 1.0 / fps
++    alpha = 1.0 - math.exp(-max(0.0, response) * delta_time)
++    for _ in range(round(fps * seconds)):
++        error *= 1.0 - alpha
++    return error
++
++
++def apply_offsets(
++    point,
++    distance,
++    distance_drop,
++    recoil,
++    recoil_strength,
++    zero_recoil,
++):
++    adjusted = (
++        point[0],
++        point[1] - max(0.0, distance) * max(0.0, distance_drop),
++        point[2],
++    )
++    if zero_recoil or recoil_strength <= 0.0:
++        return {"point": adjusted, "pitch_comp": 0.0, "yaw_comp": 0.0}
++    return {
++        "point": adjusted,
++        "pitch_comp": recoil[1] * recoil_strength,
++        "yaw_comp": -recoil[0] * recoil_strength,
++    }
+diff --git tests/visible_aim_test.py tests/visible_aim_test.py
+new file mode 100644
+index 0000000..3039626
+--- /dev/null
++++ tests/visible_aim_test.py
+@@ -0,0 +1,91 @@
++import math
++import sys
++from pathlib import Path
++
++TESTS = Path(__file__).resolve().parent
++PROJECT = TESTS.parent
++sys.path.insert(0, str(TESTS))
++
++try:
++    from cnkx_visible_aim_impl import apply_offsets, simulate_error
++except (ImportError, ModuleNotFoundError):
++    print("VISIBLE_AIM_TESTS=FAIL missing implementation")
++    raise SystemExit(1)
++
++
++# 指数平滑在 30/60/120 FPS 下经过同样时长应得到等效响应。
++error_30 = simulate_error(90.0, response=8.0, fps=30, seconds=1.0, firing=True)
++error_60 = simulate_error(90.0, response=8.0, fps=60, seconds=1.0, firing=True)
++error_120 = simulate_error(90.0, response=8.0, fps=120, seconds=1.0, firing=True)
++assert math.isclose(error_30, error_60, rel_tol=1e-9, abs_tol=1e-9)
++assert math.isclose(error_60, error_120, rel_tol=1e-9, abs_tol=1e-9)
++assert error_120 < 0.04
++
++# 停止开火后完全停止相机修正。
++assert simulate_error(45.0, response=8.0, fps=60, seconds=1.0, firing=False) == 45.0
++
++# 距离下调与后坐补偿是两个独立设置。
++base = apply_offsets(
++    point=(0.0, 10.0, 100.0),
++    distance=100.0,
++    distance_drop=0.0,
++    recoil=(2.0, 3.0),
++    recoil_strength=0.0,
++    zero_recoil=False,
++)
++assert base == {"point": (0.0, 10.0, 100.0), "pitch_comp": 0.0, "yaw_comp": 0.0}
++
++dropped = apply_offsets(
++    point=(0.0, 10.0, 100.0),
++    distance=100.0,
++    distance_drop=0.01,
++    recoil=(2.0, 3.0),
++    recoil_strength=0.0,
++    zero_recoil=False,
++)
++assert dropped["point"] == (0.0, 9.0, 100.0)
++assert dropped["pitch_comp"] == 0.0
++
++compensated = apply_offsets(
++    point=(0.0, 10.0, 100.0),
++    distance=100.0,
++    distance_drop=0.0,
++    recoil=(2.0, 3.0),
++    recoil_strength=0.5,
++    zero_recoil=False,
++)
++assert compensated["point"] == (0.0, 10.0, 100.0)
++assert compensated["pitch_comp"] == 1.5
++assert compensated["yaw_comp"] == -1.0
++
++# ZeroRecoil 开启时不再叠加第二套后坐补偿。
++zero_recoil = apply_offsets(
++    point=(0.0, 10.0, 100.0),
++    distance=100.0,
++    distance_drop=0.01,
++    recoil=(2.0, 3.0),
++    recoil_strength=1.0,
++    zero_recoil=True,
++)
++assert zero_recoil["point"] == (0.0, 9.0, 100.0)
++assert zero_recoil["pitch_comp"] == 0.0
++assert zero_recoil["yaw_comp"] == 0.0
++
++# 生产实现应读取真实开火字段和 PlayerCamera._rot，并使用指数平滑。
++controller_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Targeting/VisibleAimController.cs"
++).read_text(encoding="utf-8")
++weapon_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs"
++).read_text(encoding="utf-8")
++tick_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Runtime/TickDriver.cs"
++).read_text(encoding="utf-8")
++assert 'GameBinder.Field("Weapon", "_holdingFireInput")' in controller_source
++assert 'GameBinder.Field("PlayerCamera", "_rot")' in controller_source
++assert "1f - Mathf.Exp(-response * deltaTime)" in controller_source
++assert "CheatState.ZeroRecoil" in controller_source
++assert "VisibleAimController.Step" in weapon_source
++assert "WeaponCheats.VisibleAimTick" in tick_source
++
++print("VISIBLE_AIM_TESTS=PASS cases=7")

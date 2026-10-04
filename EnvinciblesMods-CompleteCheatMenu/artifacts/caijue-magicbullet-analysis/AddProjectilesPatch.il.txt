@@ -1,0 +1,127 @@
+=== HowToFishMagicBullet.AddProjectilesPatch::Prefix RVA=0x3464 ===
+IL_000C: newobj       .ctor
+IL_0011: stloc.0      
+IL_0012: ldloc.0      
+IL_0013: ldarg.s      argument(0x0004)
+IL_0015: stfld        velocities
+IL_001A: call         get_IsActive
+IL_001F: brtrue.s     34
+IL_0021: ret          
+IL_0022: ldarg.2      
+IL_0023: brfalse.s    78
+IL_0025: ldarg.0      
+IL_0026: call         UnityEngine.Object::op_Implicit
+IL_002B: brfalse.s    78
+IL_002D: ldsfld       Player::LocalPlayer
+IL_0032: call         UnityEngine.Object::op_Implicit
+IL_0037: brfalse.s    78
+IL_0039: ldarg.0      
+IL_003A: ldsfld       Player::LocalPlayer
+IL_003F: call         UnityEngine.Object::op_Inequality
+IL_0044: brtrue.s     78
+IL_0046: ldloc.0      
+IL_0047: ldfld        velocities
+IL_004C: brtrue.s     79
+IL_004E: ret          
+IL_004F: call         get_Enabled
+IL_0054: callvirt     ::get_Value
+IL_0059: brtrue.s     92
+IL_005B: ret          
+IL_005C: ldloc.0      
+IL_005D: call         get_ActiveTarget
+IL_0062: stfld        target
+IL_0067: ldloc.0      
+IL_0068: ldfld        target
+IL_006D: call         IsAllowedTarget
+IL_0072: brfalse.s    189
+IL_0074: ldc.i4.0     
+IL_0075: stloc.1      
+IL_0076: br.s         161
+IL_0078: ldloc.0      
+IL_0079: ldfld        velocities
+IL_007E: ldloc.1      
+IL_007F: ldarg.3      
+IL_0080: ldloc.0      
+IL_0081: ldfld        velocities
+IL_0086: ldloc.1      
+IL_0087: ldelem       <dnfile.mdtable.TypeRefRow object at 0x000001B25C5168E0>
+IL_008C: ldloc.0      
+IL_008D: ldfld        target
+IL_0092: ldarg.1      
+IL_0093: call         CalculateRedirectedVelocity
+IL_0098: stelem       <dnfile.mdtable.TypeRefRow object at 0x000001B25C5168E0>
+IL_009D: ldloc.1      
+IL_009E: ldc.i4.1     
+IL_009F: add          
+IL_00A0: stloc.1      
+IL_00A1: ldloc.1      
+IL_00A2: ldloc.0      
+IL_00A3: ldfld        velocities
+IL_00A8: ldlen        
+IL_00A9: conv.i4      
+IL_00AA: blt.s        120
+IL_00AC: ldloc.0      
+IL_00AD: ldftn        <Prefix>b__0
+IL_00B3: newobj       ::.ctor
+IL_00B8: call         Debug
+IL_00BD: ret          
+=== HowToFishMagicBullet.AddProjectilesPatch::Postfix RVA=0x3524 ===
+IL_000C: call         get_IsActive
+IL_0011: brtrue.s     20
+IL_0013: ret          
+IL_0014: ldarg.2      
+IL_0015: brfalse.s    59
+IL_0017: ldarg.1      
+IL_0018: call         UnityEngine.Object::op_Implicit
+IL_001D: brfalse.s    59
+IL_001F: ldsfld       Player::LocalPlayer
+IL_0024: call         UnityEngine.Object::op_Implicit
+IL_0029: brfalse.s    59
+IL_002B: ldarg.1      
+IL_002C: ldsfld       Player::LocalPlayer
+IL_0031: call         UnityEngine.Object::op_Inequality
+IL_0036: brtrue.s     59
+IL_0038: ldarg.3      
+IL_0039: brtrue.s     60
+IL_003B: ret          
+IL_003C: call         get_Enabled
+IL_0041: callvirt     ::get_Value
+IL_0046: brtrue.s     73
+IL_0048: ret          
+IL_0049: call         get_WallPenetration
+IL_004E: brfalse.s    144
+IL_0050: call         get_WallPenetration
+IL_0055: callvirt     ::get_Value
+IL_005A: brfalse.s    144
+IL_005C: call         get_ActiveTarget
+IL_0061: stloc.0      
+IL_0062: ldloc.0      
+IL_0063: call         IsAllowedTarget
+IL_0068: brfalse.s    144
+IL_006A: ldc.i4.0     
+IL_006B: stloc.1      
+IL_006C: br.s         138
+IL_006E: ldarg.s      argument(0x0004)
+IL_0070: ldloc.1      
+IL_0071: add          
+IL_0072: stloc.2      
+IL_0073: ldarg.0      
+IL_0074: ldarg.1      
+IL_0075: ldloc.2      
+IL_0076: call         FindSpawnedProjectile
+IL_007B: stloc.3      
+IL_007C: ldloc.3      
+IL_007D: brfalse.s    134
+IL_007F: ldloc.3      
+IL_0080: ldloc.0      
+IL_0081: call         Register
+IL_0086: ldloc.1      
+IL_0087: ldc.i4.1     
+IL_0088: add          
+IL_0089: stloc.1      
+IL_008A: ldloc.1      
+IL_008B: ldarg.3      
+IL_008C: ldlen        
+IL_008D: conv.i4      
+IL_008E: blt.s        110
+IL_0090: ret          

@@ -1,0 +1,67 @@
+{
+  "generated_at": "2026-08-25T07:05:28.9948915Z",
+  "project_root": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu",
+  "game_root": "E:\\SteamLibrary\\steamapps\\common\\How to Fish\\How to Fish",
+  "files": [
+    {
+      "label": "source_dll",
+      "path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\CompleteCheatMenu.dll",
+      "exists": true,
+      "sha256": "E51F5D0A7630E54B76F70DEF8FDA9E38DD1ED12067D535CCBA4187B3C0E28FA3",
+      "length": 154624,
+      "last_write_time_utc": "2026-08-24T05:00:05.6911136Z",
+      "file_version": "0.6.1.0",
+      "product_version": "0.6.1+e81d2eca07f44ac6ef7c03939c49c4c2607fd278"
+    },
+    {
+      "label": "optimized_localized_dll",
+      "path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\CompleteCheatMenu.optimized.zh-CN.dll",
+      "exists": true,
+      "sha256": "F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79",
+      "length": 157184,
+      "last_write_time_utc": "2026-08-25T04:38:52.0613443Z",
+      "file_version": "0.7.0.0",
+      "product_version": "0.7.0+optimized-aim"
+    },
+    {
+      "label": "deployed_dll",
+      "path": "E:\\SteamLibrary\\steamapps\\common\\How to Fish\\How to Fish\\BepInEx\\plugins\\EnvinciblesMods-CompleteCheatMenu\\CompleteCheatMenu.dll",
+      "exists": true,
+      "sha256": "F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79",
+      "length": 157184,
+      "last_write_time_utc": "2026-08-25T04:38:52.0613443Z",
+      "file_version": "0.7.0.0",
+      "product_version": "0.7.0+optimized-aim"
+    },
+    {
+      "label": "assembly_csharp",
+      "path": "E:\\SteamLibrary\\steamapps\\common\\How to Fish\\How to Fish\\How to Fish_Data\\Managed\\Assembly-CSharp.dll",
+      "exists": true,
+      "sha256": "FA8C6F47874E69FE07B9C978F35CC05372DF2BDD3535DE5F5FAC355F999A5762",
+      "length": 837120,
+      "last_write_time_utc": "2026-08-24T17:14:07.0453649Z",
+      "file_version": "0.0.0.0",
+      "product_version": "0.0.0.0"
+    },
+    {
+      "label": "game_binder_source",
+      "path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Game\\GameBinder.cs",
+      "exists": true,
+      "sha256": "73788094C7B3B045E5B97569D976DF282E36EB0E02F970557AEAC4339D65A56B",
+      "length": 9223,
+      "last_write_time_utc": "2026-08-25T07:03:05.2632162Z",
+      "file_version": null,
+      "product_version": null
+    },
+    {
+      "label": "game_binder_original_source",
+      "path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\cnkx-port\\original-src\\GameBinder.cs",
+      "exists": true,
+      "sha256": "161300E1A8A5AAD437171B43A4FEF012222D86748C09278EFA6DF2F4BBACCDAC",
+      "length": 7718,
+      "last_write_time_utc": "2026-08-25T07:04:19.9192711Z",
+      "file_version": null,
+      "product_version": null
+    }
+  ]
+}

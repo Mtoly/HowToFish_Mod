@@ -1,0 +1,38 @@
+TASK4_VERIFICATION
+DATE=2026-09-05
+
+BASELINE_COMMAND:
+  python tests/projectile_guidance_reset_test.py
+BASELINE_RESULT:
+  Baseline cases recorded in artifacts/projectile-guidance-reset/baseline.txt; lifecycle reset and return-to-launch behavior were absent.
+  EXIT_STATUS=0
+
+MODIFIED_COMMAND:
+  python tests/projectile_guidance_reset_test.py; python tests/projectile_guidance_state_test.py; python tests/projectile_guidance_lifecycle_test.py
+MODIFIED_RESULT:
+  PROJECTILE_GUIDANCE_RESET_SPEC=PASS cases=5
+  PROJECTILE_GUIDANCE_STATE_TESTS=PASS cases=6
+  PROJECTILE_TARGET_LIFECYCLE_TESTS=PASS cases=5
+  EXIT_STATUS=0
+
+BUILD_RESULT:
+  CompleteCheatMenu.task4.dll SHA256=E0857E621436748DC665DDAE562D65C62EBA01B43ACA82400133E559B1BB452E
+  EXIT_STATUS=0
+
+ROLLBACK_COMMAND:
+  ROLLBACK_TASK4.sh artifacts/projectile-guidance-reset/task4-rollback-test
+ROLLBACK_RESULT:
+  ProjectileGuidance.cs=True
+  CheatState.cs=True
+  Presets.cs=True
+  WeaponsTab.cs=True
+  EXIT_STATUS=0
+
+RESTORED_BEHAVIOR:
+  Independent rollback copy matches task4-baseline-source SHA-256 for all four files; active modified source remains unchanged.
+
+ARTIFACTS:
+  artifacts/projectile-guidance-reset/task4-state-machine.patch
+  artifacts/projectile-guidance-reset/CompleteCheatMenu.task4.dll
+  artifacts/projectile-guidance-reset/ROLLBACK_TASK4.sh
+  artifacts/projectile-guidance-reset/task4-rollback-test/

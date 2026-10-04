@@ -1,0 +1,198 @@
+{
+  "id": "fn_fal",
+  "displayName": "FN FAL",
+  "basePrefab": "Assault Rifle",
+  "enabled": true,
+  "bundle": "arsenal.bundle",
+  "model": {
+    "file": "fn_fal.glb",
+    "bundleAsset": "FnFal",
+    "bundleAxisFix": true,
+    "fitToBase": true,
+    "scale": 1.25,
+    "position": [
+      1.2,
+      -0.15,
+      0.25
+    ],
+    "rotation": [
+      5.008957e-06,
+      -5.00895658e-06,
+      90.0
+    ],
+    "material": "colors",
+    "skinning": "parts",
+    "partBones": {
+      "0": "Gun",
+      "1": "Gun",
+      "2": "Slide",
+      "3": "Gun",
+      "4": "Gun",
+      "5": "Mag",
+      "6": "Gun",
+      "7": "Mag",
+      "8": "Mag",
+      "9": "Mag",
+      "10": "Gun",
+      "11": "Gun",
+      "12": "Slide"
+    },
+    "hideBaseAttachments": true,
+    "leftHandPart": -1,
+    "gripAlongPart": 0.35
+  },
+  "stats": {
+    "damage": 70,
+    "timeBetweenShots": 0.11,
+    "fullAuto": true,
+    "noQueueingShots": false,
+    "canAds": true,
+    "spread": 0.45,
+    "projectileCountPerShot": 1,
+    "ammoPerMag": 20,
+    "extendedAmmoPerMag": 30
+  },
+  "ik": {
+    "left": [
+      -1.2,
+      4.35,
+      2.55
+    ],
+    "leftRotation": [
+      0.0,
+      105.0,
+      0.0
+    ],
+    "followMagOnReload": false,
+    "reloadBlend": 0.15,
+    "chargeLeft": [
+      -0.841894567,
+      9.98675251,
+      2.87164831
+    ],
+    "chargeFrom": 0.6,
+    "chargePeak": 0.76,
+    "chargeTo": 0.85,
+    "chargeClip": "ReloadLast",
+    "gripReturnAt": 0.85
+  },
+  "slide": {
+    "travel": 0.5,
+    "time": 0.05,
+    "offset": [
+      0.0,
+      -2.51337528,
+      0.0
+    ]
+  },
+  "reload": {
+    "enabled": true,
+    "duration": 2.0,
+    "drop": 6.0,
+    "dip": 4.0
+  },
+  "pose": {
+    "l_thumb_low": [
+      1.82695222,
+      -84.7531738,
+      -29.36435
+    ],
+    "l_thumb_mid": [
+      3.97770977,
+      -170.815063,
+      -6.244232
+    ],
+    "l_thumb_tip": [
+      -1.27053833,
+      178.9541,
+      -1.3788147
+    ],
+    "l_index_low": [
+      72.02104,
+      84.61669,
+      79.3826141
+    ],
+    "l_index_mid": [
+      53.203167,
+      -3.70895386,
+      4.5617466
+    ],
+    "l_index_tip": [
+      27.4401627,
+      10.6214066,
+      -0.9402771
+    ],
+    "l_middle_low": [
+      59.4012,
+      148.143723,
+      153.197464
+    ],
+    "l_middle_mid": [
+      51.88607,
+      -13.5640564,
+      -14.5316162
+    ],
+    "l_middle_tip": [
+      35.7213326,
+      -2.42697144,
+      -6.50439453
+    ],
+    "l_ring_low": [
+      65.614296,
+      161.852753,
+      165.2088
+    ],
+    "l_ring_mid": [
+      54.543026,
+      0.6127535,
+      -5.92102051
+    ],
+    "l_ring_tip": [
+      36.20837,
+      -6.547821,
+      -6.68701172
+    ],
+    "l_pinky_low": [
+      55.4212379,
+      166.559875,
+      170.271271
+    ],
+    "l_pinky_mid": [
+      -34.7248535,
+      -179.9937,
+      9.805377
+    ],
+    "l_pinky_tip": [
+      42.2700157,
+      -170.9418,
+      -3.02810669
+    ]
+  },
+  "sound": {
+    "fire": "fn_fal_fire.wav",
+    "fireAsset": "fn_fal_fire",
+    "fireVolume": 1.0
+  },
+  "attachments": {
+    "sights": false,
+    "barrels": false,
+    "laser": false,
+    "extendedMag": true,
+    "bulletUpgradeCostMultiplier": 5.0
+  },
+  "recoil": {
+    "screenMultiplier": 1.6,
+    "modelMultiplier": 1.4,
+    "adsRotMulti": 0.7
+  },
+  "shop": {
+    "sell": true,
+    "price": 45000
+  },
+  "ads": [
+    -0.074,
+    0.065,
+    0.0
+  ],
+  "credit": "Low-Poly FN FAL by TastyTony - CC-BY-4.0 - https://sketchfab.com/3d-models/low-poly-fn-fal-c737946bdccf4441b558b97ede5d0e3b"
+}

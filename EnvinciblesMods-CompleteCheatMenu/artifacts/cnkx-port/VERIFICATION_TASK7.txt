@@ -1,0 +1,135 @@
+CompleteCheatMenu cnKX port - Task 7 verification
+DATE=2026-08-25
+TASK=实现可见性缓存和 TargetingSystem
+STATUS=COMPLETE
+
+CHANGED_BRANCH_OR_FIELD
+- VisibilityCache: 以 EntityRecord.InstanceId + AimPoint.Bone/Source 缓存短周期视线结果。
+- VisibilityCache.RaycastVisible: 未命中、命中目标本体、目标子对象或目标父对象视为可见。
+- TargetingSystem.Acquire: 同次完成快照刷新、骨骼解析、屏幕点选择、可见性、评分、锁定与 TargetSolution 生成。
+- TargetingSystem lock: 当前目标有效且保持期未结束时保持；目标失效立即释放；保持期结束后应用切换惩罚。
+- WeaponCheats.CurrentTarget: 从旧 Target? 改为 TargetSolution；移除 FindTarget/EvaluateCandidate/HasLineOfSight。
+- WeaponCheats.AimBeforeShot: 直接使用本次 TargetSolution.AimPoint。
+- WeaponsTab: 兼容显示 TargetSolution 的名称、距离、角度和骨骼。
+- snapshot_isolation_test.py: 断言 TargetingSystem 内部刷新 TargetingSnapshot，保持 ESP/自瞄隔离语义。
+
+ARTIFACTS
+- MODIFIED_FILE_1: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\VisibilityCache.cs
+- MODIFIED_FILE_2: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\TargetingSystem.cs
+- MODIFIED_FILE_3: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Cheats\WeaponCheats.cs
+- MODIFIED_FILE_4: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\UI\Tabs\WeaponsTab.cs
+- MODIFIED_FILE_5: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\snapshot_isolation_test.py
+- TEST_HELPER: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\cnkx_target_lock_impl.py
+- TEST_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\target_lock_test.py
+- MODIFIED_DLL: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\CompleteCheatMenu.dll
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task7-targeting-system.diff
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK7.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK7.sh
+- WINDOWS_ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK7.ps1
+- ORIGINAL_SOURCE_DIR: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task7-original-src
+
+RED_TEST
+COMMAND=python .\tests\target_lock_test.py
+INPUT=测试已创建；TargetingSystem/VisibilityCache/参考模型尚不存在
+LITERAL_OUTPUT=TARGET_LOCK_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+
+BASELINE
+COMMAND=Get-FileHash -Algorithm SHA256 .\artifacts\CompleteCheatMenu.dll
+INPUT=Task 6 完成版程序集
+LITERAL_OUTPUT=SHA256 18BBE7E1656DD7BDE06B3622575229C645C5BB7650F46B7695AF48EE578308BD
+EXIT_STATUS=0
+
+MODIFIED_TARGET_LOCK_TEST
+COMMAND=python .\tests\target_lock_test.py
+INPUT=对象/点缓存、TTL、父子命中、同次目标点解算、保持期、立即释放与切换
+LITERAL_OUTPUT=TARGET_LOCK_TESTS=PASS cases=8
+EXIT_STATUS=0
+OBSERVED_RESULT=同一对象同一点在 TTL 内只调用一次射线；当前目标失效后在保持期内立即切换；返回点来自本次 Acquire。
+
+REGRESSION_TESTS
+COMMAND=python .\tests\bone_selection_test.py
+LITERAL_OUTPUT=BONE_SELECTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\targeting_math_test.py
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=PASS cases=10
+EXIT_STATUS=0
+COMMAND=python .\tests\snapshot_isolation_test.py
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\entity_registry_test.py
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+EXIT_STATUS=0
+COMMAND=python .\tests\aim_scoring_test.py
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Task 3-6 的实体注册、ESP/自瞄隔离、评分及骨骼回退继续通过。
+
+EXPECTED_FUTURE_RED_TESTS
+COMMAND=python .\tests\ballistic_prediction_test.py
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+COMMAND=python .\tests\tracking_probability_test.py
+LITERAL_OUTPUT=TRACKING_PROBABILITY_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+RESULT=EXPECTED_RED; 分别留给 Task 8 与 Task 9。
+
+MODIFIED_BUILD
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File .\decompiled-src\build.ps1
+INPUT=集中式 TargetingSystem、VisibilityCache 与 WeaponCheats/WeaponsTab 兼容层
+LITERAL_OUTPUT=0 compiler errors
+LITERAL_OUTPUT=MODIFIED_BUILD_EXIT=0
+LITERAL_OUTPUT=MODIFIED_DLL_SHA256=123741A9E5C1735C69227C85FD2ABEECBAABE9CF76085F5282A5790F39900B26
+EXIT_STATUS=0
+
+ASSEMBLY_TYPE_CHECK
+COMMAND=dnfile TypeDef inspection on artifacts\CompleteCheatMenu.dll
+INPUT=修改版程序集
+LITERAL_OUTPUT=TYPE_VisibilityCache=True
+LITERAL_OUTPUT=TYPE_TargetingSystem=True
+EXIT_STATUS=0
+
+ROLLBACK_POWERSHELL
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK7.ps1 -DestinationRoot .\artifacts\cnkx-port\rollback-task7-test-20260825a
+INPUT=包含全部 Task 7 修改文件的独立目录
+LITERAL_OUTPUT=WEAPON_SHA256=77F5BC19FE6D7F5ECC0E37F56728FCA811C58A98BAE675282C3F63798527274D
+LITERAL_OUTPUT=WEAPONS_TAB_SHA256=3AC916ED304208B69C3CEEE0927E38779C04787BE2DFAB926249D609E7991271
+LITERAL_OUTPUT=SNAPSHOT_TEST_SHA256=6916348C59CEAEE39AF143EF3FC113493FFA9EA6DFDA8C40736352054978201F
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=三个既有文件恢复 Task 6 字节，四个 Task 7 新文件被移除；工作目录继续保留修改版。
+
+ROLLBACK_BASH
+COMMAND=ROLLBACK_TASK7.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-task7-test-sh-20260825a
+INPUT=第二个独立修改副本
+LITERAL_OUTPUT=WEAPON_SHA256=77F5BC19FE6D7F5ECC0E37F56728FCA811C58A98BAE675282C3F63798527274D
+LITERAL_OUTPUT=WEAPONS_TAB_SHA256=3AC916ED304208B69C3CEEE0927E38779C04787BE2DFAB926249D609E7991271
+LITERAL_OUTPUT=SNAPSHOT_TEST_SHA256=6916348C59CEAEE39AF143EF3FC113493FFA9EA6DFDA8C40736352054978201F
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+
+MODIFIED_SOURCE_HASHES
+- VisibilityCache.cs=D4D032D61F2F89B2CA647354951364CFCBB5198DD42291E91BCE8A0368FD0DE6
+- TargetingSystem.cs=139C1E8A5F58B8BE4C5432BBC1359A07395059E9DCF0B30D62309DC41DDDC747
+- WeaponCheats.cs=B99444C00D46140CE35A73251610000F3C5D718489F23149AA894B8C705310C6
+- WeaponsTab.cs=19D9977FC059932195AD42BF5EBC1A850312AC946B039B16C34E45EA9D9324D3
+- cnkx_target_lock_impl.py=A0EAC8EC5FD21A9980C97AC810FD2E7F0BCA8DCFAA7DA031C9D8196AA1E4B48A
+- target_lock_test.py=1E1F2E190AA20F360ED01B0CABDB5C5C45E2B87CD7D134440E292F5B67B2948B
+- snapshot_isolation_test.py=13F82493D127B6B958C19F7923D17B9EA56839189BBA71F0BFA7686476DD617E
+
+DIFF
+LINES=720
+SHA256=2C91D5864E5D83E4B147477793B7396D96FC65BBADAEA2419FE9C70CF29F0BCC
+
+PLAN_MARK
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+RESULT=Task 7 marked complete with evidence path.
+
+DEPLOYMENT
+RESULT=NOT_DEPLOYED_GATE_A_IN_PROGRESS
+DEPLOYED_DLL_UNCHANGED_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+
+GIT
+RESULT=SKIPPED_NOT_A_GIT_REPOSITORY

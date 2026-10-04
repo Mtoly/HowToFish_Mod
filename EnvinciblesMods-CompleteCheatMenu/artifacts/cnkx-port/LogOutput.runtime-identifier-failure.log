@@ -1,0 +1,55 @@
+[Message:   BepInEx] BepInEx 5.4.23.5 - How to Fish (2026/8/25 19:48:44)
+[Info   :   BepInEx] Running under Unity v6000.4.4.3542935
+[Info   :   BepInEx] CLR runtime version: 4.0.30319.42000
+[Info   :   BepInEx] Supports SRE: True
+[Info   :   BepInEx] System platform: Bits64, Windows
+[Message:   BepInEx] Preloader started
+[Info   :   BepInEx] Loaded 1 patcher method from [BepInEx.Preloader 5.4.23.5]
+[Info   :   BepInEx] 1 patcher plugin loaded
+[Info   :   BepInEx] Patching [UnityEngine.CoreModule] with [BepInEx.Chainloader]
+[Message:   BepInEx] Preloader finished
+[Message:   BepInEx] Chainloader ready
+[Message:   BepInEx] Chainloader started
+[Debug  :   BepInEx] Skipping loading E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\LDD_Team-How_To_Fish_Trainer_v2\HowToFishTrainer.dll because it's not a valid .NET assembly. Full error: Format of the executable (.exe) or library (.dll) is invalid.
+[Info   :   BepInEx] 4 plugins to load
+[Info   :   BepInEx] Loading [How To Fish - Magic Bullet 1.2.2]
+[Info   :How To Fish - Magic Bullet] [Compatibility] ProjectileManager methods verified successfully. Wall Penetration is supported.
+[Info   :How To Fish - Magic Bullet] How To Fish - Magic Bullet v1.2.2 loaded.
+[Info   :How To Fish - Magic Bullet] Target mode: Crosshair | FOV: 35° | Sticky: True | WallPen: False
+[Info   :   BepInEx] Loading [NoSharedMoney 1.1.0]
+[Info   :NoSharedMoney] SaveBackups is not installed, so wallets will not be included in save backups. Installing it is recommended, since a lost wallet file cannot be recovered any other way.
+[Info   :NoSharedMoney] Hooked 8/8 purchase paths: BuyItem, BuyBait, BuyAttachment, BuyBulletUpgrade, BuySharpnessUpgrade, BuyBoatMotor, BuyBoatRadar, UnlockPocket
+[Info   :NoSharedMoney] NoSharedMoney 1.1.0 loaded. Money is now per-player; every player needs this mod installed.
+[Info   :   BepInEx] Loading [Complete Cheat Menu 0.7.0]
+[Info   :Complete Cheat Menu] 9 method(s) patched.
+[Info   :Complete Cheat Menu] 已加载 完整作弊菜单​​​​​​​​​​​​​ 0.7.0。进入游戏后按 Insert。​​​​​​​​​​​
+[Info   :   BepInEx] Loading [Keep Inventory 1.0.0]
+[Info   :Keep Inventory] KeepInventory loaded!
+[Message:   BepInEx] Chainloader startup complete
+[Info   : Unity Log] Local User: Nico:6
+[Info   : Unity Log] No AudioManager in scene
+[Info   :Complete Cheat Menu] Type 'Player' was ambiguous (3 matches); picked Player by 'LocalPlayer'.
+[Debug  :NoSharedMoney] Registered server broadcast handler.
+[Debug  :NoSharedMoney] Registered client broadcast handler.
+[Info   : Unity Log] [2026.08.25 20:19:23] Local client is starting for FishySteamworks. Server IP is , port is 0.
+[Info   : Unity Log] [2026.08.25 20:19:23] Connection state changed: k_ESteamNetworkingConnectionState_Connecting - 
+[Info   : Unity Log] [2026.08.25 20:19:24] Connection state changed: k_ESteamNetworkingConnectionState_FindingRoute - 
+[Info   : Unity Log] [2026.08.25 20:19:24] Local client is started for FishySteamworks.
+[Warning:Complete Cheat Menu] 绑定失败：​​​​​​​​​​​PlayerVitals.治疗​​()
+[Warning:Complete Cheat Menu] 绑定失败：​​​​​​​​​​​PlayerManager.AlivePlayers
+[Warning:Complete Cheat Menu] 绑定失败：​​​​​​​​​​​Bonus.价值​​​
+[Info   :Complete Cheat Menu] Spawn catalogue loaded: 85 entries.
+[Info   :Complete Cheat Menu] 诊断：3/153 个绑定失败。​​​​​​​​​​​​​​​​​​​​
+[Warning:Complete Cheat Menu] 绑定失败：​​​​​​​​​​​BossManager.首领​​
+[Info   :Complete Cheat Menu] 击杀分数目录：24 个奖励。​​​​​​​​​​​​​​​​​​​
+[Error  : Unity Log] Failed to load the Steam App List: State = ConnectionError, Error Message = Unable to complete SSL connection
+[Error  : Unity Log] InvalidOperationException: Steamworks is not initialized.
+Stack trace:
+Steamworks.InteropHelp.TestIfAvailableClient () (at <838935102a5b43408219717ae515cc24>:0)
+Steamworks.SteamNetworkingSockets.CloseConnection (Steamworks.HSteamNetConnection hPeer, System.Int32 nReason, System.String pszDebug, System.Boolean bEnableLinger) (at <838935102a5b43408219717ae515cc24>:0)
+FishySteamworks.Client.ClientSocket.StopConnection () (at <1ca5388579a949fb9f169c0aef414990>:0)
+FishySteamworks.FishySteamworks.StopClient () (at <1ca5388579a949fb9f169c0aef414990>:0)
+FishySteamworks.FishySteamworks.StopConnection (System.Boolean server) (at <1ca5388579a949fb9f169c0aef414990>:0)
+FishySteamworks.FishySteamworks.Shutdown () (at <1ca5388579a949fb9f169c0aef414990>:0)
+FishySteamworks.FishySteamworks.OnDestroy () (at <1ca5388579a949fb9f169c0aef414990>:0)
+

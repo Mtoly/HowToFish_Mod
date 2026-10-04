@@ -1,0 +1,142 @@
+--- a/tools/localize_dll.py
++++ b/tools/localize_dll.py
+@@ -30,6 +30,7 @@
+ NO_TRANSLATE = {'General','Keybinds','Settings','ToggleKey','EnableAllKeybinds','AutoEnableCheats','BackupSaves',
+                 'Player','Weapons','Movement','Boat','Teleport','Spawn','Entities','Items','Skins','Money','World',
+                 'Kill score','Progression','Gambling','Fishing','Visuals','Diagnostics'}
++SEMANTIC_RUNTIME_STRINGS = {'Red', 'Black', 'Green'}
+ 
+ def protected_runtime_strings():
+     """Protect member/type identifiers that are also ordinary UI words.
+@@ -39,6 +40,7 @@
+     the protected set from source calls instead of maintaining a fragile list.
+     """
+     protected = set(NO_TRANSLATE)
++    protected.update(SEMANTIC_RUNTIME_STRINGS)
+     source_root = ROOT / 'decompiled-src' / 'CompleteCheatMenu'
+     call = re.compile(
+         r'(?:GameBinder\.(?:Type|Field|Property|Method)|ReadMember|GetProperty|GetField|GetMethod|GetNestedType|HarmonyPatch)\s*\([^;\n]*'
+--- a/decompiled-src/CompleteCheatMenu/UI/Tabs/GamblingTab.cs
++++ b/decompiled-src/CompleteCheatMenu/UI/Tabs/GamblingTab.cs
+@@ -70,7 +70,7 @@
+ 					string[] array = colours;
+ 					foreach (string text in array)
+ 					{
+-						if (GUILayout.Button(text, (GamblingCheats.ForcedColour == text) ? Theme.BtnAccent : Theme.Btn, GUILayout.Width(96f)))
++						if (GUILayout.Button(ColourLabel(text), (GamblingCheats.ForcedColour == text) ? Theme.BtnAccent : Theme.Btn, GUILayout.Width(96f)))
+ 						{
+ 							GamblingCheats.ForcedColour = text;
+ 						}
+@@ -102,9 +102,9 @@
+ 		Widgets.Section("Live", delegate
+ 		{
+ 			Row("Spin in progress", GamblingCheats.IsBetting ? "yes" : "no");
+-			Row("You bet", GamblingCheats.BetColour);
+-			Row("Ball is on", GamblingCheats.CurrentBallColour);
+-			Row("Steering toward", GamblingCheats.CurrentTarget);
++			Row("You bet", ColourLabel(GamblingCheats.BetColour));
++			Row("Ball is on", ColourLabel(GamblingCheats.CurrentBallColour));
++			Row("Steering toward", ColourStatusLabel(GamblingCheats.CurrentTarget));
+ 			Row("Pot worth", GamblingCheats.PotWorth.ToString("N0"));
+ 			Row("Last result", GamblingCheats.LastOutcome);
+ 			GUILayout.Space(4f);
+@@ -148,7 +148,7 @@
+ 				foreach (string text in array)
+ 				{
+ 					string colour = text;
+-					Widgets.ActionButton(colour, () => GamblingCheats.StartSpin(colour), "Spinning on " + colour, Theme.Btn, 96f);
++					Widgets.ActionButton(ColourLabel(colour), () => GamblingCheats.StartSpin(colour), "Spinning on " + ColourLabel(colour), Theme.Btn, 96f);
+ 				}
+ 				GUILayout.EndHorizontal();
+ 			}
+@@ -299,4 +299,31 @@
+ 		}
+ 		return targets[CheatState.SlotTargetIndex];
+ 	}
++
++	private static string ColourLabel(string colour)
++	{
++		return colour switch
++		{
++			"Red" => "红色",
++			"Black" => "黑色",
++			"Green" => "绿色",
++			_ => colour
++		};
++	}
++
++	private static string ColourStatusLabel(string status)
++	{
++		if (string.IsNullOrEmpty(status))
++		{
++			return status;
++		}
++		foreach (string colour in GamblingCheats.Colours)
++		{
++			if (status.StartsWith(colour, StringComparison.Ordinal))
++			{
++				return ColourLabel(colour) + status.Substring(colour.Length);
++			}
++		}
++		return status;
++	}
+ }
+--- a/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
++++ b/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+@@ -907,3 +907,21 @@
+ 角度 FOV 圆 + 像素范围限制 + 当前目标专用连线 + 初始弹道修正 + 飞行中持续制导已集成并部署
+ ```
+ 
++#### Task 18：赌博轮盘强制颜色汉化回归修复 ✅ 已完成（2026-08-27）
++
++**根因：**
++
++- 赌博逻辑使用游戏 `BetColor` 枚举名 `Red`、`Black`、`Green` 作为内部协议值。
++- DLL 汉化器把同一批 `#US` 字符串槽翻译为中文；`GameBinder.EnumNames("BetColor")` 运行时仍返回英文。
++- 结果是 `NearestSlotOfColour` 中目标颜色与 `ColourOfSlot` 返回值永远不相等，函数回退到当前槽位，轮盘修正角度恒为 `0°`。
++
++**修复：**
++
++- 将 `Red`、`Black`、`Green` 加入 `SEMANTIC_RUNTIME_STRINGS`，汉化构建不再改写内部颜色值。
++- 赌博页面通过 `ColourLabel` 单独显示“红色、黑色、绿色”，内部继续传递游戏枚举英文名。
++- 实时“下注颜色、球当前颜色、引导目标”和手动开始按钮均使用显示值/协议值分离。
++- 新增 `gambling_colour_localization_test.py`，实际运行汉化器并检查三种运行时颜色的修改条目为 0。
++- 19 个 Python 回归测试全部通过；生产构建、汉化程序集元数据和格式化占位符检查通过。
++- 汉化后 IL 已确认：`ColourOfSlot` 保留 `Green/Red/Black`，`NearestSlotOfColour` 保留 `Green`，赔率模式保留 `Red/Black`。
++- 当前游戏进程锁定已加载 DLL，已配置进程退出后自动部署修复版并核对 SHA-256；下一次启动生效。
++
+--- /dev/null
++++ b/tests/gambling_colour_localization_test.py
+@@ -0,0 +1,32 @@
++import json
++import subprocess
++import sys
++import tempfile
++from pathlib import Path
++
++
++ROOT = Path(__file__).resolve().parents[1]
++LOCALIZER = ROOT / "tools" / "localize_dll.py"
++RAW_DLL = ROOT / "artifacts" / "cnkx-port" / "task17-5-aim-overlay" / "CompleteCheatMenu.task17-5.dll"
++
++source = LOCALIZER.read_text(encoding="utf-8")
++assert "SEMANTIC_RUNTIME_STRINGS" in source
++for colour in ("Red", "Black", "Green"):
++    assert repr(colour) in source or f'"{colour}"' in source
++assert "protected.update(SEMANTIC_RUNTIME_STRINGS)" in source
++
++with tempfile.TemporaryDirectory() as directory:
++    localized = Path(directory) / "CompleteCheatMenu.localized.dll"
++    completed = subprocess.run(
++        [sys.executable, str(LOCALIZER), str(RAW_DLL), str(localized)],
++        check=True,
++        capture_output=True,
++        text=True,
++    )
++    changes = json.loads(localized.with_suffix(".localization.diff.json").read_text(encoding="utf-8"))["changed"]
++    translated_runtime_colours = [change for change in changes if change["original"] in {"Red", "Black", "Green"}]
++    assert not translated_runtime_colours, translated_runtime_colours
++    assert localized.exists() and localized.stat().st_size == RAW_DLL.stat().st_size
++    assert '"changed"' in completed.stdout
++
++print("GAMBLING_COLOUR_LOCALIZATION_TEST=PASS cases=9")

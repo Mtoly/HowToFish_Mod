@@ -1,0 +1,174 @@
+TASK=Complete Cheat Menu cnKX feature port release
+DATE=2026-08-25
+STATUS=PASS
+GIT=SKIPPED_NOT_A_GIT_REPOSITORY
+
+CHANGED_BRANCH_OR_FIELD
+- EntityRegistry and independent ESP/targeting snapshots
+- weighted target acquisition, multi-bone selection, target lock and visibility cache
+- velocity sampling, ballistic prediction, shot redirection and visible aim controller
+- per-weapon original-value restoration
+- Renderer Bounds ESP, skeleton/health/info rendering and aim radius
+- localized UI, presets and diagnostics
+- runtime reflection identifier protection in tools/localize_dll.py
+- parameterized deterministic decompiled-src/build.ps1
+
+FOUR_PRIMARY_ARTIFACTS
+MODIFIED_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.cnKX.zh-CN.dll
+MODIFIED_SHA256=41F5B3EACE8DAD48754561FD5C936026C9B991A323F92DB9A2849CD82CA1AE30
+DIFF_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port.patch
+DIFF_SHA256=653DC353EF184B0E2832EA3F47D5E23B8DF09BA295C7CC91BD1B014E82109D50
+VERIFICATION=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\VERIFICATION_CNKX.txt
+ROLLBACK=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\ROLLBACK_CNKX.ps1
+ROLLBACK_SHA256=E9418E8D8F01CD616C6A0393C83227AA0C970A2F7A91C0900536981B85292054
+ROLLBACK_SH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\ROLLBACK_CNKX.sh
+ROLLBACK_SH_SHA256=122D19968E23E812BB9A0359E1D327FD7E5474F704F055E0BCCD9BB783F7A69F
+
+BASELINE
+COMMAND=Get-FileHash E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.dll -Algorithm SHA256
+INPUT=deployed Complete Cheat Menu before Task 15
+LITERAL_OUTPUT=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+EXIT_STATUS=0
+BASELINE_COPY=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\CompleteCheatMenu.pre-cnkx.dll
+BASELINE_COPY_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+GAME_BACKUP=E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.pre-cnkx-20260825_201656.dll.bak
+GAME_BACKUP_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+
+BUILD
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File .\decompiled-src\build.ps1 -GameRoot "E:\SteamLibrary\steamapps\common\How to Fish\How to Fish" -OutputPath .\artifacts\CompleteCheatMenu.dll
+INPUT=83 sorted C# source files and verified BepInEx/Unity/game references
+LITERAL_OUTPUT=BUILD_OUTPUT=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\CompleteCheatMenu.dll
+LITERAL_OUTPUT=BUILD_SOURCE_COUNT=83
+LITERAL_OUTPUT=BUILD_SHA256=9F9A20D3331199D6E4AE56E69DD9058BD8DBEDFF6525E584287A4142B25ACDBE
+LITERAL_OUTPUT=BUILD_EXIT=0
+EXIT_STATUS=0
+
+LOCALIZATION
+COMMAND=python .\tools\localize_dll.py .\artifacts\CompleteCheatMenu.dll .\CompleteCheatMenu.cnKX.zh-CN.dll
+INPUT=unlocalized 0.7.0 build plus dynamically protected reflection identifiers
+LITERAL_OUTPUT={"changed": 263, "source_sha256": "9f9a20d3331199d6e4ae56e69dd9058bd8dbedff6525e584287a4142b25acdbe", "modified_sha256": "41f5b3eace8dad48754561fd5c936026c9b991a323f92db9a2849cd82ca1ae30"}
+LITERAL_OUTPUT=LOCALIZE_EXIT=0
+EXIT_STATUS=0
+
+RUNTIME IDENTIFIER CORRECTION
+BASELINE_FAILURE_INPUT=first localized build translated reflection member strings Heal, Value and Boss
+BASELINE_FAILURE_OUTPUT=[Warning:Complete Cheat Menu] 绑定失败：PlayerVitals.治疗()
+BASELINE_FAILURE_OUTPUT=[Warning:Complete Cheat Menu] 绑定失败：Bonus.价值
+BASELINE_FAILURE_OUTPUT=[Warning:Complete Cheat Menu] 绑定失败：BossManager.首领
+MODIFIED_LOGIC=protected_runtime_strings extracts identifiers from GameBinder, ReadMember, reflection and HarmonyPatch calls before translating #US strings
+MODIFIED_RESULT=Heal, Value and Boss remain unchanged in the final assembly
+RESTORED_BEHAVIOR=menu diagnostics changed from translated-member binding failures to 0/154 failed bindings
+
+METADATA AND PLACEHOLDERS
+COMMAND=dnfile TypeDef/method inspection plus localization report placeholder comparison
+LITERAL_OUTPUT=RUNTIME_IDENTIFIER_Heal_PRESERVED=True
+LITERAL_OUTPUT=RUNTIME_IDENTIFIER_Value_PRESERVED=True
+LITERAL_OUTPUT=RUNTIME_IDENTIFIER_Boss_PRESERVED=True
+LITERAL_OUTPUT=RAW_ASSEMBLY_VERSION=0.7.0.0
+LITERAL_OUTPUT=LOCALIZED_ASSEMBLY_VERSION=0.7.0.0
+LITERAL_OUTPUT=TYPESET_EQUAL=True
+LITERAL_OUTPUT=REQUIRED_TYPES_MISSING=0
+LITERAL_OUTPUT=PLACEHOLDER_MISMATCHES=0
+LITERAL_OUTPUT=LOCALIZATION_CHANGED=263
+LITERAL_OUTPUT=METADATA_VALIDATION=PASS
+EXIT_STATUS=0
+
+FULL REGRESSION
+COMMAND=python .\tests\localized_ui_preset_test.py
+LITERAL_OUTPUT=LOCALIZED_UI_PRESET_TESTS=PASS cases=9
+EXIT_STATUS=0
+COMMAND=python .\tests\esp_projection_test.py
+LITERAL_OUTPUT=ESP_PROJECTION_TESTS=PASS cases=8
+EXIT_STATUS=0
+COMMAND=python .\tests\weapon_restore_test.py
+LITERAL_OUTPUT=WEAPON_RESTORE_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\visible_aim_test.py
+LITERAL_OUTPUT=VISIBLE_AIM_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\tracking_probability_test.py
+LITERAL_OUTPUT=TRACKING_PROBABILITY_TESTS=PASS cases=6
+EXIT_STATUS=0
+COMMAND=python .\tests\ballistic_prediction_test.py
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\target_lock_test.py
+LITERAL_OUTPUT=TARGET_LOCK_TESTS=PASS cases=8
+EXIT_STATUS=0
+COMMAND=python .\tests\bone_selection_test.py
+LITERAL_OUTPUT=BONE_SELECTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\targeting_math_test.py
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=PASS cases=10
+EXIT_STATUS=0
+COMMAND=python .\tests\snapshot_isolation_test.py
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\entity_registry_test.py
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+EXIT_STATUS=0
+COMMAND=python .\tests\aim_scoring_test.py
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+COMMAND=.\artifacts\cnkx-port\cnkx_performance_harness.exe
+LITERAL_OUTPUT=SEMANTIC_BASELINE_MATCH=True
+LITERAL_OUTPUT=ENHANCED_WEIGHTING_CHANGES_RESULT=True
+LITERAL_OUTPUT=DETERMINISTIC_RESULT=True
+LITERAL_OUTPUT=PREDICTION_FINITE=True
+LITERAL_OUTPUT=HARNESS_RESULT=PASS
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Task 2-14 targeting, prediction, tracking, visible aim, weapon restoration, ESP, localization and snapshot behavior all remain passing.
+
+DEPLOYMENT
+COMMAND=Copy-Item .\CompleteCheatMenu.cnKX.zh-CN.dll E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.dll -Force
+INPUT=CompleteCheatMenu.cnKX.zh-CN.dll SHA256 41F5B3EACE8DAD48754561FD5C936026C9B991A323F92DB9A2849CD82CA1AE30
+LITERAL_OUTPUT=DEPLOYED_SHA256=41F5B3EACE8DAD48754561FD5C936026C9B991A323F92DB9A2849CD82CA1AE30
+LITERAL_OUTPUT=DEPLOY_MATCH=True
+EXIT_STATUS=0
+DEPLOYED_DLL=E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.dll
+
+STARTUP
+COMMAND=Start-Process steam://rungameid/4001890
+INPUT=deployed SHA256 41F5B3EACE8DAD48754561FD5C936026C9B991A323F92DB9A2849CD82CA1AE30
+LITERAL_OUTPUT=[Info   :   BepInEx] Loading [Complete Cheat Menu 0.7.0]
+LITERAL_OUTPUT=[Info   :Complete Cheat Menu] 9 method(s) patched.
+LITERAL_OUTPUT=[Info   :Complete Cheat Menu] 已加载 完整作弊菜单 0.7.0。进入游戏后按 Insert。
+LITERAL_OUTPUT=[Message:   BepInEx] Chainloader startup complete
+LITERAL_OUTPUT=[Info   :Complete Cheat Menu] 诊断：0/154 个绑定失败。
+LITERAL_OUTPUT=PLUGIN_ERROR_COUNT=0
+LITERAL_OUTPUT=ArgumentException=False
+LITERAL_OUTPUT=HarmonyException=False
+LITERAL_OUTPUT=NullReferenceException=False
+EXIT_STATUS=0
+LOG=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\LogOutput.cnkx-deployed.log
+LOG_SHA256=B2901DF0323A3FAA5F70CA097A3B149216E4B4A72B52FB43A9ADDA2A9313291C
+OBSERVED_EXTERNAL_LOG=another trainer DLL is not a valid .NET assembly and Steam App List had an SSL connection error; neither record originates from Complete Cheat Menu.
+
+ROLLBACK POWERSHELL
+COMMAND=.\ROLLBACK_CNKX.ps1 -DestinationDll .\artifacts\cnkx-port\rollback-cnkx-test-20260825a\CompleteCheatMenu.dll
+INPUT=independent copy of deployed SHA256 41F5B3EACE8DAD48754561FD5C936026C9B991A323F92DB9A2849CD82CA1AE30
+LITERAL_OUTPUT=RESTORED_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+LITERAL_OUTPUT=POWERSHELL_ROLLBACK_EXIT=0
+EXIT_STATUS=0
+
+ROLLBACK BASH
+COMMAND=ROLLBACK_CNKX.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-cnkx-test-sh-20260825a/CompleteCheatMenu.dll
+INPUT=second independent copy of deployed SHA256 41F5B3EACE8DAD48754561FD5C936026C9B991A323F92DB9A2849CD82CA1AE30
+LITERAL_OUTPUT=RESTORED_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+LITERAL_OUTPUT=BASH_ROLLBACK_EXIT=0
+EXIT_STATUS=0
+RESTORED_STATUS=both independent copies restored the exact pre-deployment assembly; the game directory retains the new release.
+
+FINAL STATE
+PLAN_TASK15_MARKED=True
+GAME_RUNNING=True
+GAME_PID=21460
+GAME_DIRECTORY_RETAINS_MODIFIED=True
+DEPLOYED_SHA256=41F5B3EACE8DAD48754561FD5C936026C9B991A323F92DB9A2849CD82CA1AE30
+GATE_A=PASS
+GATE_B=PASS
+GATE_C=PASS
+GATE_D=PASS
+NEXT=User in-game verification of individual ESP and aiming toggles; release engineering plan is complete.

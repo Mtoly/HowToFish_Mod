@@ -1,0 +1,95 @@
+TASK=Gambling roulette force-colour localization regression
+DATE=2026-08-27
+RESULT=PASS
+
+ROOT_CAUSE
+GameBinder.EnumNames("BetColor") returns Red/Black/Green, while the localized DLL rewrote the same internal #US values to Chinese. NearestSlotOfColour therefore found no matching target and returned the current slot, producing a zero-degree correction.
+
+CHANGED_BRANCH_FIELDS
+- tools/localize_dll.py: protected_runtime_strings now includes SEMANTIC_RUNTIME_STRINGS={Red,Black,Green}.
+- GamblingTab.DrawRig: Chinese button labels are separated from the English ForcedColour protocol value.
+- GamblingTab.DrawLive and DrawTable: display labels use ColourLabel while game calls retain English enum names.
+
+ARTIFACTS
+MODIFIED_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\gambling-force-colour-fix\CompleteCheatMenu.gambling-fix.zh-CN.dll
+MODIFIED_FILE_SHA256=5F02EC332D300486DF22504AD2A3372828BFC60D1F47C92459F93C4BF80B9D92
+DIFF_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\gambling-force-colour-fix\gambling-force-colour-fix.diff
+DIFF_FILE_SHA256=3C949647535F99ADE30755B0F34F89B1CAC8D973FBCDCEE3BA1BDE784B94F0B1
+VERIFICATION_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\gambling-force-colour-fix\VERIFICATION.txt
+ROLLBACK_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\gambling-force-colour-fix\ROLLBACK_GAMBLING_FIX.sh
+ROLLBACK_FILE_SHA256=1005BDD6BC40DBCFEBAA0FFDED1AA791E128B2040017B3ADE587059F919DB89F
+ROLLBACK_PS_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\gambling-force-colour-fix\ROLLBACK_GAMBLING_FIX.ps1
+
+BASELINE
+COMMAND=python tests\gambling_colour_localization_test.py
+INPUT=localize_dll.py before semantic runtime colour protection.
+LITERAL_OUTPUT=AssertionError: assert "SEMANTIC_RUNTIME_STRINGS" in source
+EXIT_STATUS=1
+
+COMMAND=read artifacts\cnkx-port\task17-5-aim-overlay\CompleteCheatMenu.task17-5.zh-CN.localization.diff.json
+INPUT=previous deployed localized DLL diff.
+LITERAL_OUTPUT=Green translated; Red translated; Black translated
+EXIT_STATUS=0
+BASELINE_BEHAVIOR=BetColor enum names remained English but ColourOfSlot/NearestSlotOfColour string constants became Chinese, so no target slot matched and steering correction was zero.
+
+MODIFIED
+COMMAND=python tests\gambling_colour_localization_test.py
+INPUT=fixed localizer plus Task 17.5 raw assembly.
+LITERAL_OUTPUT=GAMBLING_COLOUR_LOCALIZATION_TEST=PASS cases=9
+EXIT_STATUS=0
+
+COMMAND=foreach tests\*_test.py: python TEST_FILE
+INPUT=19 Python regression tests.
+LITERAL_OUTPUT=PYTHON_TEST_SUMMARY=passed:19 failed:0 total:19
+EXIT_STATUS=0
+
+COMMAND=decompiled-src\build.ps1 -OutputPath artifacts\gambling-force-colour-fix\CompleteCheatMenu.gambling-fix.dll
+INPUT=96 production C# sources and current game/BepInEx references.
+LITERAL_OUTPUT=BUILD_SOURCE_COUNT=96
+LITERAL_OUTPUT=BUILD_SHA256=2E1DC3D31383B80A438D714C3C4D39837AED2D495DE0124E8EAB8E6DBD776ABA
+EXIT_STATUS=0
+
+COMMAND=python tools\localize_dll.py RAW_DLL MODIFIED_FILE
+INPUT=raw gambling-fix assembly.
+LITERAL_OUTPUT={"changed": 258, "source_sha256": "2e1dc3d31383b80a438d714c3c4d39837aed2d495de0124e8eab8e6dbd776aba", "modified_sha256": "5f02ec332d300486df22504ad2a3372828bfc60d1f47c92459f93c4bf80b9d92"}
+LITERAL_OUTPUT=TRANSLATED_RUNTIME_COLOURS=0
+LITERAL_OUTPUT=RUNTIME_COLOUR_PROTECTION=PASS
+EXIT_STATUS=0
+
+COMMAND=dump localized GamblingCheats method user strings
+INPUT=CompleteCheatMenu.gambling-fix.zh-CN.dll
+LITERAL_OUTPUT=ColourOfSlot_STRINGS=['Green', 'Red', 'Black']
+LITERAL_OUTPUT=NearestSlotOfColour_STRINGS=['Green']
+LITERAL_OUTPUT=OnSpinStarted_STRINGS=['not rigged', 'Red', 'Red', 'Black', ' (', 'loss', 'win', ')']
+EXIT_STATUS=0
+MODIFIED_BEHAVIOR=The localized build retains game-compatible English colour protocol values, so NearestSlotOfColour can select the requested pocket and FixedStep can produce a nonzero wheel correction. UI labels remain Chinese through ColourLabel.
+
+DEPLOYMENT
+COMMAND=DEPLOY_AFTER_EXIT.ps1 -GameProcessId 66320
+INPUT=MODIFIED_FILE and the running game's mapped plugin path.
+LITERAL_OUTPUT=DEPLOY_AFTER_EXIT=PASS
+LITERAL_OUTPUT=DEPLOYED_SHA256=5F02EC332D300486DF22504AD2A3372828BFC60D1F47C92459F93C4BF80B9D92
+EXIT_STATUS=0
+
+STARTUP
+COMMAND=Start-Process How to Fish.exe; wait for Chainloader startup complete
+INPUT=deployed gambling-fix localized DLL.
+LITERAL_OUTPUT=[Info   :   BepInEx] Loading [Complete Cheat Menu 0.7.0]
+LITERAL_OUTPUT=[Info   :Complete Cheat Menu] 13 method(s) patched.
+LITERAL_OUTPUT=[Message:   BepInEx] Chainloader startup complete
+LITERAL_OUTPUT=COMPLETE_CHEAT_MENU_ERROR_FATAL_COUNT=0
+EXIT_STATUS=0
+
+ROLLBACK
+COMMAND=ROLLBACK_GAMBLING_FIX.ps1 and ROLLBACK_GAMBLING_FIX.sh against separate fixture copies
+INPUT=fixed source files, created regression test, and fixed localized DLL.
+LITERAL_OUTPUT=ROLLBACK_PS_VERIFICATION=PASS SHA256=A105A0E1AB2A67A252387833000BAFFFDE46E3B6FC3AA8A7A6A708CF7404D0E0
+LITERAL_OUTPUT=ROLLBACK_SH_VERIFICATION=PASS SHA256=A105A0E1AB2A67A252387833000BAFFFDE46E3B6FC3AA8A7A6A708CF7404D0E0
+LITERAL_OUTPUT=RESTORED_SOURCE_FILES=3
+LITERAL_OUTPUT=CREATED_FILES_PRESENT=0
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Independent rollback copies restore the prior localized DLL and source behavior, including the original runtime-colour translation defect.
+
+FINAL_GAME_DLL=E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\plugins\EnvinciblesMods-CompleteCheatMenu\CompleteCheatMenu.dll
+FINAL_GAME_DLL_SHA256=5F02EC332D300486DF22504AD2A3372828BFC60D1F47C92459F93C4BF80B9D92
+STATUS=DEPLOYED_AND_STARTUP_VERIFIED

@@ -1,0 +1,7 @@
+{
+    "name": "HTF_MoreHead",
+    "version_number": "0.6.3",
+    "website_url": "https://github.com/XiaoHaiiOvO/HTFMoreHead",
+    "description": "HTF MoreHead is a BepInEx cosmetic framework for How to Fish. Content creators build independent .htfhhh AssetBundles with the Unity SDK; players select them through the game's original Hat, Accessory, and Outfit arrows.",
+    "dependencies": [BepInEx-BepInExPack-5.4.2305]
+}

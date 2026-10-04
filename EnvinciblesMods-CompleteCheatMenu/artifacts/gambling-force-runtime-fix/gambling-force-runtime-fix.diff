@@ -1,0 +1,91 @@
+
+InputObject
+-----------                                                                                                             
+	internal static string LastResolvedColour = "-";                                                                       
+	internal static bool OverrideRouletteResult(object[] args)                                                             
+		if (args == null || args.Length == 0 || RigMode != Mode.ForceColour || !IsBetting)                                    
+		string colour = CanonicalColour(ForcedColour);                                                                        
+		object value = GameBinder.EnumValue("BetColor", colour);                                                              
+		if (value == null)                                                                                                    
+		args[0] = value;                                                                                                      
+		LastResolvedColour = colour;                                                                                          
+		return true;                                                                                                          
+	internal static string CanonicalColour(string colour)                                                                  
+		return colour switch                                                                                                  
+			"红色" => "Red",                                                                                                     
+			"黑色" => "Black",                                                                                                   
+			"绿色" => "Green",                                                                                                   
+			_ => colour                                                                                                          
+		};                                                                                                                    
+		LastResolvedColour = "-";                                                                                             
+			_target = CanonicalColour(ForcedColour);                                                                             
+		string resolvedColour = (LastResolvedColour == "-" || string.IsNullOrEmpty(LastResolvedColour)) ? currentBallColour :…
+		bool flag = resolvedColour == betColour;                                                                              
+		LastOutcome = (resolvedColour == currentBallColour) ? currentBallColour + " — " + (flag ? "won" : "lost") : resolvedC…
+		LastResolvedColour = "-";                                                                                             
+		LastResolvedColour = "-";                                                                                             
+			return false;                                                                                                        
+		{                                                                                                                     
+		{                                                                                                                     
+		}                                                                                                                     
+                                                                                                                        
+		{                                                                                                                     
+			return false;                                                                                                        
+		}                                                                                                                     
+                                                                                                                        
+	{                                                                                                                      
+	}                                                                                                                      
+                                                                                                                        
+	{                                                                                                                      
+	}                                                                                                                      
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+			_target = ForcedColour;                                                                                              
+		bool flag = currentBallColour == betColour;                                                                           
+		LastOutcome = currentBallColour + " — " + (flag ? "won" : "lost");                                                    
+
+
+--- Added file: RouletteResult_Patch.cs ---
+
+using System;
+using System.Reflection;
+using CompleteCheatMenu.Cheats;
+using CompleteCheatMenu.Game;
+using HarmonyLib;
+
+namespace CompleteCheatMenu.Patches;
+
+[HarmonyPatch]
+internal static class RouletteResult_Patch
+{
+	private static MethodBase TargetMethod()
+	{
+		return GameBinder.Method("CasinoManager", "ServerRouletteResult", 1);
+	}
+
+	private static bool Prepare()
+	{
+		bool found = TargetMethod() != null;
+		if (!found)
+		{
+			Plugin.Log.LogWarning((object)"CasinoManager.ServerRouletteResult not found — forced roulette result disabled.");
+		}
+		return found;
+	}
+
+	private static void Prefix(object[] __args)
+	{
+		try
+		{
+			if (GamblingCheats.OverrideRouletteResult(__args))
+			{
+				Plugin.Log.LogInfo((object)("Roulette result overridden to " + GamblingCheats.ForcedColour + " (host result path)."));
+			}
+		}
+		catch (Exception ex)
+		{
+			Plugin.Log.LogError((object)("Forced roulette result override failed: " + ex.Message));
+		}
+	}
+}

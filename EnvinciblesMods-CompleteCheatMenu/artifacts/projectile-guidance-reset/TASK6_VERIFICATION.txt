@@ -1,0 +1,46 @@
+TASK6_VERIFICATION
+DATE=2026-09-05
+
+BUILD_COMMAND:
+  powershell -NoProfile -ExecutionPolicy Bypass -File decompiled-src/build.ps1 -OutputPath artifacts/projectile-guidance-reset/CompleteCheatMenu.projectile-guidance.dll
+BUILD_RESULT:
+  BUILD_SOURCE_COUNT=97
+  BUILD_SHA256=C554A488655F855B7ABBDE033B67CBCBB460C2F03DAF34C5F959308D9750132F
+  AssemblyVersion=0.7.0.0
+  EXIT_STATUS=0
+
+LOCALIZATION_COMMAND:
+  python tools/localize_dll.py artifacts/projectile-guidance-reset/CompleteCheatMenu.projectile-guidance.dll artifacts/projectile-guidance-reset/CompleteCheatMenu.projectile-guidance.zh-CN.dll
+LOCALIZATION_RESULT:
+  changed=258
+  source_sha256=c554a488655f855b7abbde033b67cbcbb460c2f03daf34c5f959308d9750132f
+  modified_sha256=140a2ded87aef83772f764f85890f7b1d2e3be196d19e19745659f6fc3396753
+  EXIT_STATUS=0
+
+REGRESSION_COMMAND:
+  Get-ChildItem tests -Filter *.py | python each test
+REGRESSION_RESULT:
+  24 Python regression suites passed, including targeting, ESP, visibility, gambling localization, projectile lifecycle, FirePoint restore, and weapon restore.
+  EXIT_STATUS=0
+
+STATIC_METADATA_RESULT:
+  Raw assembly name: CompleteCheatMenu.projectile-guidance, Version=0.7.0.0
+  Localized assembly name: CompleteCheatMenu.projectile-guidance, Version=0.7.0.0
+  Required source count=97
+  Runtime reflection protection remains enabled by tools/localize_dll.py.
+
+ROLLBACK_COMMAND:
+  ROLLBACK_TASK6.sh artifacts/projectile-guidance-reset/task6-rollback-test
+ROLLBACK_RESULT:
+  CompleteCheatMenu.dll SHA256 matches CompleteCheatMenu.task5.dll
+  ROLLBACK_MATCH=True
+  EXIT_STATUS=0
+
+ARTIFACTS:
+  artifacts/projectile-guidance-reset/CompleteCheatMenu.projectile-guidance.dll
+  artifacts/projectile-guidance-reset/CompleteCheatMenu.projectile-guidance.pdb
+  artifacts/projectile-guidance-reset/CompleteCheatMenu.projectile-guidance.zh-CN.dll
+  artifacts/projectile-guidance-reset/CompleteCheatMenu.projectile-guidance.zh-CN.localization.diff.json
+  artifacts/projectile-guidance-reset/task6-python-tests.txt
+  artifacts/projectile-guidance-reset/ROLLBACK_TASK6.sh
+  artifacts/projectile-guidance-reset/task6-rollback-test/

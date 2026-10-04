@@ -1,0 +1,326 @@
+=== Weapon::Shoot RVA=0x173BC ===
+IL_000C: ldarg.0      
+IL_000D: call         HasCooldown
+IL_0012: brtrue.s     36
+IL_0014: ldarg.0      
+IL_0015: ldfld        _isReloading
+IL_001A: brtrue.s     36
+IL_001C: ldarg.0      
+IL_001D: call         get_Ammo
+IL_0022: brtrue.s     37
+IL_0024: ret          
+IL_0025: ldarg.0      
+IL_0026: ldc.i4.0     
+IL_0027: stfld        _queuedShoot
+IL_002C: ldc.r4       -1.0
+IL_0031: ldc.r4       1.0
+IL_0036: call         UnityEngine.Random::Range
+IL_003B: stloc.0      
+IL_003C: ldarg.0      
+IL_003D: ldloc.0      
+IL_003E: call         AddModelRecoil
+IL_0043: ldarg.0      
+IL_0044: ldfld        _holder
+IL_0049: callvirt     get_Camera
+IL_004E: ldloc.0      
+IL_004F: ldarg.0      
+IL_0050: ldfld        _attachments
+IL_0055: callvirt     get_ScreenRecoilAmount
+IL_005A: ldfld        UnityEngine.Vector2::x
+IL_005F: mul          
+IL_0060: ldarg.0      
+IL_0061: ldfld        _attachments
+IL_0066: callvirt     get_ScreenRecoilAmount
+IL_006B: ldfld        UnityEngine.Vector2::y
+IL_0070: newobj       UnityEngine.Vector2::.ctor
+IL_0075: callvirt     Recoil
+IL_007A: ldarg.0      
+IL_007B: ldfld        _holder
+IL_0080: callvirt     get_ToolMovement
+IL_0085: ldloc.0      
+IL_0086: ldarg.0      
+IL_0087: ldfld        _attachments
+IL_008C: callvirt     get_ScreenRecoilAmount
+IL_0091: ldfld        UnityEngine.Vector2::x
+IL_0096: mul          
+IL_0097: ldarg.0      
+IL_0098: ldfld        _attachments
+IL_009D: callvirt     get_ScreenRecoilAmount
+IL_00A2: ldfld        UnityEngine.Vector2::y
+IL_00A7: newobj       UnityEngine.Vector2::.ctor
+IL_00AC: ldarg.0      
+IL_00AD: ldfld        _attachments
+IL_00B2: callvirt     get_WeaponRecoilMulti
+IL_00B7: call         UnityEngine.Vector2::op_Multiply
+IL_00BC: callvirt     Recoil
+IL_00C1: ldarg.0      
+IL_00C2: ldfld        _holder
+IL_00C7: callvirt     get_Movement
+IL_00CC: ldarg.0      
+IL_00CD: ldfld        _holder
+IL_00D2: callvirt     get_CamObject
+IL_00D7: callvirt     UnityEngine.Transform::get_forward
+IL_00DC: call         UnityEngine.Vector3::op_UnaryNegation
+IL_00E1: ldarg.0      
+IL_00E2: ldfld        _recoilKnockback
+IL_00E7: conv.r4      
+IL_00E8: call         UnityEngine.Vector3::op_Multiply
+IL_00ED: callvirt     Knockback
+IL_00F2: ldarg.0      
+IL_00F3: ldfld        _timeBetweenShots
+IL_00F8: call         OnAttack
+IL_00FD: ldarg.0      
+IL_00FE: call         get_Ammo
+IL_0103: stloc.s      local(0x0005)
+IL_0105: ldarg.0      
+IL_0106: ldloc.s      local(0x0005)
+IL_0108: ldc.i4.1     
+IL_0109: sub          
+IL_010A: call         set_Ammo
+IL_010F: ldarg.0      
+IL_0110: call         get_Ammo
+IL_0115: brtrue.s     288
+IL_0117: ldarg.0      
+IL_0118: ldc.i4.1     
+IL_0119: stfld        _queueReload
+IL_011E: br.s         312
+IL_0120: ldarg.0      
+IL_0121: ldc.i4.1     
+IL_0122: stfld        _hasCoolDown
+IL_0127: ldarg.0      
+IL_0128: ldstr        <dnfile.stream.UserString object at 0x000001A0ED280980>
+IL_012D: ldarg.0      
+IL_012E: ldfld        _timeBetweenShots
+IL_0133: call         UnityEngine.MonoBehaviour::Invoke
+IL_0138: ldarg.0      
+IL_0139: ldc.i4.1     
+IL_013A: call         ShootEffects
+IL_013F: ldarg.0      
+IL_0140: ldfld        _attachments
+IL_0145: callvirt     get_FirePoint
+IL_014A: callvirt     UnityEngine.Transform::get_position
+IL_014F: stloc.1      
+IL_0150: ldarg.0      
+IL_0151: ldfld        _attachments
+IL_0156: callvirt     get_UseSniperUi
+IL_015B: brfalse.s    445
+IL_015D: ldarg.0      
+IL_015E: ldfld        _aimPercent
+IL_0163: ldc.r4       0.8999999761581421
+IL_0168: ble.un.s     445
+IL_016A: ldarg.0      
+IL_016B: ldfld        _holder
+IL_0170: callvirt     get_Camera
+IL_0175: callvirt     get_CamTransform
+IL_017A: callvirt     UnityEngine.Transform::get_position
+IL_017F: ldarg.0      
+IL_0180: ldfld        _holder
+IL_0185: callvirt     get_Camera
+IL_018A: callvirt     get_CamTransform
+IL_018F: callvirt     UnityEngine.Transform::get_forward
+IL_0194: ldarg.0      
+IL_0195: ldfld        _modelForwardLength
+IL_019A: call         UnityEngine.Vector3::op_Multiply
+IL_019F: call         UnityEngine.Vector3::op_Addition
+IL_01A4: stloc.1      
+IL_01A5: ldarg.0      
+IL_01A6: ldfld        _holder
+IL_01AB: callvirt     get_Camera
+IL_01B0: callvirt     get_CamTransform
+IL_01B5: callvirt     UnityEngine.Transform::get_forward
+IL_01BA: stloc.2      
+IL_01BB: br.s         462
+IL_01BD: ldarg.0      
+IL_01BE: ldfld        _attachments
+IL_01C3: callvirt     get_FirePoint
+IL_01C8: callvirt     UnityEngine.Transform::get_forward
+IL_01CD: stloc.2      
+IL_01CE: ldarg.0      
+IL_01CF: call         GunClippingRay
+IL_01D4: stloc.3      
+IL_01D5: ldloca.s     local(0x0003)
+IL_01D7: call         UnityEngine.RaycastHit::get_transform
+IL_01DC: call         UnityEngine.Object::op_Implicit
+IL_01E1: brfalse      823
+IL_01E6: ldloca.s     local(0x0003)
+IL_01E8: call         UnityEngine.RaycastHit::get_transform
+IL_01ED: call         GetPlayerFromBodyPart
+IL_01F2: stloc.s      local(0x0006)
+IL_01F4: ldloca.s     local(0x0003)
+IL_01F6: call         UnityEngine.RaycastHit::get_transform
+IL_01FB: call         Get
+IL_0200: stloc.s      local(0x0007)
+IL_0202: ldloc.s      local(0x0006)
+IL_0204: call         UnityEngine.Object::op_Implicit
+IL_0209: brfalse.s    624
+IL_020B: ldc.i4.0     
+IL_020C: stloc.s      local(0x0008)
+IL_020E: br.s         614
+IL_0210: ldloc.s      local(0x0006)
+IL_0212: callvirt     get_Vitals
+IL_0217: ldloca.s     local(0x0003)
+IL_0219: call         UnityEngine.RaycastHit::get_point
+IL_021E: ldarg.0      
+IL_021F: ldfld        _attachments
+IL_0224: callvirt     get_FirePoint
+IL_0229: callvirt     UnityEngine.Transform::get_forward
+IL_022E: ldarg.0      
+IL_022F: ldfld        _holder
+IL_0234: ldarg.0      
+IL_0235: ldfld        _attachments
+IL_023A: callvirt     get_Damage
+IL_023F: ldc.i4.1     
+IL_0240: ldarg.0      
+IL_0241: ldfld        _attachments
+IL_0246: callvirt     get_FirePoint
+IL_024B: callvirt     UnityEngine.Transform::get_forward
+IL_0250: call         get_PlayerKillForce
+IL_0255: call         UnityEngine.Vector3::op_Multiply
+IL_025A: ldc.i4.0     
+IL_025B: callvirt     LocalHit
+IL_0260: ldloc.s      local(0x0008)
+IL_0262: ldc.i4.1     
+IL_0263: add          
+IL_0264: stloc.s      local(0x0008)
+IL_0266: ldloc.s      local(0x0008)
+IL_0268: ldarg.0      
+IL_0269: ldfld        _projectileCountPerShot
+IL_026E: blt.s        528
+IL_0270: ldloc.s      local(0x0007)
+IL_0272: call         UnityEngine.Object::op_Implicit
+IL_0277: brfalse.s    742
+IL_0279: ldc.i4.0     
+IL_027A: stloc.s      local(0x0009)
+IL_027C: br.s         732
+IL_027E: ldloc.s      local(0x0007)
+IL_0280: ldloca.s     local(0x0003)
+IL_0282: call         UnityEngine.RaycastHit::get_transform
+IL_0287: ldloca.s     local(0x0003)
+IL_0289: call         UnityEngine.RaycastHit::get_point
+IL_028E: ldarg.0      
+IL_028F: ldfld        _attachments
+IL_0294: callvirt     get_FirePoint
+IL_0299: callvirt     UnityEngine.Transform::get_forward
+IL_029E: ldarg.0      
+IL_029F: ldfld        _holder
+IL_02A4: ldarg.0      
+IL_02A5: ldfld        _attachments
+IL_02AA: callvirt     get_Damage
+IL_02AF: ldc.i4.1     
+IL_02B0: ldarg.0      
+IL_02B1: ldfld        _attachments
+IL_02B6: callvirt     get_FirePoint
+IL_02BB: callvirt     UnityEngine.Transform::get_forward
+IL_02C0: ldarg.0      
+IL_02C1: ldfld        _weaponInfo
+IL_02C6: callvirt     get_ProjectileForce
+IL_02CB: call         UnityEngine.Vector3::op_Multiply
+IL_02D0: ldc.i4.0     
+IL_02D1: callvirt     LocalHit
+IL_02D6: ldloc.s      local(0x0009)
+IL_02D8: ldc.i4.1     
+IL_02D9: add          
+IL_02DA: stloc.s      local(0x0009)
+IL_02DC: ldloc.s      local(0x0009)
+IL_02DE: ldarg.0      
+IL_02DF: ldfld        _projectileCountPerShot
+IL_02E4: blt.s        638
+IL_02E6: ldloca.s     local(0x0003)
+IL_02E8: call         UnityEngine.RaycastHit::get_transform
+IL_02ED: ldstr        <dnfile.stream.UserString object at 0x000001A0ED360CD0>
+IL_02F2: callvirt     UnityEngine.Component::CompareTag
+IL_02F7: brfalse.s    807
+IL_02F9: ldloca.s     local(0x0003)
+IL_02FB: call         UnityEngine.RaycastHit::get_point
+IL_0300: ldarg.0      
+IL_0301: ldfld        _attachments
+IL_0306: callvirt     get_FirePoint
+IL_030B: callvirt     UnityEngine.Transform::get_forward
+IL_0310: ldarg.0      
+IL_0311: ldfld        _attachments
+IL_0316: callvirt     get_Damage
+IL_031B: ldarg.0      
+IL_031C: call         get_Holder
+IL_0321: ldc.i4.1     
+IL_0322: call         PlayDeadPlayerHitEffects
+IL_0327: call         UnityEngine.Vector3::get_down
+IL_032C: ldc.r4       10000.0
+IL_0331: call         UnityEngine.Vector3::op_Multiply
+IL_0336: stloc.1      
+IL_0337: ldarg.0      
+IL_0338: ldfld        _projectileCountPerShot
+IL_033D: newarr       <dnfile.mdtable.TypeRefRow object at 0x000001A0E6E7BC50>
+IL_0342: stloc.s      local(0x0004)
+IL_0344: ldc.i4.0     
+IL_0345: stloc.s      local(0x000A)
+IL_0347: br.s         957
+IL_0349: ldloca.s     local(0x000B)
+IL_034B: ldc.r4       -1.0
+IL_0350: ldc.r4       1.0
+IL_0355: call         UnityEngine.Random::Range
+IL_035A: ldc.r4       -1.0
+IL_035F: ldc.r4       1.0
+IL_0364: call         UnityEngine.Random::Range
+IL_0369: ldc.r4       -1.0
+IL_036E: ldc.r4       1.0
+IL_0373: call         UnityEngine.Random::Range
+IL_0378: call         UnityEngine.Vector3::.ctor
+IL_037D: ldloc.s      local(0x000B)
+IL_037F: ldc.r4       1.0
+IL_0384: call         UnityEngine.Vector3::ClampMagnitude
+IL_0389: stloc.s      local(0x000B)
+IL_038B: ldloc.s      local(0x0004)
+IL_038D: ldloc.s      local(0x000A)
+IL_038F: ldloc.s      local(0x000B)
+IL_0391: ldarg.0      
+IL_0392: ldfld        _spread
+IL_0397: call         UnityEngine.Vector3::op_Multiply
+IL_039C: call         UnityEngine.Quaternion::Euler
+IL_03A1: ldloc.2      
+IL_03A2: call         UnityEngine.Quaternion::op_Multiply
+IL_03A7: ldarg.0      
+IL_03A8: ldfld        _projSpeed
+IL_03AD: call         UnityEngine.Vector3::op_Multiply
+IL_03B2: stelem       <dnfile.mdtable.TypeRefRow object at 0x000001A0E6E7BC50>
+IL_03B7: ldloc.s      local(0x000A)
+IL_03B9: ldc.i4.1     
+IL_03BA: add          
+IL_03BB: stloc.s      local(0x000A)
+IL_03BD: ldloc.s      local(0x000A)
+IL_03BF: ldloc.s      local(0x0004)
+IL_03C1: ldlen        
+IL_03C2: conv.i4      
+IL_03C3: blt.s        841
+IL_03C5: ldloc.s      local(0x0004)
+IL_03C7: ldlen        
+IL_03C8: conv.i4      
+IL_03C9: ldc.i4.1     
+IL_03CA: ble.s        1002
+IL_03CC: ldsfld       Instance
+IL_03D1: ldarg.0      
+IL_03D2: ldfld        _holder
+IL_03D7: ldarg.0      
+IL_03D8: ldfld        _weaponInfo
+IL_03DD: ldc.i4.1     
+IL_03DE: ldloc.1      
+IL_03DF: ldloc.s      local(0x0004)
+IL_03E1: ldc.i4.0     
+IL_03E2: ldc.i4.0     
+IL_03E3: ldc.i4.0     
+IL_03E4: callvirt     AddProjectiles
+IL_03E9: ret          
+IL_03EA: ldsfld       Instance
+IL_03EF: ldarg.0      
+IL_03F0: ldfld        _holder
+IL_03F5: ldarg.0      
+IL_03F6: ldfld        _weaponInfo
+IL_03FB: ldc.i4.1     
+IL_03FC: ldloc.1      
+IL_03FD: ldloc.s      local(0x0004)
+IL_03FF: ldc.i4.0     
+IL_0400: ldelem       <dnfile.mdtable.TypeRefRow object at 0x000001A0E6E7BC50>
+IL_0405: ldc.i4.0     
+IL_0406: ldc.i4.0     
+IL_0407: ldc.i4.0     
+IL_0408: callvirt     AddProjectile
+IL_040D: ret          

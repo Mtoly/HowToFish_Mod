@@ -1,0 +1,305 @@
+--- a/decompiled-src/CompleteCheatMenu/Runtime/EspRendererV2.cs
++++ b/decompiled-src/CompleteCheatMenu/Runtime/EspRendererV2.cs
+@@ -68,10 +68,7 @@
+ 		}
+ 		EnsureStyle();
+ 		EspSnapshot snapshot = EspSnapshotBuilder.Refresh(CheatState.EspCreatures, CheatState.EspItems, CheatState.EspPlayers);
+-		if (CheatState.EspAimCircle && CheatState.Aimbot)
+-		{
+-			GuiPrimitives.DrawCircle(new Vector2(Screen.width * 0.5f, Screen.height * 0.5f), Mathf.Max(1f, CheatState.AimScreenRadius), new Color(1f, 1f, 1f, 0.55f), 1f);
+-		}
++		DrawAimOverlay(camera);
+ 		if (!CheatState.EspEnabled)
+ 		{
+ 			return;
+@@ -82,6 +79,40 @@
+ 		DrawList(snapshot.Items, camera, maxDistanceSquared);
+ 		DrawList(snapshot.Containers, camera, maxDistanceSquared);
+ 		PruneCaches();
++	}
++
++	private static void DrawAimOverlay(Camera camera)
++	{
++		if (!CheatState.Aimbot)
++		{
++			return;
++		}
++		Vector2 center = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
++		if (CheatState.EspAimCircle)
++		{
++			float angleRadius = AimOverlayMath.AngleToPixelRadius(camera.fieldOfView, Screen.width, Screen.height, CheatState.AimFov);
++			float radius = AimOverlayMath.EffectiveRadius(CheatState.AimScreenRadius, angleRadius);
++			GuiPrimitives.DrawCircle(center, radius, new Color(1f, 1f, 1f, 0.55f), 1f);
++		}
++		if (CheatState.EspAimTargetTracer)
++		{
++			DrawCurrentTargetTracer(camera, center);
++		}
++	}
++
++	private static void DrawCurrentTargetTracer(Camera camera, Vector2 center)
++	{
++		TargetSolution target = WeaponCheats.CurrentTarget;
++		if (target == null || !Refs.IsAlive(target.Entity) || target.Transform == null || !IsFinite(target.AimPoint))
++		{
++			return;
++		}
++		Vector3 projected = camera.WorldToScreenPoint(target.AimPoint);
++		if (projected.z <= 0.01f || !IsFinite(projected))
++		{
++			return;
++		}
++		GuiPrimitives.DrawLine(center, new Vector2(projected.x, Screen.height - projected.y), TargetColor, 2f);
+ 	}
+ 
+ 	private static void EnsureStyle()
+--- a/decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
++++ b/decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
+@@ -209,6 +209,8 @@
+ 
+ 	internal static bool EspAimCircle = true;
+ 
++	internal static bool EspAimTargetTracer = true;
++
+ 	internal static bool EspLabels = true;
+ 
+ 	internal static bool EspDistanceLabels = true;
+--- a/decompiled-src/CompleteCheatMenu/Runtime/Presets.cs
++++ b/decompiled-src/CompleteCheatMenu/Runtime/Presets.cs
+@@ -57,6 +57,7 @@
+ 				B("espItemValueInfo", CheatState.EspItemValueInfo),
+ 				B("espContainerInfo", CheatState.EspContainerInfo),
+ 				B("espAimCircle", CheatState.EspAimCircle),
++				B("espAimTargetTracer", CheatState.EspAimTargetTracer),
+ 				B("espDistanceLabels", CheatState.EspDistanceLabels),
+ 				E("aimTargetMode", (int)CheatState.AimTargets),
+ 				B("aimbot", CheatState.Aimbot),
+@@ -192,6 +193,7 @@
+ 				case "espItemValueInfo": CheatState.EspItemValueInfo = text3 == "1"; break;
+ 				case "espContainerInfo": CheatState.EspContainerInfo = text3 == "1"; break;
+ 				case "espAimCircle": CheatState.EspAimCircle = text3 == "1"; break;
++				case "espAimTargetTracer": CheatState.EspAimTargetTracer = text3 == "1"; break;
+ 				case "espDistanceLabels": CheatState.EspDistanceLabels = text3 == "1"; break;
+ 				case "aimTargetMode":
+ 					if (int.TryParse(text3, NumberStyles.Integer, CultureInfo.InvariantCulture, out var targetMode) && Enum.IsDefined(typeof(AimTargetMode), targetMode)) { CheatState.AimTargets = (AimTargetMode)targetMode; loadedTargetMode = true; }
+--- a/decompiled-src/CompleteCheatMenu/UI/Tabs/VisualsTab.cs
++++ b/decompiled-src/CompleteCheatMenu/UI/Tabs/VisualsTab.cs
+@@ -41,8 +41,10 @@
+ 		CheatState.EspItemValueInfo = GUILayout.Toggle(CheatState.EspItemValueInfo, "  物品价值", Theme.Toggle);
+ 		CheatState.EspContainerInfo = GUILayout.Toggle(CheatState.EspContainerInfo, "  容器信息", Theme.Toggle);
+ 		GUILayout.EndHorizontal();
+-		CheatState.EspAimCircle = Widgets.ToggleRow("锁定范围圆", CheatState.EspAimCircle, CheatState.EspAimCircle ? "开启" : "关闭");
++		CheatState.EspAimCircle = Widgets.ToggleRow("自瞄有效范围圆", CheatState.EspAimCircle, CheatState.EspAimCircle ? "开启" : "关闭");
++		CheatState.EspAimTargetTracer = Widgets.ToggleRow("当前目标连线", CheatState.EspAimTargetTracer, CheatState.EspAimTargetTracer ? "开启" : "关闭");
+ 		CheatState.EspDistance = Widgets.SliderRow("最大绘制距离", CheatState.EspDistance, 20f, 600f, "0", 150f);
++		Widgets.Note("自瞄有效范围圆同时反映瞄准锥角和屏幕像素范围，实际半径取两项限制中的较小值；当前目标连线不依赖普通射线或透视总开关。");
+ 		Widgets.Note("实体列表使用注册表快照；几何、骨骼和可见性使用短周期缓存，避免逐帧全量扫描。");
+ 	}
+ 
+--- a/tests/localized_ui_preset_test.py
++++ b/tests/localized_ui_preset_test.py
+@@ -43,7 +43,8 @@
+     "手持物",
+     "物品价值",
+     "容器信息",
+-    "锁定范围圆",
++    "自瞄有效范围圆",
++    "当前目标连线",
+ ):
+     assert token in visuals, token
+ 
+@@ -68,7 +69,7 @@
+     "aimRecoilCompensation", "aimRecoilCompensationStrength",
+     "instantHit", "instantHitProjectileSpeed", "espBoxes", "espSkeletons",
+     "espHealthBars", "espTypeInfo", "espVisibilityInfo", "espHeldItemInfo",
+-    "espItemValueInfo", "espContainerInfo", "espAimCircle",
++    "espItemValueInfo", "espContainerInfo", "espAimCircle", "espAimTargetTracer",
+ )
+ for key in keys:
+     assert presets.count(f'"{key}"') >= 2, key
+--- a/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
++++ b/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+@@ -884,3 +884,26 @@
+ Task 17.5：角度 FOV 换算圆 + 当前追踪目标专用连线 + 最终部署验证
+ ```
+ 
++#### Task 17.5：角度 FOV 换算圆、当前目标专用连线与最终部署 ✅ 已完成（2026-08-25）
++
++**完成记录：**
++
++- 新增 `AimOverlayMath`，使用当前相机垂直 FOV、屏幕尺寸和 `AimFov` 将三维瞄准锥角换算为屏幕像素半径。
++- 当角度达到或超过前向半球边界时，角度半径安全限制为屏幕半对角线，避免 `tan(90°)` 非有限值。
++- 自瞄范围圆现在绘制真实有效半径：`min(AimScreenRadius, AimFovPixelRadius)`，与目标筛选同时受角度和像素半径限制的语义一致。
++- 新增 `EspAimTargetTracer`，从屏幕中心直接连接到 `WeaponCheats.CurrentTarget.AimPoint`；目标失效、位于相机后方或投影结果非有限时跳过绘制。
++- 当前目标专用连线和自瞄有效范围圆均不依赖 `EspEnabled` 或普通 `EspTracers`，原有实体方框、普通底部射线、骨架、血条、标签与统一 `EspDistance` 保持不变。
++- 视觉页新增“自瞄有效范围圆”和“当前目标连线”，并明确说明角度/像素双重限制及专用连线独立性；新开关写入预设键 `espAimTargetTracer`。
++- 新增 `aim_overlay_test.py` 和直接编译生产数学源码的 `aim_overlay_harness.cs`；RED 基线因缺少 `AimOverlayMath.cs` 失败，GREEN 后 22 个静态/集成检查及 10 个生产数学行为用例全部通过。
++- Task 2–17.5 共 18 个 Python 回归测试全部通过；源码程序集构建成功，源码数 96，版本保持 `0.7.0.0`。
++- 汉化程序集类型集、方法集、版本和格式化占位符检查通过；`AimOverlayMath`、`DrawAimOverlay` 与 `DrawCurrentTargetTracer` 均存在。
++- 已部署到游戏目录；部署前 DLL 已备份，部署文件 SHA-256 与构建产物一致。
++- 实际启动游戏后 BepInEx 加载 `Complete Cheat Menu 0.7.0`，Harmony 报告 13 个方法已 Patch，Chainloader 启动完成，插件相关 Error/Fatal 为 0。
++
++**最终状态：**
++
++```text
++Task 17.1–17.5 全部完成
++角度 FOV 圆 + 像素范围限制 + 当前目标专用连线 + 初始弹道修正 + 飞行中持续制导已集成并部署
++```
++
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Targeting/AimOverlayMath.cs
+@@ -0,0 +1,43 @@
++using UnityEngine;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal static class AimOverlayMath
++{
++	internal static float AngleToPixelRadius(float verticalFov, int screenWidth, int screenHeight, float aimAngle)
++	{
++		if (screenWidth <= 0 || screenHeight <= 0 || !IsFinite(verticalFov) || !IsFinite(aimAngle) || verticalFov <= 0f || aimAngle <= 0f)
++		{
++			return 0f;
++		}
++		float halfWidth = screenWidth * 0.5f;
++		float halfHeight = screenHeight * 0.5f;
++		float viewportRadius = Mathf.Sqrt(halfWidth * halfWidth + halfHeight * halfHeight);
++		if (aimAngle >= 89.9f)
++		{
++			return viewportRadius;
++		}
++		float safeVerticalFov = Mathf.Clamp(verticalFov, 0.01f, 179.8f);
++		float focalLength = halfHeight / Mathf.Tan(safeVerticalFov * 0.5f * Mathf.Deg2Rad);
++		float angleRadius = focalLength * Mathf.Tan(Mathf.Clamp(aimAngle, 0f, 89.9f) * Mathf.Deg2Rad);
++		if (!IsFinite(angleRadius))
++		{
++			return viewportRadius;
++		}
++		return Mathf.Min(viewportRadius, Mathf.Max(0f, angleRadius));
++	}
++
++	internal static float EffectiveRadius(float screenRadius, float angleRadius)
++	{
++		if (!IsFinite(screenRadius) || !IsFinite(angleRadius) || screenRadius <= 0f || angleRadius <= 0f)
++		{
++			return 0f;
++		}
++		return Mathf.Min(screenRadius, angleRadius);
++	}
++
++	private static bool IsFinite(float value)
++	{
++		return !float.IsNaN(value) && !float.IsInfinity(value);
++	}
++}
+--- /dev/null
++++ b/tests/aim_overlay_test.py
+@@ -0,0 +1,55 @@
++import math
++import re
++from pathlib import Path
++
++
++ROOT = Path(__file__).resolve().parents[1]
++SRC = ROOT / "decompiled-src" / "CompleteCheatMenu"
++MATH = SRC / "Targeting" / "AimOverlayMath.cs"
++ESP = SRC / "Runtime" / "EspRendererV2.cs"
++STATE = SRC / "Runtime" / "CheatState.cs"
++PRESETS = SRC / "Runtime" / "Presets.cs"
++VISUALS = SRC / "UI" / "Tabs" / "VisualsTab.cs"
++
++
++def angle_to_pixels(vertical_fov, screen_width, screen_height, aim_angle):
++    if screen_width <= 0 or screen_height <= 0 or vertical_fov <= 0 or aim_angle <= 0:
++        return 0.0
++    diagonal = math.hypot(screen_width * 0.5, screen_height * 0.5)
++    if aim_angle >= 89.9:
++        return diagonal
++    focal = (screen_height * 0.5) / math.tan(math.radians(vertical_fov * 0.5))
++    return min(diagonal, focal * math.tan(math.radians(aim_angle)))
++
++
++assert abs(angle_to_pixels(60.0, 1920, 1080, 30.0) - 540.0) < 0.001
++assert abs(angle_to_pixels(60.0, 1920, 1080, 10.0) - 164.925) < 0.01
++assert abs(angle_to_pixels(60.0, 1920, 1080, 90.0) - 1101.454) < 0.01
++assert angle_to_pixels(0.0, 1920, 1080, 30.0) == 0.0
++
++math_source = MATH.read_text(encoding="utf-8")
++assert "AngleToPixelRadius" in math_source
++assert "EffectiveRadius" in math_source
++assert "Mathf.Tan" in math_source
++assert "camera.fieldOfView" not in math_source
++assert "Mathf.Min(screenRadius, angleRadius)" in math_source
++
++esp = ESP.read_text(encoding="utf-8")
++assert "AimOverlayMath.AngleToPixelRadius(camera.fieldOfView" in esp
++assert "AimOverlayMath.EffectiveRadius(CheatState.AimScreenRadius" in esp
++assert "DrawCurrentTargetTracer(camera" in esp
++assert re.search(r"DrawAimOverlay\(camera\);.*?if \(!CheatState\.EspEnabled\)", esp, re.S)
++assert "CheatState.EspAimTargetTracer" in esp
++assert "WeaponCheats.CurrentTarget" in esp
++assert "target.AimPoint" in esp
++assert "new Vector2(Screen.width * 0.5f, Screen.height * 0.5f)" in esp
++
++state = STATE.read_text(encoding="utf-8")
++presets = PRESETS.read_text(encoding="utf-8")
++visuals = VISUALS.read_text(encoding="utf-8")
++assert "internal static bool EspAimTargetTracer = true;" in state
++assert 'B("espAimTargetTracer", CheatState.EspAimTargetTracer)' in presets
++assert 'case "espAimTargetTracer"' in presets
++assert "当前目标连线" in visuals
++
++print("AIM_OVERLAY_TEST=PASS cases=22")
+--- /dev/null
++++ b/tests/aim_overlay_harness.cs
+@@ -0,0 +1,50 @@
++using System;
++using CompleteCheatMenu.Targeting;
++
++namespace UnityEngine
++{
++	internal static class Mathf
++	{
++		internal const float Deg2Rad = (float)(Math.PI / 180.0);
++		internal static float Sqrt(float value) => (float)Math.Sqrt(value);
++		internal static float Tan(float value) => (float)Math.Tan(value);
++		internal static float Min(float a, float b) => Math.Min(a, b);
++		internal static float Max(float a, float b) => Math.Max(a, b);
++		internal static float Clamp(float value, float min, float max) => Math.Min(max, Math.Max(min, value));
++	}
++}
++
++internal static class AimOverlayHarness
++{
++	private static int _cases;
++
++	private static void Near(float expected, float actual, float tolerance, string name)
++	{
++		_cases++;
++		if (Math.Abs(expected - actual) > tolerance)
++		{
++			throw new Exception(name + ": expected " + expected + ", got " + actual);
++		}
++	}
++
++	private static void Equal(float expected, float actual, string name)
++	{
++		Near(expected, actual, 0.0001f, name);
++	}
++
++	public static int Main()
++	{
++		Near(540f, AimOverlayMath.AngleToPixelRadius(60f, 1920, 1080, 30f), 0.01f, "thirty degrees");
++		Near(164.925f, AimOverlayMath.AngleToPixelRadius(60f, 1920, 1080, 10f), 0.01f, "ten degrees");
++		Near(1101.454f, AimOverlayMath.AngleToPixelRadius(60f, 1920, 1080, 90f), 0.01f, "hemisphere cap");
++		Equal(0f, AimOverlayMath.AngleToPixelRadius(0f, 1920, 1080, 30f), "invalid camera fov");
++		Equal(0f, AimOverlayMath.AngleToPixelRadius(60f, 0, 1080, 30f), "invalid width");
++		Equal(0f, AimOverlayMath.AngleToPixelRadius(60f, 1920, 1080, 0f), "invalid aim angle");
++		Equal(250f, AimOverlayMath.EffectiveRadius(250f, 540f), "screen radius wins");
++		Equal(164.925f, AimOverlayMath.EffectiveRadius(250f, 164.925f), "angle radius wins");
++		Equal(0f, AimOverlayMath.EffectiveRadius(-1f, 100f), "negative screen radius");
++		Equal(0f, AimOverlayMath.EffectiveRadius(100f, float.NaN), "non-finite angle radius");
++		Console.WriteLine("AIM_OVERLAY_HARNESS=PASS cases=" + _cases);
++		return 0;
++	}
++}

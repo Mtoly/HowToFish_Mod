@@ -1,0 +1,75 @@
+diff --git "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\cnkx-port\\original-src\\GameBinder.cs" "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Game\\GameBinder.cs"
+index 9ae5b5e..910aec5 100644
+--- "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\cnkx-port\\original-src\\GameBinder.cs"
++++ "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Game\\GameBinder.cs"
+@@ -120,6 +120,70 @@ internal static class GameBinder
+ 		return methodInfo;
+ 	}
+ 
++	internal static FieldInfo FirstField(string typeName, params string[] candidateNames)
++	{
++		Type type = Type(typeName);
++		if (type == null || candidateNames == null)
++		{
++			return null;
++		}
++		foreach (string candidateName in candidateNames)
++		{
++			if (!string.IsNullOrEmpty(candidateName))
++			{
++				FieldInfo fieldInfo = type.GetField(candidateName, Any);
++				if (fieldInfo != null)
++				{
++					return fieldInfo;
++				}
++			}
++		}
++		return null;
++	}
++
++	internal static PropertyInfo FirstProperty(string typeName, params string[] candidateNames)
++	{
++		Type type = Type(typeName);
++		if (type == null || candidateNames == null)
++		{
++			return null;
++		}
++		foreach (string candidateName in candidateNames)
++		{
++			if (!string.IsNullOrEmpty(candidateName))
++			{
++				PropertyInfo propertyInfo = type.GetProperty(candidateName, Any);
++				if (propertyInfo != null)
++				{
++					return propertyInfo;
++				}
++			}
++		}
++		return null;
++	}
++
++	internal static MethodInfo FirstMethod(string typeName, int argCount, params string[] candidateNames)
++	{
++		Type type = Type(typeName);
++		if (type == null || candidateNames == null)
++		{
++			return null;
++		}
++		foreach (string candidateName in candidateNames)
++		{
++			if (string.IsNullOrEmpty(candidateName))
++			{
++				continue;
++			}
++			MethodInfo methodInfo = type.GetMethods(Any).FirstOrDefault((MethodInfo method) => method.Name == candidateName && (argCount < 0 || method.GetParameters().Length == argCount));
++			if (methodInfo != null)
++			{
++				return methodInfo;
++			}
++		}
++		return null;
++	}
++
+ 	internal static bool TryGet<T>(FieldInfo f, object instance, out T value)
+ 	{
+ 		value = default(T);

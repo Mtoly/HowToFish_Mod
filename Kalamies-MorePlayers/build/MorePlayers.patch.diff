@@ -1,0 +1,99 @@
+diff --git "a/D:\\Code\\How2fish\\Kalamies-MorePlayers\\analysis\\current-game\\MorePlayers.il.txt" "b/D:\\Code\\How2fish\\Kalamies-MorePlayers\\analysis\\current-game\\MorePlayers.fixed.il.txt"
+index 8c8e132..f449c18 100644
+--- "a/D:\\Code\\How2fish\\Kalamies-MorePlayers\\analysis\\current-game\\MorePlayers.il.txt"
++++ "b/D:\\Code\\How2fish\\Kalamies-MorePlayers\\analysis\\current-game\\MorePlayers.fixed.il.txt"
+@@ -1,5 +1,5 @@
+ Assembly: MorePlayers, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null
+-Path: D:\Code\How2fish\Kalamies-MorePlayers\MorePlayers.dll
++Path: D:\Code\How2fish\Kalamies-MorePlayers\build\MorePlayers.fixed.dll
+ Filter: plugin
+ Matched types: 3
+ 
+@@ -95,53 +95,55 @@ TYPE MorePlayers.CreateLobby_Patch
+       IL_003C: stloc.1
+       IL_003D: ldc.i4.1
+       IL_003E: stloc.2
+-      IL_003F: br.s         IL_0093
++      IL_003F: br.s         IL_0099
+       IL_0041: ldloc.0
+       IL_0042: ldloc.2
+       IL_0043: callvirt     !0 System.Collections.Generic.List`1<HarmonyLib.CodeInstruction>::get_Item(System.Int32)
+       IL_0048: ldloc.1
+       IL_0049: call         System.Boolean HarmonyLib.CodeInstructionExtensions::Calls(HarmonyLib.CodeInstruction,System.Reflection.MethodInfo)
+-      IL_004E: brfalse.s    IL_008F
++      IL_004E: brfalse.s    IL_0095
+       IL_0050: ldloc.0
+       IL_0051: ldloc.2
+       IL_0052: ldc.i4.1
+       IL_0053: sub
+       IL_0054: callvirt     !0 System.Collections.Generic.List`1<HarmonyLib.CodeInstruction>::get_Item(System.Int32)
+       IL_0059: call         System.Boolean HarmonyLib.CodeInstructionExtensions::LoadsConstant(HarmonyLib.CodeInstruction)
+-      IL_005E: brfalse.s    IL_008F
++      IL_005E: brfalse.s    IL_0095
+       IL_0060: ldloc.0
+       IL_0061: ldloc.2
+       IL_0062: ldc.i4.1
+       IL_0063: sub
+-      IL_0064: ldsfld       System.Reflection.Emit.OpCode System.Reflection.Emit.OpCodes::Call
+-      IL_0069: ldtoken      MorePlayers.Plugin
+-      IL_006E: call         System.Type System.Type::GetTypeFromHandle(System.RuntimeTypeHandle)
+-      IL_0073: ldstr        "Limit"
+-      IL_0078: call         System.Reflection.MethodInfo HarmonyLib.AccessTools::PropertyGetter(System.Type,System.String)
+-      IL_007D: newobj       System.Void HarmonyLib.CodeInstruction::.ctor(System.Reflection.Emit.OpCode,System.Object)
+-      IL_0082: callvirt     System.Void System.Collections.Generic.List`1<HarmonyLib.CodeInstruction>::set_Item(System.Int32,!0)
+-      IL_0087: ldc.i4.1
+-      IL_0088: stsfld       System.Boolean MorePlayers.CreateLobby_Patch::Rewrote
+-      IL_008D: br.s         IL_00A5
+-      IL_008F: ldloc.2
+-      IL_0090: ldc.i4.1
+-      IL_0091: add
+-      IL_0092: stloc.2
+-      IL_0093: ldloc.1
+-      IL_0094: ldnull
+-      IL_0095: call         System.Boolean System.Reflection.MethodInfo::op_Inequality(System.Reflection.MethodInfo,System.Reflection.MethodInfo)
+-      IL_009A: brfalse.s    IL_00A5
+-      IL_009C: ldloc.2
+-      IL_009D: ldloc.0
+-      IL_009E: callvirt     System.Int32 System.Collections.Generic.List`1<HarmonyLib.CodeInstruction>::get_Count()
+-      IL_00A3: blt.s        IL_0041
+-      IL_00A5: ldsfld       System.Boolean MorePlayers.CreateLobby_Patch::Rewrote
+-      IL_00AA: brtrue.s     IL_00BB
+-      IL_00AC: ldsfld       BepInEx.Logging.ManualLogSource MorePlayers.Plugin::Log
+-      IL_00B1: ldstr        "Could not rewrite the lobby size in SteamManager.CreateLobby; falling back to resizing the lobby once it exists."
+-      IL_00B6: callvirt     System.Void BepInEx.Logging.ManualLogSource::LogWarning(System.Object)
+-      IL_00BB: ldloc.0
+-      IL_00BC: ret
++      IL_0064: callvirt     !0 System.Collections.Generic.List`1<HarmonyLib.CodeInstruction>::get_Item(System.Int32)
++      IL_0069: dup
++      IL_006A: ldsfld       System.Reflection.Emit.OpCode System.Reflection.Emit.OpCodes::Call
++      IL_006F: stfld        System.Reflection.Emit.OpCode HarmonyLib.CodeInstruction::opcode
++      IL_0074: ldtoken      MorePlayers.Plugin
++      IL_0079: call         System.Type System.Type::GetTypeFromHandle(System.RuntimeTypeHandle)
++      IL_007E: ldstr        "Limit"
++      IL_0083: call         System.Reflection.MethodInfo HarmonyLib.AccessTools::PropertyGetter(System.Type,System.String)
++      IL_0088: stfld        System.Object HarmonyLib.CodeInstruction::operand
++      IL_008D: ldc.i4.1
++      IL_008E: stsfld       System.Boolean MorePlayers.CreateLobby_Patch::Rewrote
++      IL_0093: br.s         IL_00AB
++      IL_0095: ldloc.2
++      IL_0096: ldc.i4.1
++      IL_0097: add
++      IL_0098: stloc.2
++      IL_0099: ldloc.1
++      IL_009A: ldnull
++      IL_009B: call         System.Boolean System.Reflection.MethodInfo::op_Inequality(System.Reflection.MethodInfo,System.Reflection.MethodInfo)
++      IL_00A0: brfalse.s    IL_00AB
++      IL_00A2: ldloc.2
++      IL_00A3: ldloc.0
++      IL_00A4: callvirt     System.Int32 System.Collections.Generic.List`1<HarmonyLib.CodeInstruction>::get_Count()
++      IL_00A9: blt.s        IL_0041
++      IL_00AB: ldsfld       System.Boolean MorePlayers.CreateLobby_Patch::Rewrote
++      IL_00B0: brtrue.s     IL_00C1
++      IL_00B2: ldsfld       BepInEx.Logging.ManualLogSource MorePlayers.Plugin::Log
++      IL_00B7: ldstr        "Could not rewrite the lobby size in SteamManager.CreateLobby; falling back to resizing the lobby once it exists."
++      IL_00BC: callvirt     System.Void BepInEx.Logging.ManualLogSource::LogWarning(System.Object)
++      IL_00C1: ldloc.0
++      IL_00C2: ret
+ 
+ TYPE MorePlayers.CreateOnlineLobby_Patch
+   ATTRIBUTE HarmonyLib.HarmonyPatch(ConnectionManager, "CreateOnlineLobby")

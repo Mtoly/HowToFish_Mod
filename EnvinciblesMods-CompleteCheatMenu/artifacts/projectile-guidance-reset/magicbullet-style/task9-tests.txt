@@ -1,0 +1,24 @@
+=== magic_bullet_style_test.py EXIT=0 ===
+MAGIC_BULLET_STYLE_TESTS=PASS cases=6
+=== magicbullet_flight_mode_test.py EXIT=2 ===
+D:\Python\python.exe: can't open file 'D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\tests\\magicbullet_flight_mode_test.py': [Errno 2] No such file or directory
+=== projectile_guidance_test.py EXIT=0 ===
+PROJECTILE_GUIDANCE_TESTS=PASS cases=5
+=== projectile_guidance_state_test.py EXIT=0 ===
+PROJECTILE_GUIDANCE_STATE_TESTS=PASS cases=6
+=== projectile_guidance_reset_test.py EXIT=0 ===
+PROJECTILE_GUIDANCE_RESET_SPEC=PASS cases=5
+=== projectile_lifecycle_test.py EXIT=0 ===
+PROJECTILE_LIFECYCLE_TESTS=PASS cases=5
+=== projectile_target_lifecycle_test.py EXIT=0 ===
+PROJECTILE_TARGET_LIFECYCLE_TESTS=PASS cases=5
+=== projectile_initial_velocity_test.py EXIT=0 ===
+PROJECTILE_INITIAL_VELOCITY_TESTS=PASS cases=5
+=== projectile_spawn_metadata_test.py EXIT=0 ===
+PROJECTILE_SPAWN_METADATA_TESTS=PASS cases=4
+=== localized_ui_preset_test.py EXIT=1 ===
+Traceback (most recent call last):
+  File "D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\localized_ui_preset_test.py", line 99, in <module>
+    assert not residual, residual[:20]
+           ^^^^^^^^^^^^
+AssertionError: ['MagicBullet ����ģʽ', 'MagicBullet ģʽֻ�ڵ�������ǰ�ض���һ����ʵ�ٶȣ������в��ٳ�����д�ٶȣ��رպ�ָ������Ƶ���']

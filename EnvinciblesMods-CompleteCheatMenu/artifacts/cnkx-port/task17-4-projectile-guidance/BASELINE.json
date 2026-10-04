@@ -1,0 +1,72 @@
+[
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Runtime\\CheatState.cs",
+    "Length": 5098,
+    "SHA256": "D962540F4AFE39BC899BA49A4D13C5D96C60C8C0298201BBA6B9B9E22A153034"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Runtime\\Presets.cs",
+    "Length": 13434,
+    "SHA256": "9D7130C6E13C1B0B01F74194B4156AF9CA5922C9DBBA4EDAFC69693930FED58C"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\UI\\Tabs\\WeaponsTab.cs",
+    "Length": 9060,
+    "SHA256": "C59DB88D26205361A2BE4B0303669438073363E55CD9B5B1232BF65F41E9F0EE"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\UI\\Tabs\\DiagnosticsTab.cs",
+    "Length": 9289,
+    "SHA256": "CC94B6B46BFCE927C3303A41355A815A036963A9CD08672D43C2421D40D0FFAD"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Plugin.cs",
+    "Length": 3982,
+    "SHA256": "E015B634344FC93145B8332708C72169FEAF49A962AE35EC0578DC23F2C67796"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\BallisticPredictor.cs",
+    "Length": 1457,
+    "SHA256": "AACFEAC3510651F237EF2B9BD3A99C357D3B242FF20EFB0703C4C6D45930F803"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\InitialVelocityRedirector.cs",
+    "Length": 1942,
+    "SHA256": "9D04BE7A669C406F09E07ECB9F3EDA98CBDCC7C6ED7FAB1027D93C7424425580"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Patches\\WeaponAddProjectile_Patch.cs",
+    "Length": 1649,
+    "SHA256": "B2730718E03608182014522B6B4AE11F86AA4F32D0B808B40678BB4385EEF727"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Patches\\WeaponAddProjectiles_Patch.cs",
+    "Length": 1708,
+    "SHA256": "35ADE2A457834458AB4745613257CA52DECAB7ED39FD7327EAD0DA72A0856D9B"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\tests\\ballistic_prediction_test.py",
+    "Length": 2554,
+    "SHA256": "058487C45D08A56060F156FDC1DFC5BD08051FC508B706C5EEC50CA35767C682"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\tests\\projectile_initial_velocity_harness.cs",
+    "Length": 4859,
+    "SHA256": "CBFF0AA7E2E13E0CBF68981A84FD3565ADC99B0EBDD77CEEFF12BDFB40752FEA"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\docs\\plans\\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md",
+    "Length": 55181,
+    "SHA256": "94AFC81C2B58D45ED7693C60064291793E2DE510172D34BF5499F92D7B2DC774"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\cnkx-port\\task17-3-initial-velocity\\CompleteCheatMenu.task17-3.zh-CN.dll",
+    "Length": 198144,
+    "SHA256": "71C880055D706399932994C8CC1F9D46F5F5E9EDDDC5E7BFB8C030A73EA8E72C"
+  },
+  {
+    "Path": "E:\\SteamLibrary\\steamapps\\common\\How to Fish\\How to Fish\\BepInEx\\plugins\\EnvinciblesMods-CompleteCheatMenu\\CompleteCheatMenu.dll",
+    "Length": 188928,
+    "SHA256": "224A13AE043E203D3EBCBFF840241BB32588A7549B8F8DC8326236513A4AAB0A"
+  }
+]

@@ -1,0 +1,269 @@
+diff --git "a/artifacts\\original-src\\CompleteCheatMenu.Cheats.WeaponCheats.decompiled.cs" "b/decompiled-src\\CompleteCheatMenu\\Cheats\\WeaponCheats.cs"
+index c39982d..cd86249 100644
+--- "a/artifacts\\original-src\\CompleteCheatMenu.Cheats.WeaponCheats.decompiled.cs"
++++ "b/decompiled-src\\CompleteCheatMenu\\Cheats\\WeaponCheats.cs"
+@@ -21,6 +21,10 @@ internal static class WeaponCheats
+ 
+ 	private static readonly Dictionary<object, Dictionary<string, object>> _originals = new Dictionary<object, Dictionary<string, object>>();
+ 
++	private static float _nextTargetPreview;
++
++	private static float _targetLockUntil;
++
+ 	internal static object HeldWeapon
+ 	{
+ 		get
+@@ -45,15 +49,7 @@ internal static class WeaponCheats
+ 
+ 	internal static bool HoldingWeapon => HeldWeapon != null;
+ 
+-	internal static string WeaponName
+-	{
+-		get
+-		{
+-			object heldItem = ItemCheats.HeldItem;
+-			object obj = ((heldItem is Object) ? heldItem : null);
+-			return ((obj != null) ? ((Object)obj).name : null) ?? "-";
+-		}
+-	}
++	internal static string WeaponName => (ItemCheats.HeldItem as Object)?.name ?? "-";
+ 
+ 	private static object Attachments
+ 	{
+@@ -112,8 +108,7 @@ internal static class WeaponCheats
+ 			PropertyInfo propertyInfo = GameBinder.Property("Attachments", "FirePoint");
+ 			try
+ 			{
+-				object? obj = propertyInfo?.GetValue(attachments);
+-				return (Transform)((obj is Transform) ? obj : null);
++				return propertyInfo?.GetValue(attachments) as Transform;
+ 			}
+ 			catch
+ 			{
+@@ -176,8 +171,13 @@ internal static class WeaponCheats
+ 
+ 	private static void UpdateTargetPreview()
+ 	{
++		if (Time.unscaledTime < _nextTargetPreview)
++		{
++			return;
++		}
++		_nextTargetPreview = Time.unscaledTime + 0.05f;
+ 		Camera currentCamera = Refs.CurrentCamera;
+-		if ((Object)(object)currentCamera == (Object)null)
++		if (currentCamera == null)
+ 		{
+ 			CurrentTarget = null;
+ 		}
+@@ -189,43 +189,28 @@ internal static class WeaponCheats
+ 
+ 	internal static void AimBeforeShot()
+ 	{
+-		//IL_0034: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0039: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00b4: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00b5: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00ba: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0077: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_007c: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0086: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_008b: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0091: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0096: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_009b: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_009f: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00a4: Unknown result type (might be due to invalid IL or missing references)
+ 		if (!CheatState.Aimbot && !CheatState.FireWhereLooking)
+ 		{
+ 			return;
+ 		}
+ 		Camera currentCamera = Refs.CurrentCamera;
+ 		Transform firePoint = FirePoint;
+-		if ((Object)(object)currentCamera == (Object)null || (Object)(object)firePoint == (Object)null)
++		if (currentCamera == null || firePoint == null)
+ 		{
+ 			return;
+ 		}
+-		Vector3 val = ((Component)currentCamera).transform.forward;
++		Vector3 forward = currentCamera.transform.forward;
+ 		if (CheatState.Aimbot)
+ 		{
+ 			Target? target = (CurrentTarget = FindTarget(currentCamera));
+-			if (target.HasValue && (Object)(object)target.Value.Transform != (Object)null)
++			if (target.HasValue && target.Value.Transform != null)
+ 			{
+-				Vector3 val2 = target.Value.Transform.position + Vector3.up * CheatState.AimHeightOffset - firePoint.position;
+-				val = ((Vector3)(ref val2)).normalized;
++				forward = (target.Value.Transform.position + target.Value.Transform.up * CheatState.AimHeightOffset - firePoint.position).normalized;
+ 			}
+ 		}
+-		if (((Vector3)(ref val)).sqrMagnitude > 0.0001f)
++		if (forward.sqrMagnitude > 0.0001f)
+ 		{
+-			firePoint.rotation = Quaternion.LookRotation(val, Vector3.up);
++			firePoint.rotation = Quaternion.LookRotation(forward, Vector3.up);
+ 		}
+ 	}
+ 
+@@ -257,73 +242,109 @@ internal static class WeaponCheats
+ 
+ 	private static Target? FindTarget(Camera cam)
+ 	{
+-		//IL_001b: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0020: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0027: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_002c: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00a2: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00a7: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00b1: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00b6: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00bb: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00bc: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00c1: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00de: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00df: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00f4: Unknown result type (might be due to invalid IL or missing references)
+-		VisualCheats.Rescan(CheatState.AimAtCreatures, items: false, CheatState.AimAtPlayers, 0.15f);
+-		Vector3 position = ((Component)cam).transform.position;
+-		Vector3 forward = ((Component)cam).transform.forward;
+-		Target? result = null;
+-		float num = CheatState.AimFov;
+-		foreach (VisualCheats.EspTarget target in VisualCheats.Targets)
+-		{
+-			if ((Object)(object)target.Transform == (Object)null || target.Kind == VisualCheats.EspKind.Item || (target.Kind == VisualCheats.EspKind.Creature && !CheatState.AimAtCreatures) || (target.Kind == VisualCheats.EspKind.Player && !CheatState.AimAtPlayers))
++		Vector3 position = cam.transform.position;
++		Vector3 forward = cam.transform.forward;
++		Target? best = null;
++		Target? current = null;
++		float bestScore = float.MaxValue;
++		Transform currentTransform = CurrentTarget.HasValue ? CurrentTarget.Value.Transform : null;
++
++		if (CheatState.AimAtCreatures)
++		{
++			List<AimTargetRegistry.Entry> creatures = AimTargetRegistry.Creatures;
++			for (int i = creatures.Count - 1; i >= 0; i--)
+ 			{
+-				continue;
++				AimTargetRegistry.Entry entry = creatures[i];
++				Creature creature = entry.Creature;
++				if (creature == null)
++				{
++					creatures.RemoveAt(i);
++					continue;
++				}
++				string name = creature.name;
++				if (entry.Name != name)
++				{
++					entry.RefreshName(name);
++				}
++				if (!creature.gameObject.activeInHierarchy || (CheatState.AimExcludeDead && creature.IsDead) || (CheatState.AimExcludeSeagulls && entry.IsSeagull))
++				{
++					continue;
++				}
++				Fish fish = creature as Fish;
++				if (CheatState.AimExcludeHookedFish && fish != null && fish.AttachedRod != null)
++				{
++					continue;
++				}
++				EvaluateCandidate(position, forward, entry.Transform, entry.Name, entry.IsAlbatross, currentTransform, ref best, ref current, ref bestScore);
+ 			}
+-			Vector3 val = target.Transform.position + Vector3.up * CheatState.AimHeightOffset - position;
+-			float magnitude = ((Vector3)(ref val)).magnitude;
+-			if (!(magnitude > CheatState.AimRange) && !(magnitude < 0.5f))
++		}
++
++		if (CheatState.AimAtPlayers)
++		{
++			VisualCheats.Rescan(creatures: false, items: false, players: true, 0.15f);
++			foreach (VisualCheats.EspTarget target in VisualCheats.Targets)
+ 			{
+-				float num2 = Vector3.Angle(forward, val);
+-				if (!(num2 > num) && (!CheatState.AimRequireLineOfSight || HasLineOfSight(position, target.Transform)))
++				if (target.Kind == VisualCheats.EspKind.Player && target.Transform != null)
+ 				{
+-					num = num2;
+-					result = new Target
+-					{
+-						Transform = target.Transform,
+-						Name = target.Label,
+-						Angle = num2,
+-						Distance = magnitude
+-					};
++					EvaluateCandidate(position, forward, target.Transform, target.Label, albatross: false, currentTransform, ref best, ref current, ref bestScore);
+ 				}
+ 			}
+ 		}
+-		return result;
++
++		if (current.HasValue && Time.unscaledTime < _targetLockUntil)
++		{
++			return current;
++		}
++		if (best.HasValue && best.Value.Transform != currentTransform)
++		{
++			_targetLockUntil = Time.unscaledTime + CheatState.AimLockDuration;
++		}
++		return best;
++	}
++
++	private static void EvaluateCandidate(Vector3 origin, Vector3 forward, Transform transform, string name, bool albatross, Transform currentTransform, ref Target? best, ref Target? current, ref float bestScore)
++	{
++		Vector3 to = transform.position + transform.up * CheatState.AimHeightOffset - origin;
++		float distance = to.magnitude;
++		if (distance > CheatState.AimRange || distance < 0.5f)
++		{
++			return;
++		}
++		float angle = Vector3.Angle(forward, to);
++		if (angle > CheatState.AimFov || (CheatState.AimRequireLineOfSight && !HasLineOfSight(origin, transform)))
++		{
++			return;
++		}
++		Target candidate = new Target { Transform = transform, Name = name, Angle = angle, Distance = distance };
++		if (transform == currentTransform)
++		{
++			current = candidate;
++		}
++		float score = CheatState.AimPrioritizeAlbatross && albatross
++			? angle * 0.2f
++			: distance * CheatState.AimDistanceWeight + angle * CheatState.AimAngleWeight;
++		if (currentTransform != null && transform != currentTransform)
++		{
++			score += CheatState.AimSwitchPenalty;
++		}
++		if (score < bestScore)
++		{
++			bestScore = score;
++			best = candidate;
++		}
+ 	}
+ 
+ 	private static bool HasLineOfSight(Vector3 from, Transform target)
+ 	{
+-		//IL_0001: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0006: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0010: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0015: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_001a: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_001b: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0020: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0029: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_002c: Unknown result type (might be due to invalid IL or missing references)
+-		Vector3 val = target.position + Vector3.up * CheatState.AimHeightOffset - from;
+-		float magnitude = ((Vector3)(ref val)).magnitude;
+-		RaycastHit val2 = default(RaycastHit);
+-		if (!Physics.Raycast(from, ((Vector3)(ref val)).normalized, ref val2, magnitude))
++		Vector3 vector = target.position + target.up * CheatState.AimHeightOffset - from;
++		float magnitude = vector.magnitude;
++		if (!Physics.Raycast(from, vector.normalized, out var hitInfo, magnitude))
+ 		{
+ 			return true;
+ 		}
+-		if (!((Object)(object)((RaycastHit)(ref val2)).transform == (Object)(object)target) && !((RaycastHit)(ref val2)).transform.IsChildOf(target))
++		if (!(hitInfo.transform == target) && !hitInfo.transform.IsChildOf(target))
+ 		{
+-			return target.IsChildOf(((RaycastHit)(ref val2)).transform);
++			return target.IsChildOf(hitInfo.transform);
+ 		}
+ 		return true;
+ 	}

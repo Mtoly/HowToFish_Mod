@@ -1,0 +1,1005 @@
+--- a/decompiled-src/CompleteCheatMenu/UI/Tabs/VisualsTab.cs
++++ b/decompiled-src/CompleteCheatMenu/UI/Tabs/VisualsTab.cs
+@@ -6,93 +6,92 @@
+ 
+ internal static class VisualsTab
+ {
+-	internal const string Title = "Visuals";
++	internal const string Title = "视觉";
+ 
+ 	internal static void Draw()
+ 	{
+-		Widgets.Section("ESP", delegate
++		Widgets.Section("透视绘制", DrawEsp);
++		Widgets.Section("镜头", DrawCamera);
++		Widgets.Section("画面效果", DrawEffects);
++	}
++
++	private static void DrawEsp()
++	{
++		int registered = EntityRegistry.Creatures.Count + EntityRegistry.Players.Count + EntityRegistry.Items.Count + EntityRegistry.Containers.Count;
++		CheatState.EspEnabled = Widgets.ToggleRow("启用透视", CheatState.EspEnabled, CheatState.EspEnabled ? $"已注册 {registered} 个目标" : "关闭");
++		GUILayout.BeginHorizontal();
++		CheatState.EspCreatures = GUILayout.Toggle(CheatState.EspCreatures, "  生物", Theme.Toggle);
++		CheatState.EspItems = GUILayout.Toggle(CheatState.EspItems, "  物品与容器", Theme.Toggle);
++		CheatState.EspPlayers = GUILayout.Toggle(CheatState.EspPlayers, "  玩家", Theme.Toggle);
++		GUILayout.EndHorizontal();
++		GUILayout.BeginHorizontal();
++		CheatState.EspBoxes = GUILayout.Toggle(CheatState.EspBoxes, "  方框", Theme.Toggle);
++		CheatState.EspTracers = GUILayout.Toggle(CheatState.EspTracers, "  射线", Theme.Toggle);
++		CheatState.EspSkeletons = GUILayout.Toggle(CheatState.EspSkeletons, "  骨架", Theme.Toggle);
++		CheatState.EspHealthBars = GUILayout.Toggle(CheatState.EspHealthBars, "  血条", Theme.Toggle);
++		GUILayout.EndHorizontal();
++		GUILayout.BeginHorizontal();
++		CheatState.EspLabels = GUILayout.Toggle(CheatState.EspLabels, "  名称", Theme.Toggle);
++		CheatState.EspDistanceLabels = GUILayout.Toggle(CheatState.EspDistanceLabels, "  距离", Theme.Toggle);
++		CheatState.EspTypeInfo = GUILayout.Toggle(CheatState.EspTypeInfo, "  类型", Theme.Toggle);
++		CheatState.EspVisibilityInfo = GUILayout.Toggle(CheatState.EspVisibilityInfo, "  可见状态", Theme.Toggle);
++		GUILayout.EndHorizontal();
++		GUILayout.BeginHorizontal();
++		CheatState.EspHeldItemInfo = GUILayout.Toggle(CheatState.EspHeldItemInfo, "  手持物", Theme.Toggle);
++		CheatState.EspItemValueInfo = GUILayout.Toggle(CheatState.EspItemValueInfo, "  物品价值", Theme.Toggle);
++		CheatState.EspContainerInfo = GUILayout.Toggle(CheatState.EspContainerInfo, "  容器信息", Theme.Toggle);
++		GUILayout.EndHorizontal();
++		CheatState.EspAimCircle = Widgets.ToggleRow("锁定范围圆", CheatState.EspAimCircle, CheatState.EspAimCircle ? "开启" : "关闭");
++		CheatState.EspDistance = Widgets.SliderRow("最大绘制距离", CheatState.EspDistance, 20f, 600f, "0", 150f);
++		Widgets.Note("实体列表使用注册表快照；几何、骨骼和可见性使用短周期缓存，避免逐帧全量扫描。");
++	}
++
++	private static void DrawCamera()
++	{
++		if (!VisualCheats.FovAvailable)
+ 		{
+-			CheatState.EspEnabled = Widgets.ToggleRow("Enable ESP", CheatState.EspEnabled, CheatState.EspEnabled ? $"{VisualCheats.Targets.Count} tracked" : "off");
+-			GUILayout.BeginHorizontal();
+-			CheatState.EspCreatures = GUILayout.Toggle(CheatState.EspCreatures, "  Creatures", Theme.Toggle);
+-			CheatState.EspItems = GUILayout.Toggle(CheatState.EspItems, "  Items", Theme.Toggle);
+-			CheatState.EspPlayers = GUILayout.Toggle(CheatState.EspPlayers, "  Players", Theme.Toggle);
+-			GUILayout.EndHorizontal();
+-			GUILayout.BeginHorizontal();
+-			CheatState.EspLabels = GUILayout.Toggle(CheatState.EspLabels, "  Names", Theme.Toggle);
+-			CheatState.EspDistanceLabels = GUILayout.Toggle(CheatState.EspDistanceLabels, "  Distance", Theme.Toggle);
+-			CheatState.EspTracers = GUILayout.Toggle(CheatState.EspTracers, "  Tracers", Theme.Toggle);
+-			GUILayout.EndHorizontal();
+-			CheatState.EspDistance = Widgets.SliderRow("Max distance", CheatState.EspDistance, 20f, 600f, "0", 150f);
+-			Widgets.Note("Creatures are found by scanning the scene twice a second — the game keeps no live creature list. Raising the distance costs nothing extra.");
+-		});
+-		Widgets.Section("Camera", delegate
++			Widgets.Note("视野控制入口尚未解析。");
++		}
++		else
+ 		{
+-			if (!VisualCheats.FovAvailable)
++			float fov = Widgets.SliderRow("视野角度", CheatState.Fov, 30f, 140f, "0", 60f);
++			if (!Mathf.Approximately(fov, CheatState.Fov))
+ 			{
+-				Widgets.Note("PlayerCamera.SetFOV did not resolve — field of view unavailable.");
++				CheatState.Fov = fov;
++				VisualCheats.SetFov(fov);
+ 			}
+-			else
+-			{
+-				float num = Widgets.SliderRow("Field of view", CheatState.Fov, 30f, 140f, "0", 60f);
+-				if (!Mathf.Approximately(num, CheatState.Fov))
+-				{
+-					CheatState.Fov = num;
+-					VisualCheats.SetFov(num);
+-				}
+-			}
+-			GUILayout.Space(4f);
+-			if (!VisualCheats.FreeCamAvailable)
+-			{
+-				Widgets.Note("Free camera needs a live player camera. Load into a save.");
+-			}
+-			else
+-			{
+-				bool freeCamActive = VisualCheats.FreeCamActive;
+-				bool flag = Widgets.ToggleRow("Free camera", freeCamActive, freeCamActive ? "active" : "off");
+-				if (flag != freeCamActive)
+-				{
+-					Notifications.Result(VisualCheats.ToggleFreeCam(flag), flag ? "Free camera on" : "Free camera off", "Free camera toggle failed");
+-				}
+-				CheatState.FreeCamSpeed = Widgets.SliderRow("Speed", CheatState.FreeCamSpeed, 1f, 80f, "0.#", 15f);
+-				CheatState.FreeCamSensitivity = Widgets.SliderRow("Sensitivity", CheatState.FreeCamSensitivity, 0.2f, 8f, "0.##", 2f);
+-				Widgets.Note("Mouse looks, WASD moves, Space and Ctrl for height, Shift to boost. Your body is now pinned in place while the camera is detached.");
+-				GUILayout.Space(4f);
+-				if (!VisualCheats.BodyAvailable)
+-				{
+-					Widgets.Note("Own-body rendering unavailable — PlayerSkin.InitializeOther did not resolve.");
+-				}
+-				else
+-				{
+-					bool bodyShown = VisualCheats.BodyShown;
+-					bool flag2 = Widgets.ToggleRow("Show my character", bodyShown, bodyShown ? "visible" : "hidden");
+-					if (flag2 != bodyShown)
+-					{
+-						Notifications.Result(VisualCheats.ShowOwnBody(flag2), flag2 ? "Character visible" : "Character hidden", "Could not switch the model");
+-					}
+-					Widgets.Note("The game only builds hand meshes for your own player — that's why free camera showed floating hands. This runs the full-body setup it uses for everyone else. Expect it to look wrong in first person; turn it off when you leave free camera.");
+-				}
+-			}
+-		});
+-		Widgets.Section("Effects", delegate
++		}
++		if (!VisualCheats.FreeCamAvailable)
+ 		{
+-			bool damageNumbers = VisualCheats.DamageNumbers;
+-			bool flag = Widgets.ToggleRow("Damage numbers", damageNumbers, damageNumbers ? "on" : "off");
+-			if (flag != damageNumbers)
+-			{
+-				VisualCheats.SetDamageNumbers(flag);
+-			}
+-			bool blood = VisualCheats.Blood;
+-			bool flag2 = Widgets.ToggleRow("Blood", blood, blood ? "on" : "off");
+-			if (flag2 != blood)
+-			{
+-				VisualCheats.SetBlood(flag2);
+-			}
+-			GUILayout.BeginHorizontal();
+-			Widgets.ActionButton("Clear decals", VisualCheats.ClearDecals, "Decals cleared");
+-			Widgets.ActionButton("Decals off", () => VisualCheats.SetDecals(to: false), "Decals hidden");
+-			Widgets.ActionButton("Decals on", () => VisualCheats.SetDecals(to: true), "Decals shown");
+-			GUILayout.EndHorizontal();
+-		});
++			Widgets.Note("自由镜头需要已经加载的玩家镜头。");
++			return;
++		}
++		bool active = VisualCheats.FreeCamActive;
++		bool next = Widgets.ToggleRow("自由镜头", active, active ? "运行中" : "关闭");
++		if (next != active) Notifications.Result(VisualCheats.ToggleFreeCam(next), next ? "自由镜头已开启" : "自由镜头已关闭", "自由镜头切换失败");
++		CheatState.FreeCamSpeed = Widgets.SliderRow("移动速度", CheatState.FreeCamSpeed, 1f, 80f, "0.#", 15f);
++		CheatState.FreeCamSensitivity = Widgets.SliderRow("鼠标灵敏度", CheatState.FreeCamSensitivity, 0.2f, 8f, "0.##", 2f);
++		Widgets.Note("鼠标观察，WASD 移动，空格和左 Ctrl 控制高度，Shift 加速。");
++		if (VisualCheats.BodyAvailable)
++		{
++			bool shown = VisualCheats.BodyShown;
++			bool showNext = Widgets.ToggleRow("显示自己的角色", shown, shown ? "可见" : "隐藏");
++			if (showNext != shown) Notifications.Result(VisualCheats.ShowOwnBody(showNext), showNext ? "角色已显示" : "角色已隐藏", "角色模型切换失败");
++		}
++	}
++
++	private static void DrawEffects()
++	{
++		bool damage = VisualCheats.DamageNumbers;
++		bool nextDamage = Widgets.ToggleRow("伤害数字", damage, damage ? "开启" : "关闭");
++		if (nextDamage != damage) VisualCheats.SetDamageNumbers(nextDamage);
++		bool blood = VisualCheats.Blood;
++		bool nextBlood = Widgets.ToggleRow("血液效果", blood, blood ? "开启" : "关闭");
++		if (nextBlood != blood) VisualCheats.SetBlood(nextBlood);
++		GUILayout.BeginHorizontal();
++		Widgets.ActionButton("清除贴花", VisualCheats.ClearDecals, "贴花已清除");
++		Widgets.ActionButton("隐藏贴花", () => VisualCheats.SetDecals(to: false), "贴花已隐藏");
++		Widgets.ActionButton("显示贴花", () => VisualCheats.SetDecals(to: true), "贴花已显示");
++		GUILayout.EndHorizontal();
+ 	}
+ }
+--- a/decompiled-src/CompleteCheatMenu/UI/Tabs/WeaponsTab.cs
++++ b/decompiled-src/CompleteCheatMenu/UI/Tabs/WeaponsTab.cs
+@@ -1,108 +1,132 @@
+ using CompleteCheatMenu.Cheats;
+ using CompleteCheatMenu.Runtime;
++using CompleteCheatMenu.Targeting;
+ using UnityEngine;
+ 
+ namespace CompleteCheatMenu.UI.Tabs;
+ 
+ internal static class WeaponsTab
+ {
+-	internal const string Title = "Weapons";
++	internal const string Title = "武器";
+ 
+ 	internal static void Draw()
+ 	{
+-		if (!Widgets.RequireHost(CheatGate.BlockReason()))
++		if (!Widgets.RequireHost(CheatGate.BlockReason())) return;
++		Widgets.Section("当前武器", DrawHeldWeapon);
++		Widgets.Section("射击参数", DrawFiring);
++		Widgets.Section("弹丸参数", DrawProjectiles);
++		Widgets.Section("自动瞄准", DrawAimAssist);
++	}
++
++	private static void DrawHeldWeapon()
++	{
++		if (!WeaponCheats.HoldingWeapon)
+ 		{
++			Widgets.Note("请先手持枪械。切换武器时会安全恢复上一件武器的原值。");
+ 			return;
+ 		}
+-		Widgets.Section("Held weapon", delegate
++		GUILayout.BeginHorizontal();
++		GUILayout.Label(WeaponCheats.WeaponName, Theme.H1);
++		GUILayout.FlexibleSpace();
++		GUILayout.Label($"弹药 {WeaponCheats.Ammo}", Theme.Muted);
++		GUILayout.EndHorizontal();
++		GUILayout.BeginHorizontal();
++		Widgets.ActionButton("立即补满弹药", WeaponCheats.RefillAmmo, "弹药已补满");
++		Widgets.ActionButton("免费升级子弹", WeaponCheats.BuyBulletUpgrade, "子弹升级已应用", Theme.BtnAccent);
++		GUILayout.EndHorizontal();
++	}
++
++	private static void DrawFiring()
++	{
++		CheatState.InfiniteAmmo = Widgets.ToggleRow("无限弹药", CheatState.InfiniteAmmo, OnOff(CheatState.InfiniteAmmo));
++		if (CheatState.InfiniteAmmo)
+ 		{
+-			if (!WeaponCheats.HoldingWeapon)
+-			{
+-				Widgets.Note("Hold a gun. Settings below are applied to whatever you're carrying and re-applied when you switch weapons.");
+-			}
+-			else
+-			{
+-				GUILayout.BeginHorizontal();
+-				GUILayout.Label(WeaponCheats.WeaponName, Theme.H1);
+-				GUILayout.FlexibleSpace();
+-				GUILayout.Label($"ammo {WeaponCheats.Ammo}", Theme.Muted);
+-				GUILayout.EndHorizontal();
+-				GUILayout.BeginHorizontal();
+-				Widgets.ActionButton("Refill now", WeaponCheats.RefillAmmo, "Ammo refilled");
+-				Widgets.ActionButton("Free bullet upgrade", WeaponCheats.BuyBulletUpgrade, "Bullet upgrade applied", Theme.BtnAccent);
+-				GUILayout.EndHorizontal();
+-			}
+-		});
+-		Widgets.Section("Firing", delegate
++			CheatState.AmmoTopUp = Widgets.IntSliderRow("保持弹药数量", CheatState.AmmoTopUp, 1, 999);
++			Widgets.Note("同时取消等待中的换弹，使枪械持续射击。");
++		}
++		CheatState.NoSpread = Widgets.ToggleRow("无散布", CheatState.NoSpread, OnOff(CheatState.NoSpread));
++		CheatState.FireWhereLooking = Widgets.ToggleRow("朝准星射击", CheatState.FireWhereLooking, OnOff(CheatState.FireWhereLooking));
++		Widgets.Note("将枪口方向与镜头方向对齐，消除枪管与视线之间的偏移。");
++		CheatState.ZeroRecoil = Widgets.ToggleRow("无后坐力", CheatState.ZeroRecoil, OnOff(CheatState.ZeroRecoil));
++		CheatState.RapidFire = Widgets.ToggleRow("快速射击", CheatState.RapidFire, OnOff(CheatState.RapidFire));
++		if (CheatState.RapidFire) CheatState.FireInterval = Widgets.SliderRow("射击间隔（秒）", CheatState.FireInterval, 0.01f, 0.5f, "0.###", 0.05f);
++	}
++
++	private static void DrawProjectiles()
++	{
++		CheatState.MultiShot = Widgets.ToggleRow("多弹丸", CheatState.MultiShot, OnOff(CheatState.MultiShot));
++		if (CheatState.MultiShot) CheatState.ProjectileCount = Widgets.SliderRow("每发弹丸数量", CheatState.ProjectileCount, 1f, 30f, "0", 1f);
++		CheatState.FastBullets = Widgets.ToggleRow("高速子弹", CheatState.FastBullets, OnOff(CheatState.FastBullets));
++		if (CheatState.FastBullets) CheatState.ProjectileSpeed = Widgets.SliderRow("高速子弹速度", CheatState.ProjectileSpeed, 20f, 2000f, "0", 300f);
++		CheatState.InstantHit = Widgets.ToggleRow("瞬击", CheatState.InstantHit, OnOff(CheatState.InstantHit));
++		if (CheatState.InstantHit)
+ 		{
+-			CheatState.InfiniteAmmo = Widgets.ToggleRow("Infinite ammo", CheatState.InfiniteAmmo, CheatState.InfiniteAmmo ? "on" : "off");
+-			if (CheatState.InfiniteAmmo)
+-			{
+-				CheatState.AmmoTopUp = Widgets.IntSliderRow("Held at", CheatState.AmmoTopUp, 1, 999);
+-				Widgets.Note("Also cancels queued reloads, so the gun never stops to reload.");
+-			}
+-			CheatState.NoSpread = Widgets.ToggleRow("Perfect accuracy", CheatState.NoSpread, CheatState.NoSpread ? "on" : "off");
+-			CheatState.FireWhereLooking = Widgets.ToggleRow("Fire where you're looking", CheatState.FireWhereLooking, CheatState.FireWhereLooking ? "on" : "off");
+-			Widgets.Note("Aligns the gun's fire point with the camera, removing the barrel-to-eye offset that makes hipfire drift off the crosshair. Pair with perfect accuracy for pinpoint hipfire.");
+-			CheatState.ZeroRecoil = Widgets.ToggleRow("Zero recoil", CheatState.ZeroRecoil, CheatState.ZeroRecoil ? "on" : "off");
+-			Widgets.Note("Clears screen kick, weapon kick and the knockback the shot applies to you.");
+-			CheatState.RapidFire = Widgets.ToggleRow("Rapid fire", CheatState.RapidFire, CheatState.RapidFire ? "on" : "off");
+-			if (CheatState.RapidFire)
+-			{
+-				CheatState.FireInterval = Widgets.SliderRow("Seconds between shots", CheatState.FireInterval, 0.01f, 0.5f, "0.###", 0.05f);
+-			}
+-		});
+-		Widgets.Section("Projectiles", delegate
++			CheatState.InstantHitProjectileSpeed = Widgets.SliderRow("瞬击等效弹速", CheatState.InstantHitProjectileSpeed, 1000f, 30000f, "0", 10000f);
++			Widgets.Note("瞬击与高速子弹同时开启时，瞬击弹速优先。");
++		}
++		GUILayout.Space(4f);
++		Widgets.ActionButton("恢复当前武器原值", WeaponCheats.ResetHeldWeapon, "已恢复原始数值", Theme.Btn);
++		Widgets.Note(WeaponCheats.HasOriginals ? "当前武器的初始字段值已经保存。" : "当前武器尚未修改。");
++	}
++
++	private static void DrawAimAssist()
++	{
++		CheatState.Aimbot = Widgets.ToggleRow("自动瞄准", CheatState.Aimbot, CheatState.Aimbot ? "运行中" : "关闭");
++		Widgets.Note("开火瞬间重新解算最佳目标并修正枪口方向；可见拉枪会在真实开火时平滑调整镜头。");
++		GUILayout.Label("目标类型", Theme.Body);
++		GUILayout.BeginHorizontal();
++		if (GUILayout.Toggle(CheatState.AimTargets == AimTargetMode.Creatures, "  仅生物", Theme.Toggle)) CheatState.AimTargets = AimTargetMode.Creatures;
++		if (GUILayout.Toggle(CheatState.AimTargets == AimTargetMode.Players, "  仅玩家", Theme.Toggle)) CheatState.AimTargets = AimTargetMode.Players;
++		if (GUILayout.Toggle(CheatState.AimTargets == AimTargetMode.CreaturesAndPlayers, "  生物与玩家", Theme.Toggle)) CheatState.AimTargets = AimTargetMode.CreaturesAndPlayers;
++		GUILayout.EndHorizontal();
++		CheatState.AimRequireLineOfSight = Widgets.ToggleRow("需要视线", CheatState.AimRequireLineOfSight, OnOff(CheatState.AimRequireLineOfSight));
++		GUILayout.BeginHorizontal();
++		CheatState.AimExcludeDead = GUILayout.Toggle(CheatState.AimExcludeDead, "  排除死亡目标", Theme.Toggle);
++		CheatState.AimExcludeSeagulls = GUILayout.Toggle(CheatState.AimExcludeSeagulls, "  排除海鸥", Theme.Toggle);
++		CheatState.AimExcludeHookedFish = GUILayout.Toggle(CheatState.AimExcludeHookedFish, "  排除上钩鱼", Theme.Toggle);
++		GUILayout.EndHorizontal();
++		CheatState.AimPrioritizeAlbatross = Widgets.ToggleRow("信天翁优先", CheatState.AimPrioritizeAlbatross, OnOff(CheatState.AimPrioritizeAlbatross));
++		CheatState.AimFov = Widgets.SliderRow("瞄准锥角（度）", CheatState.AimFov, 1f, 180f, "0", 35f);
++		CheatState.AimRange = Widgets.SliderRow("最大范围", CheatState.AimRange, 10f, 600f, "0", 200f);
++		CheatState.AimScreenRadius = Widgets.SliderRow("屏幕锁定半径", CheatState.AimScreenRadius, 10f, 1000f, "0", 250f);
++		CheatState.AimHeightOffset = Widgets.SliderRow("回退瞄准高度", CheatState.AimHeightOffset, -1f, 3f, "0.##", 0.5f);
++		CheatState.AimDistanceWeight = Widgets.SliderRow("距离权重", CheatState.AimDistanceWeight, 0f, 3f, "0.##", 1f);
++		CheatState.AimAngleWeight = Widgets.SliderRow("角度权重", CheatState.AimAngleWeight, 0f, 3f, "0.##", 0.5f);
++		CheatState.AimScreenDistanceWeight = Widgets.SliderRow("屏幕距离权重", CheatState.AimScreenDistanceWeight, 0f, 3f, "0.##", 0f);
++		CheatState.AimPriorityBonus = Widgets.SliderRow("优先目标奖励", CheatState.AimPriorityBonus, 0f, 200f, "0", 50f);
++		CheatState.AimPriorityBonusLimit = Widgets.SliderRow("优先奖励上限", CheatState.AimPriorityBonusLimit, 0f, 500f, "0", 200f);
++		CheatState.AimLockDuration = Widgets.SliderRow("目标保持时间", CheatState.AimLockDuration, 0f, 1f, "0.##", 0.2f);
++		CheatState.AimSwitchPenalty = Widgets.SliderRow("切换目标惩罚", CheatState.AimSwitchPenalty, 0f, 30f, "0.#", 8f);
++		CheatState.AimPrediction = Widgets.ToggleRow("弹道预测", CheatState.AimPrediction, OnOff(CheatState.AimPrediction));
++		if (CheatState.AimPrediction)
+ 		{
+-			CheatState.MultiShot = Widgets.ToggleRow("Extra projectiles", CheatState.MultiShot, CheatState.MultiShot ? "on" : "off");
+-			if (CheatState.MultiShot)
+-			{
+-				CheatState.ProjectileCount = Widgets.SliderRow("Per shot", CheatState.ProjectileCount, 1f, 30f, "0", 1f);
+-				Widgets.Note("Turns any gun into a shotgun. Combine with perfect accuracy to stack every pellet on one point.");
+-			}
+-			CheatState.FastBullets = Widgets.ToggleRow("Bullet speed", CheatState.FastBullets, CheatState.FastBullets ? "on" : "off");
+-			if (CheatState.FastBullets)
+-			{
+-				CheatState.ProjectileSpeed = Widgets.SliderRow("Speed", CheatState.ProjectileSpeed, 20f, 2000f, "0", 300f);
+-			}
+-			GUILayout.Space(4f);
+-			Widgets.ActionButton("Restore this weapon's originals", WeaponCheats.ResetHeldWeapon, "Original values restored", Theme.Btn);
+-			Widgets.Note(WeaponCheats.HasOriginals ? "The values this gun shipped with were saved before anything was changed." : "Nothing has been changed on this weapon yet.");
+-		});
+-		Widgets.Section("Aim assist", delegate
++			CheatState.AimVelocityMinInterval = Widgets.SliderRow("速度采样最小间隔", CheatState.AimVelocityMinInterval, 0.005f, 0.2f, "0.###", 0.02f);
++			CheatState.AimTeleportDistance = Widgets.SliderRow("传送距离阈值", CheatState.AimTeleportDistance, 1f, 100f, "0.#", 25f);
++			CheatState.AimMaxTargetSpeed = Widgets.SliderRow("目标最大速度", CheatState.AimMaxTargetSpeed, 10f, 500f, "0", 250f);
++			CheatState.AimGravityCompensation = Widgets.ToggleRow("重力补偿", CheatState.AimGravityCompensation, OnOff(CheatState.AimGravityCompensation));
++			if (CheatState.AimGravityCompensation) CheatState.AimGravityScale = Widgets.SliderRow("重力补偿倍率", CheatState.AimGravityScale, 0f, 3f, "0.##", 1f);
++		}
++		CheatState.AimTrackingChance = Widgets.SliderRow("追踪概率（百分比）", CheatState.AimTrackingChance, 0f, 100f, "0", 100f);
++		CheatState.AimVisibleAssist = Widgets.ToggleRow("可见拉枪", CheatState.AimVisibleAssist, OnOff(CheatState.AimVisibleAssist));
++		if (CheatState.AimVisibleAssist)
+ 		{
+-			CheatState.Aimbot = Widgets.ToggleRow("Aimbot", CheatState.Aimbot, CheatState.Aimbot ? "ACTIVE" : "off");
+-			Widgets.Note("Points the gun's fire point at the best target while your view stays under your control — your shots go where the aimbot looks, your camera doesn't get yanked around.");
+-			GUILayout.BeginHorizontal();
+-			CheatState.AimAtCreatures = GUILayout.Toggle(CheatState.AimAtCreatures, "  Creatures", Theme.Toggle);
+-			CheatState.AimAtPlayers = GUILayout.Toggle(CheatState.AimAtPlayers, "  Players", Theme.Toggle);
+-			CheatState.AimRequireLineOfSight = GUILayout.Toggle(CheatState.AimRequireLineOfSight, "  Needs line of sight", Theme.Toggle);
+-			GUILayout.EndHorizontal();
+-			GUILayout.BeginHorizontal();
+-			CheatState.AimExcludeDead = GUILayout.Toggle(CheatState.AimExcludeDead, "  排除死亡目标", Theme.Toggle);
+-			CheatState.AimExcludeSeagulls = GUILayout.Toggle(CheatState.AimExcludeSeagulls, "  排除海鸥", Theme.Toggle);
+-			CheatState.AimExcludeHookedFish = GUILayout.Toggle(CheatState.AimExcludeHookedFish, "  排除上钩鱼", Theme.Toggle);
+-			GUILayout.EndHorizontal();
+-			CheatState.AimPrioritizeAlbatross = Widgets.ToggleRow("信天翁优先", CheatState.AimPrioritizeAlbatross, CheatState.AimPrioritizeAlbatross ? "开" : "关");
+-			CheatState.AimFov = Widgets.SliderRow("Cone (degrees)", CheatState.AimFov, 1f, 180f, "0", 35f);
+-			CheatState.AimRange = Widgets.SliderRow("Range", CheatState.AimRange, 10f, 600f, "0", 200f);
+-			CheatState.AimHeightOffset = Widgets.SliderRow("Aim height", CheatState.AimHeightOffset, -1f, 3f, "0.##", 0.5f);
+-			CheatState.AimDistanceWeight = Widgets.SliderRow("距离权重", CheatState.AimDistanceWeight, 0f, 3f, "0.##", 1f);
+-			CheatState.AimAngleWeight = Widgets.SliderRow("角度权重", CheatState.AimAngleWeight, 0f, 3f, "0.##", 0.5f);
+-			CheatState.AimLockDuration = Widgets.SliderRow("目标保持时间", CheatState.AimLockDuration, 0f, 1f, "0.##", 0.2f);
+-			CheatState.AimSwitchPenalty = Widgets.SliderRow("切换目标惩罚", CheatState.AimSwitchPenalty, 0f, 30f, "0.#", 8f);
+-			CompleteCheatMenu.Targeting.TargetSolution currentTarget = WeaponCheats.CurrentTarget;
+-			GUILayout.Space(4f);
+-			if (currentTarget != null)
+-			{
+-				string targetName = (currentTarget.Entity as Object)?.name ?? currentTarget.Transform?.name ?? "-";
+-				GUILayout.Label($"目标：{targetName}   {currentTarget.Distance:0}米   偏离中心 {currentTarget.Angle:0}°   瞄准点：{currentTarget.Bone}", Theme.Body);
+-			}
+-			else
+-			{
+-				GUILayout.Label(CheatState.Aimbot ? "No target in the cone." : "Aimbot is off.", Theme.Muted);
+-			}
+-			Widgets.Note("Aim height lifts the point of aim off the target's origin — raise it for head shots on tall creatures.");
+-		});
++			CheatState.AimVisibleResponse = Widgets.SliderRow("拉枪响应速度", CheatState.AimVisibleResponse, 0.5f, 30f, "0.##", 8f);
++			CheatState.AimDistanceDropPerUnit = Widgets.SliderRow("距离下调", CheatState.AimDistanceDropPerUnit, 0f, 0.05f, "0.####", 0f);
++			CheatState.AimRecoilCompensation = Widgets.ToggleRow("后坐补偿", CheatState.AimRecoilCompensation, OnOff(CheatState.AimRecoilCompensation));
++			if (CheatState.AimRecoilCompensation) CheatState.AimRecoilCompensationStrength = Widgets.SliderRow("后坐补偿强度", CheatState.AimRecoilCompensationStrength, 0f, 2f, "0.##", 1f);
++		}
++		CheatState.AimTrackingDiagnostics = Widgets.ToggleRow("追踪诊断日志", CheatState.AimTrackingDiagnostics, OnOff(CheatState.AimTrackingDiagnostics));
++		TargetSolution target = WeaponCheats.CurrentTarget;
++		GUILayout.Space(4f);
++		if (target == null)
++		{
++			GUILayout.Label(CheatState.Aimbot ? "当前范围内没有可用目标。" : "自动瞄准已关闭。", Theme.Muted);
++			return;
++		}
++		string name = (target.Entity as Object)?.name ?? target.Transform?.name ?? "-";
++		GUILayout.Label($"目标：{name}　距离：{target.Distance:0.0} 米　角度：{target.Angle:0.0}°　瞄准点：{target.Bone}　可见：{(target.Visible ? "是" : "否")}", Theme.Body);
+ 	}
++
++	private static string OnOff(bool value) => value ? "开启" : "关闭";
+ }
++
+--- a/decompiled-src/CompleteCheatMenu/UI/Tabs/DiagnosticsTab.cs
++++ b/decompiled-src/CompleteCheatMenu/UI/Tabs/DiagnosticsTab.cs
+@@ -1,50 +1,57 @@
+ using CompleteCheatMenu.Cheats;
+ using CompleteCheatMenu.Game;
++using CompleteCheatMenu.Runtime;
+ using UnityEngine;
+ 
+ namespace CompleteCheatMenu.UI.Tabs;
+ 
+ internal static class DiagnosticsTab
+ {
+-	internal const string Title = "Diagnostics";
++	internal const string Title = "诊断";
+ 
+ 	private static Vector2 _scroll;
+ 
+ 	internal static void Draw()
+ 	{
+-		Widgets.Section("Status", delegate
++		Widgets.Section("运行状态", delegate
+ 		{
+-			Line("In game", Refs.InGame);
+-			Line("Host / solo", Refs.IsHost);
+-			Line("Dev cheats unlocked", CheatGate.CheatsEnabled);
+-			Line("Money API", MoneyCheats.Available);
+-			Line("Movement API", MovementCheats.Available);
+-			Line("Spawn API", SpawnCheats.Available);
+-			Line("Spawn catalogue", SpawnCatalog.Loaded, $"{SpawnCatalog.Count} entries");
+-			Line("Boat present", BoatCheats.Available);
+-			Line("Casino present", GamblingCheats.Available);
+-			Line("Skin machine", GamblingCheats.SlotsAvailable);
+-			Line("Inventory API", FishingCheats.Available);
+-			Line("Boss active", WorldCheats.BossActive);
+-			Line("FOV control", VisualCheats.FovAvailable);
+-			Line("Free camera", VisualCheats.FreeCamAvailable);
+-			Line("Holding a weapon", WeaponCheats.HoldingWeapon, WeaponCheats.WeaponName);
+-			Line("Kill score control", KillScoreCheats.Available, $"{KillScoreCheats.Catalogue.Count} bonuses");
++			Line("已进入游戏", Refs.InGame);
++			Line("房主或单人", Refs.IsHost);
++			Line("开发者作弊已解锁", CheatGate.CheatsEnabled);
++			Line("金钱接口", MoneyCheats.Available);
++			Line("移动接口", MovementCheats.Available);
++			Line("生成接口", SpawnCheats.Available);
++			Line("生成目录", SpawnCatalog.Loaded, $"{SpawnCatalog.Count} 个条目");
++			Line("船只已存在", BoatCheats.Available);
++			Line("赌场已存在", GamblingCheats.Available);
++			Line("外观机器", GamblingCheats.SlotsAvailable);
++			Line("背包接口", FishingCheats.Available);
++			Line("首领活动中", WorldCheats.BossActive);
++			Line("视野控制", VisualCheats.FovAvailable);
++			Line("自由镜头", VisualCheats.FreeCamAvailable);
++			Line("正在手持武器", WeaponCheats.HoldingWeapon, WeaponCheats.WeaponName);
++			Line("击杀分数控制", KillScoreCheats.Available, $"{KillScoreCheats.Catalogue.Count} 个奖励");
++			int creatures = EntityRegistry.Creatures.Count;
++			int players = EntityRegistry.Players.Count;
++			int items = EntityRegistry.Items.Count;
++			int containers = EntityRegistry.Containers.Count;
++			Line("目标注册", creatures + players + items + containers > 0, $"生物 {creatures} / 玩家 {players} / 物品 {items} / 容器 {containers}");
++			Line("弹速字段", GameBinder.Field("Weapon", "_projSpeed") != null, "Weapon._projSpeed");
++			Line("人体骨骼接口", typeof(Animator).GetMethod("GetBoneTransform") != null, "Animator.GetBoneTransform");
++			Line("包围盒回退", typeof(Renderer).GetProperty("bounds") != null, "Renderer.bounds");
++			Line("开火追踪入口", GameBinder.Method("Weapon", "Shoot", 0) != null && GameBinder.Property("Attachments", "FirePoint") != null, "Weapon.Shoot → FirePoint");
+ 		});
+-		Widgets.Section("Bindings", delegate
++		Widgets.Section("绑定状态", delegate
+ 		{
+ 			int failed = BindingReport.Failed;
+-			GUILayout.Label((failed == 0) ? $"All {BindingReport.Total} resolved." : $"{failed} of {BindingReport.Total} failed to resolve.", (failed == 0) ? Theme.Body : Theme.H2);
+-			if (GUILayout.Button("Re-run checks", Theme.Btn, GUILayout.Width(120f)))
+-			{
+-				RunChecks();
+-			}
++			GUILayout.Label((failed == 0) ? $"全部 {BindingReport.Total} 项已解析。" : $"{BindingReport.Total} 项中有 {failed} 项解析失败。", (failed == 0) ? Theme.Body : Theme.H2);
++			if (GUILayout.Button("重新检查", Theme.Btn, GUILayout.Width(120f))) RunChecks();
+ 		});
+ 		_scroll = GUILayout.BeginScrollView(_scroll);
+ 		foreach (BindingReport.Entry item in BindingReport.All)
+ 		{
+ 			GUILayout.BeginHorizontal();
+-			GUILayout.Label(item.Ok ? "OK" : "MISSING", item.Ok ? Theme.Muted : Theme.H2, GUILayout.Width(64f));
++			GUILayout.Label(item.Ok ? "正常" : "缺失", item.Ok ? Theme.Muted : Theme.H2, GUILayout.Width(64f));
+ 			GUILayout.Label(item.Name, Theme.Body);
+ 			GUILayout.EndHorizontal();
+ 		}
+@@ -55,14 +62,10 @@
+ 	{
+ 		GUILayout.BeginHorizontal();
+ 		GUILayout.Label(label, Theme.Body, GUILayout.Width(170f));
+-		GUILayout.Label(ok ? "yes" : "no", ok ? Theme.Body : Theme.H2, GUILayout.Width(40f));
+-		if (!string.IsNullOrEmpty(extra))
+-		{
+-			GUILayout.Label(extra, Theme.Muted);
+-		}
++		GUILayout.Label(ok ? "是" : "否", ok ? Theme.Body : Theme.H2, GUILayout.Width(40f));
++		if (!string.IsNullOrEmpty(extra)) GUILayout.Label(extra, Theme.Muted);
+ 		GUILayout.EndHorizontal();
+ 	}
+-
+ 	internal static void RunChecks()
+ 	{
+ 		_ = MoneyCheats.Available;
+@@ -177,3 +180,6 @@
+ 		Plugin.Log.LogInfo((object)$"Diagnostics: {BindingReport.Failed}/{BindingReport.Total} bindings failed.");
+ 	}
+ }
++
++
++
+--- a/decompiled-src/CompleteCheatMenu/UI/MenuWindow.cs
++++ b/decompiled-src/CompleteCheatMenu/UI/MenuWindow.cs
+@@ -23,115 +23,115 @@
+ 	{
+ 		new Tab
+ 		{
+-			Title = "Player",
++			Title = "玩家",
+ 			Draw = PlayerTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Weapons",
++			Title = "武器",
+ 			Draw = WeaponsTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Movement",
++			Title = "移动",
+ 			Draw = MovementTab.Draw,
+ 			ServerSide = false
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Boat",
++			Title = "船只",
+ 			Draw = BoatTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Teleport",
++			Title = "传送",
+ 			Draw = TeleportTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Spawn",
++			Title = "生成",
+ 			Draw = SpawnTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Entities",
++			Title = "实体",
+ 			Draw = EntitiesTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Items",
++			Title = "物品",
+ 			Draw = ItemsTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Skins",
++			Title = "外观",
+ 			Draw = SkinsTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Money",
++			Title = "金钱",
+ 			Draw = MoneyTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "World",
++			Title = "世界",
+ 			Draw = WorldTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Kill score",
++			Title = "击杀分数",
+ 			Draw = KillScoreTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Progression",
++			Title = "游戏进度",
+ 			Draw = ProgressionTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Gambling",
++			Title = "赌博",
+ 			Draw = GamblingTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Fishing",
++			Title = "钓鱼",
+ 			Draw = FishingTab.Draw,
+ 			ServerSide = true
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Visuals",
++			Title = "视觉",
+ 			Draw = VisualsTab.Draw,
+ 			ServerSide = false
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Keybinds",
++			Title = "按键",
+ 			Draw = KeybindsTab.Draw,
+ 			ServerSide = false
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Settings",
++			Title = "设置",
+ 			Draw = SettingsTab.Draw,
+ 			ServerSide = false
+ 		},
+ 		new Tab
+ 		{
+-			Title = "Diagnostics",
++			Title = "诊断",
+ 			Draw = DiagnosticsTab.Draw,
+ 			ServerSide = false
+ 		}
+@@ -234,3 +234,4 @@
+ 		}
+ 	}
+ }
++
+--- a/decompiled-src/CompleteCheatMenu/Runtime/Presets.cs
++++ b/decompiled-src/CompleteCheatMenu/Runtime/Presets.cs
+@@ -48,6 +48,49 @@
+ 				B("espPlayers", CheatState.EspPlayers),
+ 				B("espTracers", CheatState.EspTracers),
+ 				B("espLabels", CheatState.EspLabels),
++				B("espBoxes", CheatState.EspBoxes),
++				B("espSkeletons", CheatState.EspSkeletons),
++				B("espHealthBars", CheatState.EspHealthBars),
++				B("espTypeInfo", CheatState.EspTypeInfo),
++				B("espVisibilityInfo", CheatState.EspVisibilityInfo),
++				B("espHeldItemInfo", CheatState.EspHeldItemInfo),
++				B("espItemValueInfo", CheatState.EspItemValueInfo),
++				B("espContainerInfo", CheatState.EspContainerInfo),
++				B("espAimCircle", CheatState.EspAimCircle),
++				B("espDistanceLabels", CheatState.EspDistanceLabels),
++				E("aimTargetMode", (int)CheatState.AimTargets),
++				B("aimbot", CheatState.Aimbot),
++				B("aimRequireLineOfSight", CheatState.AimRequireLineOfSight),
++				B("aimExcludeDead", CheatState.AimExcludeDead),
++				B("aimExcludeSeagulls", CheatState.AimExcludeSeagulls),
++				B("aimExcludeHookedFish", CheatState.AimExcludeHookedFish),
++				B("aimPrioritizeAlbatross", CheatState.AimPrioritizeAlbatross),
++				F("aimFov", CheatState.AimFov),
++				F("aimRange", CheatState.AimRange),
++				F("aimHeightOffset", CheatState.AimHeightOffset),
++				F("aimDistanceWeight", CheatState.AimDistanceWeight),
++				F("aimAngleWeight", CheatState.AimAngleWeight),
++				F("aimScreenRadius", CheatState.AimScreenRadius),
++				F("aimScreenDistanceWeight", CheatState.AimScreenDistanceWeight),
++				F("aimPriorityBonus", CheatState.AimPriorityBonus),
++				F("aimPriorityBonusLimit", CheatState.AimPriorityBonusLimit),
++				F("aimLockDuration", CheatState.AimLockDuration),
++				F("aimSwitchPenalty", CheatState.AimSwitchPenalty),
++				B("aimPrediction", CheatState.AimPrediction),
++				F("aimVelocityMinInterval", CheatState.AimVelocityMinInterval),
++				F("aimTeleportDistance", CheatState.AimTeleportDistance),
++				F("aimMaxTargetSpeed", CheatState.AimMaxTargetSpeed),
++				B("aimGravityCompensation", CheatState.AimGravityCompensation),
++				F("aimGravityScale", CheatState.AimGravityScale),
++				F("aimTrackingChance", CheatState.AimTrackingChance),
++				B("aimTrackingDiagnostics", CheatState.AimTrackingDiagnostics),
++				B("aimVisibleAssist", CheatState.AimVisibleAssist),
++				F("aimVisibleResponse", CheatState.AimVisibleResponse),
++				F("aimDistanceDropPerUnit", CheatState.AimDistanceDropPerUnit),
++				B("aimRecoilCompensation", CheatState.AimRecoilCompensation),
++				F("aimRecoilCompensationStrength", CheatState.AimRecoilCompensationStrength),
++				B("instantHit", CheatState.InstantHit),
++				F("instantHitProjectileSpeed", CheatState.InstantHitProjectileSpeed),
+ 				F("fov", CheatState.Fov),
+ 				F("freeCamSpeed", CheatState.FreeCamSpeed),
+ 				F("itemCookness", CheatState.ItemCookness),
+@@ -80,6 +123,9 @@
+ 				return false;
+ 			}
+ 			string[] array = File.ReadAllLines(path);
++			bool? legacyCreatures = null;
++			bool? legacyPlayers = null;
++			bool loadedTargetMode = false;
+ 			foreach (string text in array)
+ 			{
+ 				int num = text.IndexOf('=');
+@@ -133,6 +179,53 @@
+ 				case "espLabels":
+ 					CheatState.EspLabels = text3 == "1";
+ 					break;
++				case "espBoxes": CheatState.EspBoxes = text3 == "1"; break;
++				case "espSkeletons": CheatState.EspSkeletons = text3 == "1"; break;
++				case "espHealthBars": CheatState.EspHealthBars = text3 == "1"; break;
++				case "espTypeInfo": CheatState.EspTypeInfo = text3 == "1"; break;
++				case "espVisibilityInfo": CheatState.EspVisibilityInfo = text3 == "1"; break;
++				case "espHeldItemInfo": CheatState.EspHeldItemInfo = text3 == "1"; break;
++				case "espItemValueInfo": CheatState.EspItemValueInfo = text3 == "1"; break;
++				case "espContainerInfo": CheatState.EspContainerInfo = text3 == "1"; break;
++				case "espAimCircle": CheatState.EspAimCircle = text3 == "1"; break;
++				case "espDistanceLabels": CheatState.EspDistanceLabels = text3 == "1"; break;
++				case "aimTargetMode":
++					if (int.TryParse(text3, NumberStyles.Integer, CultureInfo.InvariantCulture, out var targetMode) && Enum.IsDefined(typeof(AimTargetMode), targetMode)) { CheatState.AimTargets = (AimTargetMode)targetMode; loadedTargetMode = true; }
++					break;
++				case "aimAtCreatures": legacyCreatures = text3 == "1"; break;
++				case "aimAtPlayers": legacyPlayers = text3 == "1"; break;
++				case "aimbot": CheatState.Aimbot = text3 == "1"; break;
++				case "aimRequireLineOfSight": CheatState.AimRequireLineOfSight = text3 == "1"; break;
++				case "aimExcludeDead": CheatState.AimExcludeDead = text3 == "1"; break;
++				case "aimExcludeSeagulls": CheatState.AimExcludeSeagulls = text3 == "1"; break;
++				case "aimExcludeHookedFish": CheatState.AimExcludeHookedFish = text3 == "1"; break;
++				case "aimPrioritizeAlbatross": CheatState.AimPrioritizeAlbatross = text3 == "1"; break;
++				case "aimFov": if (TryFloat(text3, out var aimFov)) CheatState.AimFov = aimFov; break;
++				case "aimRange": if (TryFloat(text3, out var aimRange)) CheatState.AimRange = aimRange; break;
++				case "aimHeightOffset": if (TryFloat(text3, out var aimHeightOffset)) CheatState.AimHeightOffset = aimHeightOffset; break;
++				case "aimDistanceWeight": if (TryFloat(text3, out var aimDistanceWeight)) CheatState.AimDistanceWeight = aimDistanceWeight; break;
++				case "aimAngleWeight": if (TryFloat(text3, out var aimAngleWeight)) CheatState.AimAngleWeight = aimAngleWeight; break;
++				case "aimScreenRadius": if (TryFloat(text3, out var aimScreenRadius)) CheatState.AimScreenRadius = aimScreenRadius; break;
++				case "aimScreenDistanceWeight": if (TryFloat(text3, out var aimScreenDistanceWeight)) CheatState.AimScreenDistanceWeight = aimScreenDistanceWeight; break;
++				case "aimPriorityBonus": if (TryFloat(text3, out var aimPriorityBonus)) CheatState.AimPriorityBonus = aimPriorityBonus; break;
++				case "aimPriorityBonusLimit": if (TryFloat(text3, out var aimPriorityBonusLimit)) CheatState.AimPriorityBonusLimit = aimPriorityBonusLimit; break;
++				case "aimLockDuration": if (TryFloat(text3, out var aimLockDuration)) CheatState.AimLockDuration = aimLockDuration; break;
++				case "aimSwitchPenalty": if (TryFloat(text3, out var aimSwitchPenalty)) CheatState.AimSwitchPenalty = aimSwitchPenalty; break;
++				case "aimPrediction": CheatState.AimPrediction = text3 == "1"; break;
++				case "aimVelocityMinInterval": if (TryFloat(text3, out var aimVelocityMinInterval)) CheatState.AimVelocityMinInterval = aimVelocityMinInterval; break;
++				case "aimTeleportDistance": if (TryFloat(text3, out var aimTeleportDistance)) CheatState.AimTeleportDistance = aimTeleportDistance; break;
++				case "aimMaxTargetSpeed": if (TryFloat(text3, out var aimMaxTargetSpeed)) CheatState.AimMaxTargetSpeed = aimMaxTargetSpeed; break;
++				case "aimGravityCompensation": CheatState.AimGravityCompensation = text3 == "1"; break;
++				case "aimGravityScale": if (TryFloat(text3, out var aimGravityScale)) CheatState.AimGravityScale = aimGravityScale; break;
++				case "aimTrackingChance": if (TryFloat(text3, out var aimTrackingChance)) CheatState.AimTrackingChance = aimTrackingChance; break;
++				case "aimTrackingDiagnostics": CheatState.AimTrackingDiagnostics = text3 == "1"; break;
++				case "aimVisibleAssist": CheatState.AimVisibleAssist = text3 == "1"; break;
++				case "aimVisibleResponse": if (TryFloat(text3, out var aimVisibleResponse)) CheatState.AimVisibleResponse = aimVisibleResponse; break;
++				case "aimDistanceDropPerUnit": if (TryFloat(text3, out var aimDistanceDrop)) CheatState.AimDistanceDropPerUnit = aimDistanceDrop; break;
++				case "aimRecoilCompensation": CheatState.AimRecoilCompensation = text3 == "1"; break;
++				case "aimRecoilCompensationStrength": if (TryFloat(text3, out var aimRecoilStrength)) CheatState.AimRecoilCompensationStrength = aimRecoilStrength; break;
++				case "instantHit": CheatState.InstantHit = text3 == "1"; break;
++				case "instantHitProjectileSpeed": if (TryFloat(text3, out var instantHitSpeed)) CheatState.InstantHitProjectileSpeed = instantHitSpeed; break;
+ 				case "fov":
+ 				{
+ 					if (TryFloat(text3, out var value8))
+@@ -184,6 +277,7 @@
+ 				}
+ 				}
+ 			}
++			if (!loadedTargetMode) ApplyLegacyTargetMode(legacyCreatures, legacyPlayers);
+ 			return true;
+ 		}
+ 		catch (Exception ex)
+@@ -221,6 +315,21 @@
+ 		return key + "=" + (value ? "1" : "0");
+ 	}
+ 
++	private static string E(string key, int value)
++	{
++		return key + "=" + value.ToString(CultureInfo.InvariantCulture);
++	}
++
++	private static void ApplyLegacyTargetMode(bool? creatures, bool? players)
++	{
++		if (!creatures.HasValue && !players.HasValue) return;
++		bool includeCreatures = creatures ?? CheatState.AimTargetsCreatures;
++		bool includePlayers = players ?? CheatState.AimTargetsPlayers;
++		if (includeCreatures && includePlayers) CheatState.AimTargets = AimTargetMode.CreaturesAndPlayers;
++		else if (includePlayers) CheatState.AimTargets = AimTargetMode.Players;
++		else CheatState.AimTargets = AimTargetMode.Creatures;
++	}
++
+ 	private static bool TryFloat(string s, out float value)
+ 	{
+ 		return float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+--- a/decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
++++ b/decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
+@@ -1,6 +1,13 @@
+ using CompleteCheatMenu.Cheats;
+ 
+ namespace CompleteCheatMenu.Runtime;
++
++internal enum AimTargetMode
++{
++	Creatures,
++	Players,
++	CreaturesAndPlayers
++}
+ 
+ internal static class CheatState
+ {
+@@ -46,9 +53,11 @@
+ 
+ 	internal static bool Aimbot;
+ 
+-	internal static bool AimAtCreatures = true;
+-
+-	internal static bool AimAtPlayers;
++	internal static AimTargetMode AimTargets = AimTargetMode.Creatures;
++
++	internal static bool AimTargetsCreatures => AimTargets == AimTargetMode.Creatures || AimTargets == AimTargetMode.CreaturesAndPlayers;
++
++	internal static bool AimTargetsPlayers => AimTargets == AimTargetMode.Players || AimTargets == AimTargetMode.CreaturesAndPlayers;
+ 
+ 	internal static bool AimRequireLineOfSight = true;
+ 
+--- a/decompiled-src/CompleteCheatMenu/Targeting/TargetingSystem.cs
++++ b/decompiled-src/CompleteCheatMenu/Targeting/TargetingSystem.cs
+@@ -25,18 +25,18 @@
+ 			return null;
+ 		}
+ 		TargetingSettings settings = TargetingSettings.FromCheatState();
+-		_snapshot.Refresh(CheatState.AimAtCreatures, CheatState.AimAtPlayers);
++		_snapshot.Refresh(CheatState.AimTargetsCreatures, CheatState.AimTargetsPlayers);
+ 		_candidates.Clear();
+ 		Vector3 origin = camera.transform.position;
+ 		Vector3 forward = camera.transform.forward;
+ 		Vector2 screenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+ 		float now = Time.unscaledTime;
+ 
+-		if (CheatState.AimAtCreatures)
++		if (CheatState.AimTargetsCreatures)
+ 		{
+ 			CollectCreatures(camera, origin, forward, screenCenter, settings, now);
+ 		}
+-		if (CheatState.AimAtPlayers)
++		if (CheatState.AimTargetsPlayers)
+ 		{
+ 			CollectPlayers(camera, origin, forward, screenCenter, settings, now);
+ 		}
+--- a/tools/localize_dll.py
++++ b/tools/localize_dll.py
+@@ -2,7 +2,7 @@
+ from pathlib import Path
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+-SRC = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else ROOT / 'CompleteCheatMenu.dll'
++SRC = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else ROOT / 'artifacts' / 'CompleteCheatMenu.dll'
+ DST = Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else ROOT / 'CompleteCheatMenu.zh-CN.dll'
+ 
+ # High-signal UI phrases. Unknown technical/member strings are intentionally left intact.
+@@ -10,7 +10,7 @@
+  'Complete Cheat Menu  v0.6.1':'完整作弊菜单  v0.6.1','Complete Cheat Menu':'完整作弊菜单',
+  'Weapons':'武器','Kill score':'击杀分数','Player':'玩家','Movement':'移动','Boat':'船只','Teleport':'传送','Spawn':'生成','Items':'物品','Skins':'外观','Money':'金钱','World':'世界','Progression':'进度','Entities':'实体','Gambling':'赌博','Fishing':'钓鱼','Visuals':'视觉','Keybinds':'按键','Settings':'设置','Diagnostics':'诊断',
+  'God mode':'无敌模式','One-shot kills':'一击必杀','Friendly fire':'友军伤害','Heal':'治疗','Feed':'进食','Full reset':'完全重置','Fly mode':'飞行模式','Free camera':'自由镜头','ESP':'透视','Infinite ammo':'无限弹药','Perfect accuracy':'完美精度','Zero recoil':'无后坐力','Rapid fire':'快速射击','Extra projectiles':'额外弹丸','Bullet speed':'子弹速度','Fire where you\'re looking':'朝准星射击','Aimbot':'自动瞄准','Aim assist':'瞄准辅助',
+- 'Enable all keybinds':'启用全部快捷键','Master switch':'总开关','Menu key':'菜单键','Open / close menu':'打开/关闭菜单','Hotkeys':'快捷键','Apply':'应用','Reset':'重置','Reset all to defaults':'全部恢复默认','Save':'保存','Load':'加载','Select all':'全选','Clear':'清除','Search':'搜索','Filter':'筛选','Sort':'排序','Status':'状态','Options':'选项','General':'常规','Current values':'当前数值','Defaults are captured the first time each slider is read this session.':'每个滑块首次读取时保存本局初始值。',
++ 'Instant hit':'瞬击','Ballistic prediction':'弹道预测','Tracking chance':'追踪概率','Visible aim assist':'可见拉枪','Aim target mode':'目标类型','Lock radius circle':'锁定范围圆','Gravity compensation':'重力补偿','Recoil compensation':'后坐补偿','Distance drop':'距离下调','Screen lock radius':'屏幕锁定半径','Target diagnostics':'目标诊断','Boxes':'方框','Skeletons':'骨架','Health bars':'血条','Visibility state':'可见状态','Held item info':'手持物信息','Item value info':'物品价值信息','Container info':'容器信息', 'Enable all keybinds':'启用全部快捷键','Master switch':'总开关','Menu key':'菜单键','Open / close menu':'打开/关闭菜单','Hotkeys':'快捷键','Apply':'应用','Reset':'重置','Reset all to defaults':'全部恢复默认','Save':'保存','Load':'加载','Select all':'全选','Clear':'清除','Search':'搜索','Filter':'筛选','Sort':'排序','Status':'状态','Options':'选项','General':'常规','Current values':'当前数值','Defaults are captured the first time each slider is read this session.':'每个滑块首次读取时保存本局初始值。',
+  'Balance':'余额','Add money':'增加金钱','Remove':'移除','Set to':'设置为','Quick add':'快速增加','Amount':'数量','Quantity':'数量','Cost':'花费','Value':'数值','Worth':'价值','Weight':'重量','Cookness':'熟度','Multiplier':'倍率','Base worth':'基础价值','Item value multiplier':'物品价值倍率','Apply worth':'应用价值','Apply weight':'应用重量','Apply cookness':'应用熟度','Apply kill score':'应用击杀分数','Apply betting':'应用下注倍率',
+  'Unlock everything':'全部解锁','Unlock all':'全部解锁','Unlock boat':'解锁船只','Unlock radar':'解锁雷达','Unlock grill':'解锁烤架','Unlock all islands':'解锁所有岛屿','Unlock all pockets':'解锁所有背包格','Unlock all weapon skins':'解锁所有武器外观','Unlock all characters':'解锁所有角色','Grant every bait':'获得所有鱼饵','All baits granted':'已获得所有鱼饵','Finish game':'完成游戏','Manual save':'手动保存','Save now':'立即保存',
+  'Go to boat':'前往船只','Bring boat to me':'召回船只','Go to':'前往','Next island':'下一座岛','Previous island':'上一座岛','Teleport':'传送','Bring':'召回','Waypoint':'航点','Waypoints':'航点','Radius':'半径','Max distance':'最大距离',
+@@ -67,7 +67,12 @@
+             yield p+hdr, raw, s
+         p += hdr+ln
+ 
++if not SRC.exists():
++    raise FileNotFoundError(f'input assembly not found: {SRC}')
+ data=bytearray(SRC.read_bytes()); original=bytes(data); changes=[]
++for marker in (b'EspRendererV2', b'WeaponStateStore', b'VisibleAimController'):
++    if marker not in data:
++        raise RuntimeError(f'input assembly is not the current cnKX build; missing type marker: {marker.decode()}')
+ for pos,raw,s in us_entries(data):
+     t=translate(s)
+     if t==s: continue
+@@ -84,5 +89,7 @@
+     data[pos:pos+len(raw)]=enc
+     changes.append({'offset':pos,'original':s,'translated':t.rstrip(),'slot_units':units})
+ DST.write_bytes(data)
+-(ROOT/'CompleteCheatMenu.localization.diff.json').write_text(json.dumps({'source_sha256':hashlib.sha256(original).hexdigest(),'modified_sha256':hashlib.sha256(data).hexdigest(),'changed':changes},ensure_ascii=False,indent=2),encoding='utf-8')
++DST.with_suffix('.localization.diff.json').write_text(json.dumps({'source_sha256':hashlib.sha256(original).hexdigest(),'modified_sha256':hashlib.sha256(data).hexdigest(),'changed':changes},ensure_ascii=False,indent=2),encoding='utf-8')
+ print(json.dumps({'changed':len(changes),'source_sha256':hashlib.sha256(original).hexdigest(),'modified_sha256':hashlib.sha256(data).hexdigest()},ensure_ascii=False))
++
++
+--- /dev/null
++++ b/tests/localized_ui_preset_test.py
+@@ -0,0 +1,110 @@
++import re
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++
++weapons = (ROOT / "decompiled-src/CompleteCheatMenu/UI/Tabs/WeaponsTab.cs").read_text(encoding="utf-8")
++visuals = (ROOT / "decompiled-src/CompleteCheatMenu/UI/Tabs/VisualsTab.cs").read_text(encoding="utf-8")
++diagnostics = (ROOT / "decompiled-src/CompleteCheatMenu/UI/Tabs/DiagnosticsTab.cs").read_text(encoding="utf-8")
++state = (ROOT / "decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs").read_text(encoding="utf-8")
++presets = (ROOT / "decompiled-src/CompleteCheatMenu/Runtime/Presets.cs").read_text(encoding="utf-8")
++targeting = (ROOT / "decompiled-src/CompleteCheatMenu/Targeting/TargetingSystem.cs").read_text(encoding="utf-8")
++menu = (ROOT / "decompiled-src/CompleteCheatMenu/UI/MenuWindow.cs").read_text(encoding="utf-8")
++localizer = (ROOT / "tools/localize_dll.py").read_text(encoding="utf-8")
++
++# 1. 目标类型必须由单个互斥枚举表示。
++assert "internal enum AimTargetMode" in state
++assert "internal static AimTargetMode AimTargets" in state
++assert "internal static bool AimAtCreatures;" not in state
++assert "internal static bool AimAtPlayers;" not in state
++assert "AimTargetsCreatures" in targeting and "AimTargetsPlayers" in targeting
++
++# 2. 武器页必须暴露瞬击、预测、追踪概率、可见拉枪和独立补偿。
++for token in (
++    "瞬击",
++    "弹道预测",
++    "追踪概率",
++    "可见拉枪",
++    "距离下调",
++    "后坐补偿",
++    "目标类型",
++    "速度采样最小间隔",
++    "传送距离阈值",
++    "目标最大速度",
++):
++    assert token in weapons, token
++
++# 3. 视觉页必须暴露 V2 的所有主要绘制能力。
++for token in (
++    "方框",
++    "骨架",
++    "血条",
++    "可见状态",
++    "手持物",
++    "物品价值",
++    "容器信息",
++    "锁定范围圆",
++):
++    assert token in visuals, token
++
++# 4. 诊断页显示注册数量、弹丸绑定、骨骼能力和开火追踪入口。
++for token in ("目标注册", "弹速字段", "人体骨骼接口", "包围盒回退", "开火追踪入口"):
++    assert token in diagnostics, token
++assert 'GameBinder.Field("Weapon", "_projSpeed")' in diagnostics
++assert 'GameBinder.Method("Weapon", "Shoot", 0)' in diagnostics
++
++# 5. 所有 Task 5-12 新设置都必须写入预设并有读取分支。
++keys = (
++    "aimTargetMode", "aimbot", "aimRequireLineOfSight", "aimExcludeDead",
++    "aimExcludeSeagulls", "aimExcludeHookedFish", "aimPrioritizeAlbatross",
++    "aimFov", "aimRange", "aimHeightOffset", "aimDistanceWeight", "aimAngleWeight",
++    "aimScreenRadius", "aimScreenDistanceWeight",
++    "aimPriorityBonus", "aimPriorityBonusLimit", "aimPrediction",
++    "aimLockDuration", "aimSwitchPenalty", "aimVelocityMinInterval",
++    "aimTeleportDistance", "aimMaxTargetSpeed",
++    "aimGravityCompensation", "aimGravityScale", "aimTrackingChance",
++    "aimTrackingDiagnostics",
++    "aimVisibleAssist", "aimVisibleResponse", "aimDistanceDropPerUnit",
++    "aimRecoilCompensation", "aimRecoilCompensationStrength",
++    "instantHit", "instantHitProjectileSpeed", "espBoxes", "espSkeletons",
++    "espHealthBars", "espTypeInfo", "espVisibilityInfo", "espHeldItemInfo",
++    "espItemValueInfo", "espContainerInfo", "espAimCircle",
++)
++for key in keys:
++    assert presets.count(f'"{key}"') >= 2, key
++
++# 6. 旧预设的两个布尔目标字段仍可迁移到新枚举。
++assert 'case "aimAtCreatures"' in presets
++assert 'case "aimAtPlayers"' in presets
++assert "ApplyLegacyTargetMode" in presets
++assert "if (!loadedTargetMode) ApplyLegacyTargetMode" in presets
++
++# 7. 三个页面的直接显示字符串不得残留常见英文界面文案。
++diagnostics_ui = diagnostics.split("internal static void RunChecks", 1)[0]
++quoted = re.findall(r'"([^"\\]*(?:\\.[^"\\]*)*)"', weapons + visuals + diagnostics_ui)
++allowed = {"OK", "MISSING", "ESP", "FOV", "Projectile", "Weapon", "Shoot", "PlayerCamera", "Player", "Creature", "Animator", "Attachments", "FirePoint", "Renderer", "Bounds", "GetBoneTransform", "bounds", "WASD", "Ctrl", "Shift", "_projSpeed"}
++residual = []
++for text in quoted:
++    if "{" in text or "}" in text:
++        continue
++    visible = re.sub(r"\{[^{}]*\}", "", text)
++    if not re.search(r"[A-Za-z]{3,}", visible):
++        continue
++    if any(item in visible for item in allowed):
++        continue
++    if text.startswith(("type ", "field ", "method ")):
++        continue
++    residual.append(text)
++assert not residual, residual[:20]
++
++# 8. DLL 汉化器包含本次新增控件及格式化文本。
++for phrase in ("Instant hit", "Ballistic prediction", "Tracking chance", "Visible aim assist", "Aim target mode", "Lock radius circle"):
++    assert repr(phrase) in localizer or f"'{phrase}'" in localizer
++assert "ROOT / 'artifacts' / 'CompleteCheatMenu.dll'" in localizer
++assert "missing type marker" in localizer
++assert "DST.with_suffix('.localization.diff.json')" in localizer
++
++for title in ("玩家", "武器", "移动", "船只", "传送", "生成", "实体", "物品", "外观", "金钱", "世界", "击杀分数", "游戏进度", "赌博", "钓鱼", "视觉", "按键", "设置", "诊断"):
++    assert f'Title = "{title}"' in menu
++
++print("LOCALIZED_UI_PRESET_TESTS=PASS cases=8")

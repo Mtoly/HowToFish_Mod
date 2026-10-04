@@ -1,0 +1,5 @@
+[Info   :   BepInEx] 4 plugins to load
+[Info   :   BepInEx] Loading [Complete Cheat Menu 0.7.0]
+[Info   :Complete Cheat Menu] 13 method(s) patched.
+[Info   :Complete Cheat Menu] 已加载 完整作弊菜单​​​​​​​​​​​​​ 0.7.0。进入游戏后按 Insert。​​​​​​​​​​​
+[Message:   BepInEx] Chainloader startup complete

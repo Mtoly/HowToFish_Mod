@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-2-projectile-lifecycle\rollback-test-ps-20260825\tests\projectile_lifecycle_test.py", line 13, in <module>
+    assert path.exists(), path
+           ~~~~~~~~~~~^^
+AssertionError: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-2-projectile-lifecycle\rollback-test-ps-20260825\decompiled-src\CompleteCheatMenu\Targeting\ProjectileBindings.cs
+RED_EXIT=1

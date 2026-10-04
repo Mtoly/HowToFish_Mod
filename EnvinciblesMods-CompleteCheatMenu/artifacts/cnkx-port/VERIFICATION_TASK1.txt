@@ -1,0 +1,67 @@
+CompleteCheatMenu cnKX port - Task 1 verification
+DATE=2026-08-25
+TASK=保存基线与生成绑定清单
+STATUS=COMPLETE
+
+CHANGED_BRANCH_OR_FIELD
+- GameBinder.FirstField: 按给定精确候选字段名返回首个已解析字段。
+- GameBinder.FirstProperty: 按给定精确候选属性名返回首个已解析属性。
+- GameBinder.FirstMethod: 按给定精确候选方法名和参数数量返回首个已解析方法。
+- tools/inspect_game_bindings.ps1: 生成文件基线和程序集绑定清单。
+
+ARTIFACTS
+- MODIFIED_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Game\GameBinder.cs
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task1-gamebinder.diff
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK1.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK1.sh
+- WINDOWS_ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK1.ps1
+- BASELINE_JSON: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\baseline.json
+- BINDING_INVENTORY: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\binding-inventory.txt
+- ORIGINAL_SOURCE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\original-src\GameBinder.cs
+
+BASELINE
+COMMAND=& .\decompiled-src\build.ps1
+INPUT=GameBinder.cs restored from artifacts\cnkx-port\original-src\GameBinder.cs
+LITERAL_RESULT=SHA256 7F8C89B1C4E0CA77A49CAC3B29A8CCDAB0F02485FB3981AEDC589663CF705424
+LITERAL_RESULT=3 compiler warnings; 0 compiler errors
+EXIT_STATUS=0
+SOURCE_SHA256=161300E1A8A5AAD437171B43A4FEF012222D86748C09278EFA6DF2F4BBACCDAC
+
+MODIFIED
+COMMAND=& .\decompiled-src\build.ps1
+INPUT=GameBinder.cs with FirstField/FirstProperty/FirstMethod
+LITERAL_RESULT=SHA256 044A0852B599CEA23511AADF9AECEE83973529D2E2051DB02ECA366B584DD2F4
+LITERAL_RESULT=3 compiler warnings; 0 compiler errors
+EXIT_STATUS=0
+SOURCE_SHA256=73788094C7B3B045E5B97569D976DF282E36EB0E02F970557AEAC4339D65A56B
+RESTORED_BEHAVIOR=Existing exact Field/Property/Method APIs remain unchanged; new candidate APIs are additive.
+
+BINDING_INVENTORY
+COMMAND=& .\tools\inspect_game_bindings.ps1
+INPUT=Assembly-CSharp.dll and Unity managed assemblies under the configured game directory
+LITERAL_OUTPUT=BINDING_INVENTORY=PASS
+LITERAL_OUTPUT=REQUIRED_MISSING=0
+LITERAL_OUTPUT=OPTIONAL_UNRESOLVED=0
+LITERAL_OUTPUT=DEPLOYED_VERSION=0.7.0+optimized-aim
+EXIT_STATUS=0
+ASSEMBLY_CSHARP_SHA256=FA8C6F47874E69FE07B9C978F35CC05372DF2BDD3535DE5F5FAC355F999A5762
+DEPLOYED_DLL_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+
+ROLLBACK
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK1.ps1 -Destination .\artifacts\cnkx-port\rollback-task1-test.cs
+INPUT=Independent copy of modified GameBinder.cs
+LITERAL_OUTPUT=ROLLBACK_SHA256=161300E1A8A5AAD437171B43A4FEF012222D86748C09278EFA6DF2F4BBACCDAC
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=Test copy restored byte-for-byte to the original GameBinder.cs; working MODIFIED_FILE remains changed.
+
+DIFF
+LINES=75
+SHA256=D486866BD7A3AA0A7010046055E299253704236F14880FE98CCBCE6EA92300BE
+
+PLAN_MARK
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+RESULT=Task 1 marked complete with evidence path.
+
+GIT
+RESULT=SKIPPED_NOT_A_GIT_REPOSITORY

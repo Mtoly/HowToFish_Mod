@@ -1,0 +1,116 @@
+CompleteCheatMenu cnKX port - Task 4 verification
+DATE=2026-08-25
+TASK=拆分 ESP 与自瞄快照
+STATUS=COMPLETE
+
+CHANGED_BRANCH_OR_FIELD
+- EspSnapshot.Creatures/Players/Items/Containers: ESP 独立四类缓存。
+- EspSnapshot.Revision: 兼容绘制列表只在快照变化时重建。
+- EspSnapshotBuilder.Refresh: 只读取 EntityRegistry，不读取或修改自瞄状态。
+- TargetingSnapshot.Refresh: 只暴露生物和玩家注册表视图，不读取或清空 ESP。
+- WeaponCheats.FindTarget: 移除 VisualCheats.Rescan 和 VisualCheats.Targets 依赖。
+- VisualCheats.Rescan: 改为 EspSnapshotBuilder 的兼容转换层。
+- TickDriver: 每秒执行一次实体销毁清理。
+
+ARTIFACTS
+- MODIFIED_FILE_1: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\EspSnapshot.cs
+- MODIFIED_FILE_2: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\EspSnapshotBuilder.cs
+- MODIFIED_FILE_3: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\TargetingSnapshot.cs
+- MODIFIED_FILE_4: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Cheats\VisualCheats.cs
+- MODIFIED_FILE_5: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\TickDriver.cs
+- MODIFIED_FILE_6: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Cheats\WeaponCheats.cs
+- TEST_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\snapshot_isolation_test.py
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task4-snapshot-isolation.diff
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK4.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK4.sh
+- WINDOWS_ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK4.ps1
+- ORIGINAL_SOURCE_DIR: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task4-original-src
+
+BASELINE_BUILD
+COMMAND=Roslyn csc with Task 3 source, original VisualCheats.cs/TickDriver.cs/WeaponCheats.cs, Task 4 new files excluded
+INPUT=Task 3 completed source baseline
+LITERAL_OUTPUT=3 compiler warnings; 0 compiler errors
+LITERAL_OUTPUT=BASELINE_BUILD_EXIT=0
+LITERAL_OUTPUT=BASELINE_DLL_SHA256=7C9106B0101D4F60AF7E78C7527F297D43B89809D0A7C8733C39954255906082
+EXIT_STATUS=0
+
+MODIFIED_BUILD
+COMMAND=& .\decompiled-src\build.ps1
+INPUT=独立 ESP/Targeting 快照及兼容转换层
+LITERAL_OUTPUT=2 compiler warnings; 0 compiler errors
+LITERAL_OUTPUT=MODIFIED_BUILD_EXIT=0
+LITERAL_OUTPUT=MODIFIED_DLL_SHA256=D4A9781519809D497258A852D14113AF6AF8B43583A85C04C764BDE9828C3BA9
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=VisualCheats.Targets 继续为 EspRenderer 提供旧格式列表；WeaponCheats 的过滤、评分和锁定行为保持不变。
+
+SNAPSHOT_ISOLATION_TEST
+COMMAND=python .\tests\snapshot_isolation_test.py
+INPUT=生物 2、玩家 2、物品 2、容器 1；分别执行玩家自瞄刷新和生物自瞄刷新
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+EXIT_STATUS=0
+OBSERVED_RESULT=两次自瞄刷新后 ESP 四类数量保持 (2,2,2,1)。
+
+ENTITY_REGRESSION_TEST
+COMMAND=python .\tests\entity_registry_test.py
+INPUT=注册、去重、清理、独立刷新和扫描失败缓存保留
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+EXIT_STATUS=0
+
+AIM_REGRESSION_TEST
+COMMAND=python .\tests\aim_scoring_test.py
+INPUT=现有 9 个过滤、评分和锁定用例
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+
+ASSEMBLY_TYPE_CHECK
+COMMAND=dnfile TypeDef inspection on artifacts\CompleteCheatMenu.dll
+INPUT=修改版程序集
+LITERAL_OUTPUT=TYPE_EspSnapshot=True
+LITERAL_OUTPUT=TYPE_EspSnapshotBuilder=True
+LITERAL_OUTPUT=TYPE_TargetingSnapshot=True
+EXIT_STATUS=0
+
+ROLLBACK_POWERSHELL
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK4.ps1 -DestinationRoot .\artifacts\cnkx-port\rollback-task4-test
+INPUT=包含全部 Task 4 修改文件的独立目录
+LITERAL_OUTPUT=VISUAL_SHA256=8EB9250EC1A39203F45078A8BAF743A59647C3AE35828B5E38DB971118DD3556
+LITERAL_OUTPUT=TICK_SHA256=2AA41CC3F5DE2C4AA6111EEFABEB6D0A7E980362B2B04CA50E278B4D305C394C
+LITERAL_OUTPUT=WEAPON_SHA256=D9FF172F97F8A4CAFB4EA2FFF7E2E36033191994028DFA83B61DAD49440D3916
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=三个既有文件恢复 Task 3 字节，四个 Task 4 新文件被移除；工作目录继续保留修改版。
+
+ROLLBACK_BASH
+COMMAND=ROLLBACK_TASK4.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-task4-test-sh
+INPUT=第二个独立修改副本
+LITERAL_OUTPUT=VISUAL_SHA256=8EB9250EC1A39203F45078A8BAF743A59647C3AE35828B5E38DB971118DD3556
+LITERAL_OUTPUT=TICK_SHA256=2AA41CC3F5DE2C4AA6111EEFABEB6D0A7E980362B2B04CA50E278B4D305C394C
+LITERAL_OUTPUT=WEAPON_SHA256=D9FF172F97F8A4CAFB4EA2FFF7E2E36033191994028DFA83B61DAD49440D3916
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+
+MODIFIED_SOURCE_HASHES
+- EspSnapshot.cs=D9274B6C5161C5547A5CA776C11B6DEEC4E0D4320A60BA8FFBEAE283DA5F2D28
+- EspSnapshotBuilder.cs=65971BAE57D02DAF3E2790607579EC6051DF2CA17545307B54077938CF13A548
+- TargetingSnapshot.cs=A06CF87F01CEBD279E79ACF101798CA40773B9190D48C7718D1AFF03132BF501
+- VisualCheats.cs=99BA8985A9A8D25BFF6EA8554F560344FA2F6AA9E5BB5286E544B30AF475A301
+- TickDriver.cs=C0E7760C49980B50EAA316DCA0BCEE88881DA47CCA7E0A6F4480E56CE7818AF4
+- WeaponCheats.cs=77F5BC19FE6D7F5ECC0E37F56728FCA811C58A98BAE675282C3F63798527274D
+- snapshot_isolation_test.py=6916348C59CEAEE39AF143EF3FC113493FFA9EA6DFDA8C40736352054978201F
+
+DIFF
+LINES=510
+SHA256=82DCB9CA742420531B4850A4F109F93E1DEAD478A596ED81E4A5B859AB164394
+
+PLAN_MARK
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+RESULT=Task 4 marked complete with evidence path.
+
+DEPLOYMENT
+RESULT=NOT_DEPLOYED_GATE_A_IN_PROGRESS
+DEPLOYED_DLL_UNCHANGED_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+
+GIT
+RESULT=SKIPPED_NOT_A_GIT_REPOSITORY

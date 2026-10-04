@@ -1,0 +1,5 @@
+decompiled-src\CompleteCheatMenu\Targeting\ProjectileSpawnRegistration.cs(15,15): warning CS0649: 从未对字段“ProjectileSpawnState.Count”赋值，字段将一直保持其默认值 0
+decompiled-src\CompleteCheatMenu\Targeting\ProjectileSpawnRegistration.cs(9,16): warning CS0649: 从未对字段“ProjectileSpawnState.Active”赋值，字段将一直保持其默认值 false
+decompiled-src\CompleteCheatMenu\Targeting\ProjectileSpawnRegistration.cs(11,18): warning CS0649: 从未对字段“ProjectileSpawnState.Owner”赋值，字段将一直保持其默认值 null
+decompiled-src\CompleteCheatMenu\Targeting\ProjectileSpawnRegistration.cs(17,26): warning CS0649: 从未对字段“ProjectileSpawnState.Target”赋值，字段将一直保持其默认值 null
+decompiled-src\CompleteCheatMenu\Targeting\ProjectileSpawnRegistration.cs(13,16): warning CS0649: 从未对字段“ProjectileSpawnState.BaseId”赋值，字段将一直保持其默认值 0

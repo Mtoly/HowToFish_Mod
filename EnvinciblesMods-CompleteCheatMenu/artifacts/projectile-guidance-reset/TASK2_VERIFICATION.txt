@@ -1,0 +1,69 @@
+TASK=Task 2 extend projectile registration metadata
+DATE=2026-09-04
+STATUS=PASS
+
+CHANGED_BRANCH_OR_FIELD
+- ProjectileLaunchData stores RawVelocity and LaunchVelocity.
+- ProjectileTracker stores object and ID fallback launch metadata and exposes TryGetLaunchData.
+- Single projectile patch snapshots raw velocity before redirect and launch velocity after redirect.
+- Multi-projectile patch clones raw velocity array and stores per-projectile launch snapshots.
+- Registration forwards metadata through RegisterCreated/RegisterCreatedRange.
+
+FOUR_PRIMARY_ARTIFACTS
+MODIFIED_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\ProjectileTracker.cs
+DIFF_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\task2-source.patch
+VERIFICATION=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\TASK2_VERIFICATION.txt
+ROLLBACK=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\ROLLBACK_TASK2.sh
+
+BASELINE
+COMMAND=git diff --no-index --no-color task2-baseline-source versus decompiled-src sources
+INPUT=4 pre-Task-2 source snapshots
+LITERAL_OUTPUT=TASK2_DIFF_LINES=241
+LITERAL_OUTPUT=TASK2_DIFF_SHA256=5CBA70B4E0C3BBD4FED1039A7293F55F9503FAB79F999D706EBC343D219D3112
+EXIT_STATUS=0
+
+TESTS
+COMMAND=python tests/projectile_spawn_metadata_test.py
+INPUT=source metadata contracts
+LITERAL_OUTPUT=PROJECTILE_SPAWN_METADATA_TESTS=PASS cases=4
+EXIT_STATUS=0
+COMMAND=python tests/projectile_initial_velocity_test.py
+INPUT=single/multi redirect regression
+LITERAL_OUTPUT=PROJECTILE_INITIAL_VELOCITY_TESTS=PASS cases=5
+EXIT_STATUS=0
+COMMAND=python tests/projectile_lifecycle_test.py
+INPUT=ownership/tracker regression
+LITERAL_OUTPUT=PROJECTILE_LIFECYCLE_TESTS=PASS cases=5
+EXIT_STATUS=0
+COMMAND=python tests/projectile_guidance_test.py
+INPUT=guidance regression
+LITERAL_OUTPUT=PROJECTILE_GUIDANCE_TESTS=PASS cases=5
+EXIT_STATUS=0
+
+BUILD
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File decompiled-src/build.ps1 -GameRoot "E:\SteamLibrary\steamapps\common\How to Fish\How to Fish" -OutputPath artifacts/projectile-guidance-reset/CompleteCheatMenu.task2.dll
+INPUT=97 sorted C# source files and game references
+LITERAL_OUTPUT=BUILD_OUTPUT=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\CompleteCheatMenu.task2.dll
+LITERAL_OUTPUT=BUILD_SOURCE_COUNT=97
+LITERAL_OUTPUT=BUILD_SHA256=92863E1C9D1588A4B6376B76699476D9058BCE748CB60FFBF99CA0135EC62DF6
+LITERAL_OUTPUT=BUILD_EXIT=0
+EXIT_STATUS=0
+
+ROLLBACK
+COMMAND=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\ROLLBACK_TASK2.sh executed against independent task2-rollback-test2 directory
+INPUT=modified source copies; baseline source directory D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\task2-baseline-source
+LITERAL_OUTPUT=ROLLBACK_ALL_MATCH=True
+LITERAL_OUTPUT=ROLLBACK_EXIT=0
+EXIT_STATUS=0
+
+TASK_RESULT
+TASK2=COMPLETE
+RAW_AND_LAUNCH_METADATA=PASS
+MULTI_PROJECTILE_SNAPSHOTS=PASS
+REGRESSION_TESTS=PASS
+BUILD=PASS
+PRODUCTION_DEPLOYMENT=NOT_PERFORMED
+NEXT=Task 3 add Caijue lifecycle checks before target position/velocity reads
+
+RESTORED_STATUS
+Independent source-copy rollback restored all four baseline files exactly. The modified source remains in decompiled-src and the Task 2 DLL remains in artifacts.

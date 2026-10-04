@@ -1,0 +1,1098 @@
+--- a/decompiled-src/CompleteCheatMenu/Runtime/EspRenderer.cs
++++ b/decompiled-src/CompleteCheatMenu/Runtime/EspRenderer.cs
+@@ -1,124 +1,9 @@
+-using CompleteCheatMenu.Cheats;
+-using CompleteCheatMenu.Game;
+-using CompleteCheatMenu.UI;
+-using UnityEngine;
+-
+ namespace CompleteCheatMenu.Runtime;
+ 
+ internal static class EspRenderer
+ {
+-	private static Texture2D _pixel;
+-
+-	private static GUIStyle _label;
+-
+-	private static Texture2D Pixel
+-	{
+-		get
+-		{
+-			if (_pixel != null)
+-			{
+-				return _pixel;
+-			}
+-			_pixel = new Texture2D(1, 1)
+-			{
+-				hideFlags = HideFlags.HideAndDontSave
+-			};
+-			_pixel.SetPixel(0, 0, Color.white);
+-			_pixel.Apply();
+-			return _pixel;
+-		}
+-	}
+-
+ 	internal static void Draw()
+ 	{
+-		if (!CheatState.EspEnabled)
+-		{
+-			return;
+-		}
+-		Camera currentCamera = Refs.CurrentCamera;
+-		if (currentCamera == null)
+-		{
+-			return;
+-		}
+-		if (_label == null)
+-		{
+-			_label = new GUIStyle(GUI.skin.label)
+-			{
+-				fontSize = 11,
+-				alignment = TextAnchor.MiddleCenter
+-			};
+-		}
+-		float num = CheatState.EspDistance * CheatState.EspDistance;
+-		Vector3 position = currentCamera.transform.position;
+-		foreach (VisualCheats.EspTarget target in VisualCheats.Targets)
+-		{
+-			if (target.Transform == null)
+-			{
+-				continue;
+-			}
+-			Vector3 position2 = target.Transform.position;
+-			if ((position2 - position).sqrMagnitude > num)
+-			{
+-				continue;
+-			}
+-			Vector3 vector = currentCamera.WorldToScreenPoint(position2);
+-			if (!(vector.z <= 0f))
+-			{
+-				float x = vector.x;
+-				float num2 = (float)Screen.height - vector.y;
+-				Color color = ColorFor(target.Kind);
+-				float z = vector.z;
+-				float num3 = Mathf.Clamp(600f / Mathf.Max(z, 1f), 10f, 90f);
+-				DrawBox(new Rect(x - num3 / 2f, num2 - num3 / 2f, num3, num3), color);
+-				if (CheatState.EspLabels)
+-				{
+-					_label.normal.textColor = color;
+-					string text = (CheatState.EspDistanceLabels ? $"{target.Label}  {z:0}m" : target.Label);
+-					GUI.Label(new Rect(x - 100f, num2 - num3 / 2f - 18f, 200f, 16f), text, _label);
+-				}
+-				if (CheatState.EspTracers)
+-				{
+-					DrawLine(new Vector2((float)Screen.width / 2f, Screen.height), new Vector2(x, num2), color, 1f);
+-				}
+-			}
+-		}
+-	}
+-
+-	private static Color ColorFor(VisualCheats.EspKind kind)
+-	{
+-		return kind switch
+-		{
+-			VisualCheats.EspKind.Creature => Theme.Accent, 
+-			VisualCheats.EspKind.Player => Theme.Danger, 
+-			_ => new Color(0.85f, 0.78f, 0.35f), 
+-		};
+-	}
+-
+-	private static void DrawBox(Rect r, Color color, float thickness = 1.5f)
+-	{
+-		Color color2 = GUI.color;
+-		GUI.color = color;
+-		GUI.DrawTexture(new Rect(r.x, r.y, r.width, thickness), Pixel);
+-		GUI.DrawTexture(new Rect(r.x, r.yMax - thickness, r.width, thickness), Pixel);
+-		GUI.DrawTexture(new Rect(r.x, r.y, thickness, r.height), Pixel);
+-		GUI.DrawTexture(new Rect(r.xMax - thickness, r.y, thickness, r.height), Pixel);
+-		GUI.color = color2;
+-	}
+-
+-	private static void DrawLine(Vector2 from, Vector2 to, Color color, float width)
+-	{
+-		Color color2 = GUI.color;
+-		Matrix4x4 matrix = GUI.matrix;
+-		Vector2 vector = to - from;
+-		float magnitude = vector.magnitude;
+-		if (!(magnitude < 0.01f))
+-		{
+-			float angle = Mathf.Atan2(vector.y, vector.x) * 57.29578f;
+-			GUI.color = color;
+-			GUIUtility.RotateAroundPivot(angle, from);
+-			GUI.DrawTexture(new Rect(from.x, from.y - width / 2f, magnitude, width), Pixel);
+-			GUI.matrix = matrix;
+-			GUI.color = color2;
+-		}
++		EspRendererV2.Draw();
+ 	}
+ }
+--- a/decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
++++ b/decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
+@@ -174,6 +174,24 @@
+ 
+ 	internal static bool EspTracers;
+ 
++	internal static bool EspBoxes = true;
++
++	internal static bool EspSkeletons;
++
++	internal static bool EspHealthBars = true;
++
++	internal static bool EspTypeInfo = true;
++
++	internal static bool EspVisibilityInfo;
++
++	internal static bool EspHeldItemInfo = true;
++
++	internal static bool EspItemValueInfo = true;
++
++	internal static bool EspContainerInfo = true;
++
++	internal static bool EspAimCircle = true;
++
+ 	internal static bool EspLabels = true;
+ 
+ 	internal static bool EspDistanceLabels = true;
+--- a/decompiled-src/CompleteCheatMenu/Plugin.cs
++++ b/decompiled-src/CompleteCheatMenu/Plugin.cs
+@@ -71,6 +71,7 @@
+ 	private void OnDestroy()
+ 	{
+ 		SafeRun(WeaponCheats.RestoreAllWeapons, "restore weapons");
++		SafeRun(GuiPrimitives.Dispose, "dispose esp gui");
+ 		if (VisualCheats.FreeCamActive)
+ 		{
+ 			VisualCheats.ToggleFreeCam(on: false);
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Runtime/EspRendererV2.cs
+@@ -0,0 +1,595 @@
++using System;
++using System.Collections;
++using System.Collections.Generic;
++using System.Reflection;
++using CompleteCheatMenu.Cheats;
++using CompleteCheatMenu.Game;
++using CompleteCheatMenu.Targeting;
++using CompleteCheatMenu.UI;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Runtime;
++
++internal static class EspRendererV2
++{
++	private sealed class GeometryEntry
++	{
++		internal Renderer[] Renderers;
++		internal Animator Animator;
++		internal float ExpiresAt;
++	}
++
++	private struct VisibilityEntry
++	{
++		internal bool Visible;
++		internal float ExpiresAt;
++	}
++
++	private static readonly Color OccludedColor = new Color(0.72f, 0.34f, 0.78f, 0.95f);
++	private static readonly Color ItemColor = new Color(0.85f, 0.78f, 0.35f, 0.95f);
++	private static readonly Color ContainerColor = new Color(0.35f, 0.78f, 0.92f, 0.95f);
++	private static readonly Color TargetColor = new Color(1f, 0.84f, 0.15f, 1f);
++	private static readonly string[] CurrentHealthNames = { "Health", "CurrentHealth", "CurHealth", "_health", "_currentHealth", "_curHealth" };
++	private static readonly string[] MaxHealthNames = { "MaxHealth", "MaximumHealth", "_maxHealth", "_maximumHealth" };
++	private static readonly Vector3[] CornerBuffer = new Vector3[8];
++	private static readonly HumanBodyBones[,] HumanoidSegments = new HumanBodyBones[,]
++	{
++		{ HumanBodyBones.Head, HumanBodyBones.Neck },
++		{ HumanBodyBones.Neck, HumanBodyBones.Chest },
++		{ HumanBodyBones.Chest, HumanBodyBones.Hips },
++		{ HumanBodyBones.Chest, HumanBodyBones.LeftUpperArm },
++		{ HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm },
++		{ HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand },
++		{ HumanBodyBones.Chest, HumanBodyBones.RightUpperArm },
++		{ HumanBodyBones.RightUpperArm, HumanBodyBones.RightLowerArm },
++		{ HumanBodyBones.RightLowerArm, HumanBodyBones.RightHand },
++		{ HumanBodyBones.Hips, HumanBodyBones.LeftUpperLeg },
++		{ HumanBodyBones.LeftUpperLeg, HumanBodyBones.LeftLowerLeg },
++		{ HumanBodyBones.LeftLowerLeg, HumanBodyBones.LeftFoot },
++		{ HumanBodyBones.Hips, HumanBodyBones.RightUpperLeg },
++		{ HumanBodyBones.RightUpperLeg, HumanBodyBones.RightLowerLeg },
++		{ HumanBodyBones.RightLowerLeg, HumanBodyBones.RightFoot }
++	};
++	private static readonly Dictionary<int, GeometryEntry> GeometryCache = new Dictionary<int, GeometryEntry>();
++	private static readonly Dictionary<int, VisibilityEntry> EspVisibilityCache = new Dictionary<int, VisibilityEntry>();
++	private static GUIStyle _label;
++	private static float _nextCachePrune;
++
++	internal static void Draw()
++	{
++		if (Event.current == null || Event.current.type != EventType.Repaint)
++		{
++			return;
++		}
++		Camera camera = Refs.CurrentCamera;
++		if (camera == null)
++		{
++			return;
++		}
++		EnsureStyle();
++		EspSnapshot snapshot = EspSnapshotBuilder.Refresh(CheatState.EspCreatures, CheatState.EspItems, CheatState.EspPlayers);
++		if (CheatState.EspAimCircle && CheatState.Aimbot)
++		{
++			GuiPrimitives.DrawCircle(new Vector2(Screen.width * 0.5f, Screen.height * 0.5f), Mathf.Max(1f, CheatState.AimScreenRadius), new Color(1f, 1f, 1f, 0.55f), 1f);
++		}
++		if (!CheatState.EspEnabled)
++		{
++			return;
++		}
++		float maxDistanceSquared = CheatState.EspDistance * CheatState.EspDistance;
++		DrawList(snapshot.Creatures, camera, maxDistanceSquared);
++		DrawList(snapshot.Players, camera, maxDistanceSquared);
++		DrawList(snapshot.Items, camera, maxDistanceSquared);
++		DrawList(snapshot.Containers, camera, maxDistanceSquared);
++		PruneCaches();
++	}
++
++	private static void EnsureStyle()
++	{
++		if (_label == null)
++		{
++			_label = new GUIStyle(GUI.skin.label)
++			{
++				fontSize = 11,
++				alignment = TextAnchor.MiddleCenter,
++				wordWrap = false
++			};
++		}
++	}
++
++	private static void DrawList(IReadOnlyList<EntityRecord> records, Camera camera, float maxDistanceSquared)
++	{
++		for (int i = 0; i < records.Count; i++)
++		{
++			EntityRecord record = records[i];
++			if (!record.IsAlive || ReferenceEquals(record.Entity, Refs.LocalPlayer))
++			{
++				continue;
++			}
++			Vector3 delta = record.Transform.position - camera.transform.position;
++			if (delta.sqrMagnitude > maxDistanceSquared)
++			{
++				continue;
++			}
++			DrawRecord(record, camera, delta.magnitude);
++		}
++	}
++
++	private static void DrawRecord(EntityRecord record, Camera camera, float distance)
++	{
++		GeometryEntry geometry = GetGeometry(record);
++		Bounds bounds;
++		bool hasBounds = TryResolveCachedBounds(geometry, out bounds);
++		Rect rect;
++		if (!(hasBounds ? TryProjectBounds(camera, bounds, out rect) : TryProjectFallback(camera, record.Transform, out rect)))
++		{
++			return;
++		}
++		if (!OverlapsScreen(rect))
++		{
++			return;
++		}
++		Vector3 focus = hasBounds ? bounds.center : record.Transform.position + record.Transform.up * 0.8f;
++		bool visible = IsVisible(record, camera, focus);
++		bool currentTarget = IsCurrentTarget(record);
++		Color color = currentTarget ? TargetColor : ColorFor(record.Kind, visible);
++		if (CheatState.EspBoxes)
++		{
++			GuiPrimitives.DrawBox(rect, color, currentTarget ? 3f : 1.5f);
++		}
++		if (CheatState.EspTracers)
++		{
++			GuiPrimitives.DrawLine(new Vector2(Screen.width * 0.5f, Screen.height), new Vector2(rect.center.x, rect.yMax), color, currentTarget ? 2f : 1f);
++		}
++		if (CheatState.EspSkeletons && (record.Kind == EntityKind.Player || record.Kind == EntityKind.Creature))
++		{
++			try
++			{
++				DrawSkeleton(camera, record.Transform, geometry.Animator, record.Kind == EntityKind.Player, color);
++			}
++			catch
++			{
++				DrawResolvedSkeleton(camera, record.Transform, record.Kind == EntityKind.Player, color);
++			}
++		}
++		if (CheatState.EspHealthBars && TryReadHealth(record.Entity, out var currentHealth, out var maxHealth))
++		{
++			GuiPrimitives.DrawBar(new Rect(rect.x - 7f, rect.y, 4f, rect.height), currentHealth / maxHealth, Color.Lerp(Color.red, Color.green, Mathf.Clamp01(currentHealth / maxHealth)), new Color(0f, 0f, 0f, 0.75f));
++		}
++		if (CheatState.EspLabels)
++		{
++			string label = BuildLabel(record, distance, visible);
++			GuiPrimitives.DrawLabel(new Rect(rect.center.x - 180f, rect.y - 20f, 360f, 18f), label, _label, color);
++		}
++	}
++
++	internal static bool TryProjectBounds(Camera camera, Bounds bounds, out Rect rect)
++	{
++		rect = default(Rect);
++		Vector3[] corners = GetCorners(bounds);
++		float minX = float.PositiveInfinity;
++		float minY = float.PositiveInfinity;
++		float maxX = float.NegativeInfinity;
++		float maxY = float.NegativeInfinity;
++		for (int i = 0; i < corners.Length; i++)
++		{
++			Vector3 projected = camera.WorldToScreenPoint(corners[i]);
++			if (projected.z <= 0.01f || !IsFinite(projected))
++			{
++				return false;
++			}
++			float guiY = Screen.height - projected.y;
++			minX = Mathf.Min(minX, projected.x);
++			maxX = Mathf.Max(maxX, projected.x);
++			minY = Mathf.Min(minY, guiY);
++			maxY = Mathf.Max(maxY, guiY);
++		}
++		if (maxX - minX < 1f || maxY - minY < 1f)
++		{
++			return false;
++		}
++		rect = Rect.MinMaxRect(minX, minY, maxX, maxY);
++		return true;
++	}
++
++	internal static Vector3[] GetCorners(Bounds bounds)
++	{
++		Vector3 center = bounds.center;
++		Vector3 extents = bounds.extents;
++		CornerBuffer[0] = center + new Vector3(-extents.x, -extents.y, -extents.z);
++		CornerBuffer[1] = center + new Vector3(-extents.x, -extents.y, extents.z);
++		CornerBuffer[2] = center + new Vector3(-extents.x, extents.y, -extents.z);
++		CornerBuffer[3] = center + new Vector3(-extents.x, extents.y, extents.z);
++		CornerBuffer[4] = center + new Vector3(extents.x, -extents.y, -extents.z);
++		CornerBuffer[5] = center + new Vector3(extents.x, -extents.y, extents.z);
++		CornerBuffer[6] = center + new Vector3(extents.x, extents.y, -extents.z);
++		CornerBuffer[7] = center + new Vector3(extents.x, extents.y, extents.z);
++		return CornerBuffer;
++	}
++
++	internal static bool TryProjectFallback(Camera camera, Transform root, out Rect rect)
++	{
++		rect = default(Rect);
++		if (root == null)
++		{
++			return false;
++		}
++		Vector3 bottom = camera.WorldToScreenPoint(root.position);
++		Vector3 top = camera.WorldToScreenPoint(root.position + Vector3.up * 1.8f);
++		if (bottom.z <= 0.01f || top.z <= 0.01f || !IsFinite(bottom) || !IsFinite(top))
++		{
++			return false;
++		}
++		float bottomY = Screen.height - bottom.y;
++		float topY = Screen.height - top.y;
++		float height = Mathf.Abs(bottomY - topY);
++		if (height < 1f)
++		{
++			return false;
++		}
++		float width = height * 0.5f;
++		float centerX = (bottom.x + top.x) * 0.5f;
++		rect = new Rect(centerX - width * 0.5f, Mathf.Min(bottomY, topY), width, height);
++		return true;
++	}
++
++	private static bool OverlapsScreen(Rect rect)
++	{
++		return rect.xMax >= 0f && rect.yMax >= 0f && rect.x <= Screen.width && rect.y <= Screen.height;
++	}
++
++	private static bool IsVisible(EntityRecord record, Camera camera, Vector3 point)
++	{
++		TargetSolution current = WeaponCheats.CurrentTarget;
++		if (current != null && (ReferenceEquals(current.Entity, record.Entity) || current.Transform == record.Transform || (current.Transform != null && (current.Transform.IsChildOf(record.Transform) || record.Transform.IsChildOf(current.Transform)))))
++		{
++			return current.Visible;
++		}
++		float now = Time.unscaledTime;
++		if (EspVisibilityCache.TryGetValue(record.InstanceId, out var cached) && now <= cached.ExpiresAt)
++		{
++			return cached.Visible;
++		}
++		Transform target = record.Transform;
++		Vector3 origin = camera.transform.position;
++		Vector3 direction = point - origin;
++		float distance = direction.magnitude;
++		if (distance <= 0.01f)
++		{
++			return CacheVisibility(record.InstanceId, true, now);
++		}
++		if (!Physics.Raycast(origin, direction / distance, out var hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
++		{
++			return CacheVisibility(record.InstanceId, true, now);
++		}
++		Transform hitTransform = hit.transform;
++		bool visible = hitTransform == target || (hitTransform != null && (hitTransform.IsChildOf(target) || target.IsChildOf(hitTransform)));
++		return CacheVisibility(record.InstanceId, visible, now);
++	}
++
++	private static bool CacheVisibility(int instanceId, bool visible, float now)
++	{
++		EspVisibilityCache[instanceId] = new VisibilityEntry
++		{
++			Visible = visible,
++			ExpiresAt = now + 0.05f
++		};
++		return visible;
++	}
++
++	private static bool IsCurrentTarget(EntityRecord record)
++	{
++		TargetSolution current = WeaponCheats.CurrentTarget;
++		if (current == null)
++		{
++			return false;
++		}
++		return ReferenceEquals(current.Entity, record.Entity) || current.Transform == record.Transform || (current.Transform != null && (current.Transform.IsChildOf(record.Transform) || record.Transform.IsChildOf(current.Transform)));
++	}
++
++	private static Color ColorFor(EntityKind kind, bool visible)
++	{
++		if (!visible)
++		{
++			return OccludedColor;
++		}
++		return kind switch
++		{
++			EntityKind.Creature => Theme.Accent,
++			EntityKind.Player => Theme.Danger,
++			EntityKind.Container => ContainerColor,
++			_ => ItemColor
++		};
++	}
++
++	private static void DrawSkeleton(Camera camera, Transform root, Animator animator, bool player, Color color)
++	{
++		if (player && animator != null && animator.isHuman && animator.avatar != null && animator.avatar.isValid)
++		{
++			DrawHumanoidSkeleton(camera, animator, color);
++			return;
++		}
++		DrawResolvedSkeleton(camera, root, player, color);
++	}
++
++	private static void DrawResolvedSkeleton(Camera camera, Transform root, bool player, Color color)
++	{
++		List<AimPoint> points = BoneResolver.Resolve(root, player, 0.8f);
++		Vector3? head = FindPoint(points, "head");
++		Vector3? chest = FindPoint(points, "chest");
++		Vector3? pelvis = FindPoint(points, "pelvis");
++		if (head.HasValue && chest.HasValue)
++		{
++			DrawWorldLine(camera, head.Value, chest.Value, color);
++		}
++		if (chest.HasValue && pelvis.HasValue)
++		{
++			DrawWorldLine(camera, chest.Value, pelvis.Value, color);
++		}
++		if (pelvis.HasValue)
++		{
++			DrawWorldLine(camera, pelvis.Value, root.position, color);
++		}
++	}
++
++	private static void DrawHumanoidSkeleton(Camera camera, Animator animator, Color color)
++	{
++		for (int i = 0; i < HumanoidSegments.GetLength(0); i++)
++		{
++			Transform from = animator.GetBoneTransform(HumanoidSegments[i, 0]);
++			Transform to = animator.GetBoneTransform(HumanoidSegments[i, 1]);
++			if (from != null && to != null)
++			{
++				DrawWorldLine(camera, from.position, to.position, color);
++			}
++		}
++	}
++
++	private static Vector3? FindPoint(List<AimPoint> points, string token)
++	{
++		for (int i = 0; i < points.Count; i++)
++		{
++			if (points[i].Bone.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0)
++			{
++				return points[i].Position;
++			}
++		}
++		return null;
++	}
++
++	private static void DrawWorldLine(Camera camera, Vector3 from, Vector3 to, Color color)
++	{
++		Vector3 screenFrom = camera.WorldToScreenPoint(from);
++		Vector3 screenTo = camera.WorldToScreenPoint(to);
++		if (screenFrom.z <= 0.01f || screenTo.z <= 0.01f)
++		{
++			return;
++		}
++		GuiPrimitives.DrawLine(new Vector2(screenFrom.x, Screen.height - screenFrom.y), new Vector2(screenTo.x, Screen.height - screenTo.y), color, 1f);
++	}
++
++	private static bool TryReadHealth(object entity, out float current, out float maximum)
++	{
++		current = 0f;
++		maximum = 0f;
++		if (entity == null)
++		{
++			return false;
++		}
++		object source = ReadMember(entity, "Vitals") ?? entity;
++		return TryReadNumber(source, CurrentHealthNames, out current) && TryReadNumber(source, MaxHealthNames, out maximum) && maximum > 0f && current >= 0f;
++	}
++
++	private static string BuildLabel(EntityRecord record, float distance, bool visible)
++	{
++		string label = record.Name;
++		if (CheatState.EspTypeInfo && !string.Equals(record.Name, record.TypeName, StringComparison.OrdinalIgnoreCase))
++		{
++			label += " [" + record.TypeName + "]";
++		}
++		if (CheatState.EspDistanceLabels)
++		{
++			label += $"  {distance:0.0}m";
++		}
++		if (CheatState.EspVisibilityInfo)
++		{
++			label += visible ? "  可见" : "  遮挡";
++		}
++		string details = BuildDetails(record);
++		return string.IsNullOrEmpty(details) ? label : label + "  " + details;
++	}
++
++	private static string BuildDetails(EntityRecord record)
++	{
++		try
++		{
++			if (record.Kind == EntityKind.Player && CheatState.EspHeldItemInfo)
++			{
++				object holding = ReadMember(record.Entity, "Holding");
++				object held = ReadMember(holding, "HeldItem");
++				if (Refs.IsAlive(held))
++				{
++					return "手持: " + ObjectName(held);
++				}
++			}
++			if (record.Kind == EntityKind.Item && CheatState.EspItemValueInfo && record.Entity is Item)
++			{
++				int worth = ItemCheats.TotalWorth(record.Entity);
++				if (worth <= 0)
++				{
++					worth = ItemCheats.Worth(record.Entity);
++				}
++				if (worth > 0)
++				{
++					return "价值: " + worth;
++				}
++			}
++			if (record.Kind == EntityKind.Container && CheatState.EspContainerInfo)
++			{
++				object contents = ReadMember(record.Entity, "Items") ?? ReadMember(record.Entity, "Inventory") ?? ReadMember(record.Entity, "Contents");
++				if (contents is ICollection collection)
++				{
++					return "容器: " + collection.Count + " 项";
++				}
++			}
++		}
++		catch
++		{
++		}
++		return string.Empty;
++	}
++
++	private static string ObjectName(object value)
++	{
++		if (value is UnityEngine.Object obj && !string.IsNullOrEmpty(obj.name))
++		{
++			return obj.name;
++		}
++		return value?.GetType().Name ?? string.Empty;
++	}
++
++	private static object ReadMember(object instance, string name)
++	{
++		if (instance == null)
++		{
++			return null;
++		}
++		Type type = instance.GetType();
++		try
++		{
++			PropertyInfo property = type.GetProperty(name, GameBinder.Any);
++			if (property != null && property.GetIndexParameters().Length == 0)
++			{
++				return property.GetValue(instance);
++			}
++			FieldInfo field = type.GetField(name, GameBinder.Any);
++			return field?.GetValue(instance);
++		}
++		catch
++		{
++			return null;
++		}
++	}
++
++	private static bool TryReadNumber(object instance, string[] names, out float value)
++	{
++		value = 0f;
++		for (int i = 0; i < names.Length; i++)
++		{
++			object raw = ReadMember(instance, names[i]);
++			if (raw == null)
++			{
++				continue;
++			}
++			object unwrapped = ReadMember(raw, "Value") ?? raw;
++			try
++			{
++				value = Convert.ToSingle(unwrapped);
++				return !float.IsNaN(value) && !float.IsInfinity(value);
++			}
++			catch
++			{
++			}
++		}
++		return false;
++	}
++
++	private static bool IsFinite(Vector3 value)
++	{
++		return !float.IsNaN(value.x) && !float.IsInfinity(value.x) && !float.IsNaN(value.y) && !float.IsInfinity(value.y) && !float.IsNaN(value.z) && !float.IsInfinity(value.z);
++	}
++
++	private static GeometryEntry GetGeometry(EntityRecord record)
++	{
++		float now = Time.unscaledTime;
++		if (GeometryCache.TryGetValue(record.InstanceId, out var entry) && now <= entry.ExpiresAt)
++		{
++			return entry;
++		}
++		Renderer[] all = record.Transform.GetComponentsInChildren<Renderer>(includeInactive: false);
++		List<Renderer> usable = null;
++		for (int i = 0; i < all.Length; i++)
++		{
++			Renderer renderer = all[i];
++			if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy || IsEffectRenderer(renderer))
++			{
++				continue;
++			}
++			if (usable == null)
++			{
++				usable = new List<Renderer>(all.Length);
++			}
++			usable.Add(renderer);
++		}
++		entry = new GeometryEntry
++		{
++			Renderers = usable?.ToArray() ?? Array.Empty<Renderer>(),
++			Animator = record.Kind == EntityKind.Player ? record.Transform.GetComponentInChildren<Animator>(includeInactive: false) : null,
++			ExpiresAt = now + 1f
++		};
++		GeometryCache[record.InstanceId] = entry;
++		return entry;
++	}
++
++	private static bool IsEffectRenderer(Renderer renderer)
++	{
++		string typeName = renderer.GetType().Name;
++		return typeName == "ParticleSystemRenderer" || typeName == "TrailRenderer" || typeName == "LineRenderer";
++	}
++
++	private static bool TryResolveCachedBounds(GeometryEntry geometry, out Bounds bounds)
++	{
++		bounds = default(Bounds);
++		bool found = false;
++		Renderer[] renderers = geometry.Renderers;
++		for (int i = 0; i < renderers.Length; i++)
++		{
++			Renderer renderer = renderers[i];
++			if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy)
++			{
++				continue;
++			}
++			Bounds current = renderer.bounds;
++			if (!IsFinite(current.center) || !IsFinite(current.size) || current.size.sqrMagnitude <= 0.000001f)
++			{
++				continue;
++			}
++			if (!found)
++			{
++				bounds = current;
++				found = true;
++			}
++			else
++			{
++				bounds.Encapsulate(current);
++			}
++		}
++		return found;
++	}
++
++	private static void PruneCaches()
++	{
++		float now = Time.unscaledTime;
++		if (now < _nextCachePrune)
++		{
++			return;
++		}
++		_nextCachePrune = now + 2f;
++		List<int> expired = null;
++		foreach (KeyValuePair<int, GeometryEntry> pair in GeometryCache)
++		{
++			if (now > pair.Value.ExpiresAt + 2f)
++			{
++				(expired ??= new List<int>()).Add(pair.Key);
++			}
++		}
++		if (expired != null)
++		{
++			for (int i = 0; i < expired.Count; i++)
++			{
++				GeometryCache.Remove(expired[i]);
++				EspVisibilityCache.Remove(expired[i]);
++			}
++		}
++	}
++}
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Runtime/GuiPrimitives.cs
+@@ -0,0 +1,143 @@
++using UnityEngine;
++
++namespace CompleteCheatMenu.Runtime;
++
++internal static class GuiPrimitives
++{
++	private static Texture2D _pixel;
++
++	private static Texture2D Pixel
++	{
++		get
++		{
++			if (_pixel != null)
++			{
++				return _pixel;
++			}
++			_pixel = new Texture2D(1, 1)
++			{
++				hideFlags = HideFlags.HideAndDontSave
++			};
++			_pixel.SetPixel(0, 0, Color.white);
++			_pixel.Apply();
++			return _pixel;
++		}
++	}
++
++	internal static void DrawBox(Rect rect, Color color, float thickness = 1.5f)
++	{
++		Color previousColor = GUI.color;
++		Matrix4x4 previousMatrix = GUI.matrix;
++		try
++		{
++			GUI.color = color;
++			GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, thickness), Pixel);
++			GUI.DrawTexture(new Rect(rect.x, rect.yMax - thickness, rect.width, thickness), Pixel);
++			GUI.DrawTexture(new Rect(rect.x, rect.y, thickness, rect.height), Pixel);
++			GUI.DrawTexture(new Rect(rect.xMax - thickness, rect.y, thickness, rect.height), Pixel);
++		}
++		finally
++		{
++			GUI.matrix = previousMatrix;
++			GUI.color = previousColor;
++		}
++	}
++
++	internal static void DrawLine(Vector2 from, Vector2 to, Color color, float width = 1f)
++	{
++		Color previousColor = GUI.color;
++		Matrix4x4 previousMatrix = GUI.matrix;
++		try
++		{
++			Vector2 delta = to - from;
++			float length = delta.magnitude;
++			if (length < 0.01f)
++			{
++				return;
++			}
++			GUI.color = color;
++			GUIUtility.RotateAroundPivot(Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg, from);
++			GUI.DrawTexture(new Rect(from.x, from.y - width * 0.5f, length, width), Pixel);
++		}
++		finally
++		{
++			GUI.matrix = previousMatrix;
++			GUI.color = previousColor;
++		}
++	}
++
++	internal static void DrawCircle(Vector2 center, float radius, Color color, float width = 1f, int segments = 72)
++	{
++		Color previousColor = GUI.color;
++		Matrix4x4 previousMatrix = GUI.matrix;
++		try
++		{
++			if (radius <= 0.5f || segments < 3)
++			{
++				return;
++			}
++			float step = Mathf.PI * 2f / segments;
++			Vector2 previous = center + new Vector2(radius, 0f);
++			for (int i = 1; i <= segments; i++)
++			{
++				float angle = step * i;
++				Vector2 next = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
++				DrawLine(previous, next, color, width);
++				previous = next;
++			}
++		}
++		finally
++		{
++			GUI.matrix = previousMatrix;
++			GUI.color = previousColor;
++		}
++	}
++
++	internal static void DrawBar(Rect rect, float fraction, Color fill, Color background)
++	{
++		Color previousColor = GUI.color;
++		Matrix4x4 previousMatrix = GUI.matrix;
++		try
++		{
++			float clamped = Mathf.Clamp01(fraction);
++			GUI.color = background;
++			GUI.DrawTexture(rect, Pixel);
++			GUI.color = fill;
++			float height = rect.height * clamped;
++			GUI.DrawTexture(new Rect(rect.x + 1f, rect.yMax - height, Mathf.Max(1f, rect.width - 2f), height), Pixel);
++		}
++		finally
++		{
++			GUI.matrix = previousMatrix;
++			GUI.color = previousColor;
++		}
++	}
++
++	internal static void DrawLabel(Rect rect, string text, GUIStyle style, Color color)
++	{
++		Color previousColor = GUI.color;
++		Matrix4x4 previousMatrix = GUI.matrix;
++		Color previousText = style.normal.textColor;
++		try
++		{
++			GUI.color = Color.white;
++			style.normal.textColor = color;
++			GUI.Label(rect, text, style);
++		}
++		finally
++		{
++			style.normal.textColor = previousText;
++			GUI.matrix = previousMatrix;
++			GUI.color = previousColor;
++		}
++	}
++
++	internal static void Dispose()
++	{
++		if (_pixel != null)
++		{
++			Object.Destroy(_pixel);
++			_pixel = null;
++		}
++	}
++}
+--- /dev/null
++++ b/tests/cnkx_esp_projection_impl.py
+@@ -0,0 +1,51 @@
++import math
++
++
++def _project(point, screen, vertical_fov):
++    x, y, z = point
++    if z <= 0.01:
++        return None
++    width, height = screen
++    focal = (height * 0.5) / math.tan(math.radians(vertical_fov) * 0.5)
++    return (width * 0.5 + x * focal / z, height * 0.5 - y * focal / z)
++
++
++def project_bounds(center, extents, screen, vertical_fov):
++    corners = []
++    for sx in (-1.0, 1.0):
++        for sy in (-1.0, 1.0):
++            for sz in (-1.0, 1.0):
++                projected = _project(
++                    (
++                        center[0] + extents[0] * sx,
++                        center[1] + extents[1] * sy,
++                        center[2] + extents[2] * sz,
++                    ),
++                    screen,
++                    vertical_fov,
++                )
++                if projected is None:
++                    return None
++                corners.append(projected)
++    xs = [point[0] for point in corners]
++    ys = [point[1] for point in corners]
++    return (min(xs), min(ys), max(xs), max(ys))
++
++
++def fallback_rect(root, height, screen, vertical_fov, root_up=(0.0, 1.0, 0.0)):
++    bottom = _project(root, screen, vertical_fov)
++    # 生产实现固定使用世界竖直方向；root_up 只用于验证旋转不会改变结果。
++    top = _project((root[0], root[1] + height, root[2]), screen, vertical_fov)
++    if bottom is None or top is None:
++        return None
++    projected_height = abs(bottom[1] - top[1])
++    if projected_height <= 0.01:
++        return None
++    projected_width = projected_height * 0.5
++    center_x = (bottom[0] + top[0]) * 0.5
++    return (
++        center_x - projected_width * 0.5,
++        min(bottom[1], top[1]),
++        center_x + projected_width * 0.5,
++        max(bottom[1], top[1]),
++    )
+--- /dev/null
++++ b/tests/esp_projection_test.py
+@@ -0,0 +1,132 @@
++import math
++import sys
++from pathlib import Path
++
++TESTS = Path(__file__).resolve().parent
++PROJECT = TESTS.parent
++sys.path.insert(0, str(TESTS))
++
++try:
++    from cnkx_esp_projection_impl import fallback_rect, project_bounds
++except (ImportError, ModuleNotFoundError):
++    print("ESP_PROJECTION_TESTS=FAIL missing implementation")
++    raise SystemExit(1)
++
++
++# 1. 八角点包围盒投影得到真实的屏幕边界，而不是固定尺寸标记。
++box = project_bounds(
++    center=(0.0, 0.0, 10.0),
++    extents=(1.0, 2.0, 1.0),
++    screen=(1920.0, 1080.0),
++    vertical_fov=90.0,
++)
++assert box is not None
++assert box[0] < 960.0 < box[2]
++assert box[1] < 540.0 < box[3]
++assert box[2] - box[0] > 100.0
++assert box[3] - box[1] > 200.0
++
++# 2. 增大世界包围盒时，屏幕框同步变大。
++larger = project_bounds(
++    center=(0.0, 0.0, 10.0),
++    extents=(2.0, 3.0, 1.0),
++    screen=(1920.0, 1080.0),
++    vertical_fov=90.0,
++)
++assert larger[2] - larger[0] > box[2] - box[0]
++assert larger[3] - larger[1] > box[3] - box[1]
++
++# 3. 完全位于相机后的包围盒不得生成屏幕框。
++assert (
++    project_bounds(
++        center=(0.0, 0.0, -10.0),
++        extents=(1.0, 2.0, 1.0),
++        screen=(1920.0, 1080.0),
++        vertical_fov=90.0,
++    )
++    is None
++)
++
++# 4. 穿过近裁剪面的包围盒拒绝投影，避免产生跨越整个屏幕的异常框。
++assert (
++    project_bounds(
++        center=(0.0, 0.0, 0.5),
++        extents=(1.0, 1.0, 1.0),
++        screen=(1920.0, 1080.0),
++        vertical_fov=90.0,
++    )
++    is None
++)
++
++# 5. 无 Renderer 时的回退框稳定、有限且保持固定宽高比。
++fallback = fallback_rect(
++    root=(0.0, 0.0, 12.0),
++    height=1.8,
++    screen=(1920.0, 1080.0),
++    vertical_fov=90.0,
++)
++assert fallback is not None
++width = fallback[2] - fallback[0]
++height = fallback[3] - fallback[1]
++assert math.isfinite(width) and math.isfinite(height)
++assert width > 1.0 and height > 1.0
++assert math.isclose(width / height, 0.5, rel_tol=1e-6)
++
++# 根节点横倒或翻转时仍使用世界竖直方向，回退框保持一致。
++rotated_fallback = fallback_rect(
++    root=(0.0, 0.0, 12.0),
++    height=1.8,
++    screen=(1920.0, 1080.0),
++    vertical_fov=90.0,
++    root_up=(1.0, 0.0, 0.0),
++)
++assert rotated_fallback == fallback
++
++# 6. 屏幕外但仍在前方的实体保持有限边界，交由生产实现做可见区域裁剪。
++offscreen = project_bounds(
++    center=(25.0, 0.0, 10.0),
++    extents=(1.0, 2.0, 1.0),
++    screen=(1920.0, 1080.0),
++    vertical_fov=90.0,
++)
++assert offscreen is not None
++assert all(math.isfinite(value) for value in offscreen)
++assert offscreen[0] > 1920.0
++
++# 7. 生产实现必须具备 Repaint 门控、八角点投影、稳定回退框和目标高亮。
++renderer = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Runtime/EspRendererV2.cs"
++).read_text(encoding="utf-8")
++assert "EventType.Repaint" in renderer
++assert "TryProjectBounds" in renderer
++assert "GetCorners" in renderer
++assert "TryProjectFallback" in renderer
++assert "WeaponCheats.CurrentTarget" in renderer
++assert "DrawCircle" in renderer
++assert "DrawSkeleton" in renderer
++assert "TryReadHealth" in renderer
++assert "BuildDetails" in renderer
++assert "GeometryCache" in renderer
++assert "EspVisibilityCache" in renderer
++assert "animator.isHuman" in renderer
++assert "root.position + Vector3.up * 1.8f" in renderer
++assert "return current.Visible" in renderer
++
++# 8. 所有基础绘制函数必须在 finally 中恢复 GUI.color 和 GUI.matrix。
++primitives = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Runtime/GuiPrimitives.cs"
++).read_text(encoding="utf-8")
++assert "Color previousColor = GUI.color" in primitives
++assert "Matrix4x4 previousMatrix = GUI.matrix" in primitives
++assert primitives.count("finally") >= 4
++assert primitives.count("GUI.color = previousColor") >= 4
++assert primitives.count("GUI.matrix = previousMatrix") >= 4
++
++plugin = (PROJECT / "decompiled-src/CompleteCheatMenu/Plugin.cs").read_text(encoding="utf-8")
++wrapper = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Runtime/EspRenderer.cs"
++).read_text(encoding="utf-8")
++assert "SafeRun(EspRenderer.Draw" in plugin
++assert "EspRendererV2.Draw();" in wrapper
++
++print("ESP_PROJECTION_TESTS=PASS cases=8")

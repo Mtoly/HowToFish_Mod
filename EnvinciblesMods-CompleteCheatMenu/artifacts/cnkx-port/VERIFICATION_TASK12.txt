@@ -1,0 +1,148 @@
+CompleteCheatMenu cnKX port - Task 12 verification
+DATE=2026-08-25
+TASK=实现 EspRendererV2
+STATUS=COMPLETE
+
+CHANGED_BRANCH_OR_FIELD
+- Plugin.OnGUI -> EspRenderer.Draw -> EspRendererV2.Draw: 保留唯一兼容入口。
+- EventType.Repaint: 完整实体绘制只在 Repaint 执行。
+- EspRendererV2.TryProjectBounds/GetCorners: 投影 Renderer Bounds 八个角点，拒绝屏幕后方、近裁剪异常和非有限坐标。
+- EspRendererV2.TryProjectFallback: 无 Renderer 时使用 Vector3.up 固定世界高度生成稳定 2D 框。
+- GeometryCache: Renderer/Animator 能力按实体缓存 1 秒；过滤禁用对象、粒子、拖尾和线段 Renderer。
+- EspVisibilityCache: 普通实体可见性缓存 0.05 秒；当前锁定目标复用 TargetSolution.Visible。
+- DrawSkeleton: Humanoid 前验证 animator.isHuman 和有效 Avatar；失败回退 BoneResolver，不中断整帧。
+- ESP_FEATURES: 方框、射线、骨架、血条、名称、欧氏距离、类型、手持物、物品价值、容器信息、可见/遮挡色、目标高亮、锁定范围圆。
+- GuiPrimitives: DrawBox/DrawLine/DrawCircle/DrawBar/DrawLabel 均在 finally 恢复 GUI.color 和 GUI.matrix。
+- CheatState: 新增 EspBoxes/EspSkeletons/EspHealthBars/EspTypeInfo/EspVisibilityInfo/EspHeldItemInfo/EspItemValueInfo/EspContainerInfo/EspAimCircle。
+
+ARTIFACTS
+- MODIFIED_FILE_1: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\EspRendererV2.cs
+- MODIFIED_FILE_2: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\GuiPrimitives.cs
+- MODIFIED_FILE_3: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\EspRenderer.cs
+- MODIFIED_FILE_4: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\CheatState.cs
+- MODIFIED_FILE_5: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Plugin.cs
+- TEST_HELPER: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\cnkx_esp_projection_impl.py
+- TEST_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\esp_projection_test.py
+- MODIFIED_DLL: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\CompleteCheatMenu.dll
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task12-esp-renderer-v2.diff
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK12.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK12.sh
+- WINDOWS_ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK12.ps1
+- ORIGINAL_SOURCE_DIR: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task12-original-src
+
+RED_TEST
+COMMAND=python .\tests\esp_projection_test.py
+INPUT=测试已创建；EspRendererV2、GuiPrimitives 和投影参考实现尚不存在
+LITERAL_OUTPUT=ESP_PROJECTION_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+
+BASELINE
+COMMAND=Get-FileHash -Algorithm SHA256 .\artifacts\CompleteCheatMenu.dll
+INPUT=Task 11 完成版程序集
+LITERAL_OUTPUT=SHA256 BAB0A9EECDD228F152F4B4B7D8E6F8E504C33ACE3E324CBB2C4771A9586B44D9
+EXIT_STATUS=0
+
+MODIFIED_ESP_PROJECTION_TEST
+COMMAND=python .\tests\esp_projection_test.py
+INPUT=八角点边界、尺寸变化、屏幕后方、近裁剪、稳定回退框、旋转不变、屏幕外有限坐标、生产接线和 GUI 状态恢复
+LITERAL_OUTPUT=ESP_PROJECTION_TESTS=PASS cases=8
+EXIT_STATUS=0
+OBSERVED_RESULT=真实 Bounds 随世界尺寸变化；完全在相机后或穿过近裁剪面的 Bounds 被拒绝；无 Renderer 回退框宽高比 0.5，根节点旋转不改变结果；生产入口使用 EspRenderer 兼容层。
+
+REGRESSION_TESTS
+COMMAND=python .\tests\weapon_restore_test.py
+LITERAL_OUTPUT=WEAPON_RESTORE_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\visible_aim_test.py
+LITERAL_OUTPUT=VISIBLE_AIM_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\tracking_probability_test.py
+LITERAL_OUTPUT=TRACKING_PROBABILITY_TESTS=PASS cases=6
+EXIT_STATUS=0
+COMMAND=python .\tests\ballistic_prediction_test.py
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\target_lock_test.py
+LITERAL_OUTPUT=TARGET_LOCK_TESTS=PASS cases=8
+EXIT_STATUS=0
+COMMAND=python .\tests\bone_selection_test.py
+LITERAL_OUTPUT=BONE_SELECTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\targeting_math_test.py
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=PASS cases=10
+EXIT_STATUS=0
+COMMAND=python .\tests\snapshot_isolation_test.py
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\entity_registry_test.py
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+EXIT_STATUS=0
+COMMAND=python .\tests\aim_scoring_test.py
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Task 3-11 的实体注册、快照、目标、骨骼、预测、发射追踪、可见拉枪和武器恢复行为全部继续通过。
+
+MODIFIED_BUILD
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File .\decompiled-src\build.ps1
+INPUT=EspRendererV2、GuiPrimitives、能力缓存、稳定回退框、可见性缓存和详情探测
+LITERAL_OUTPUT=0 compiler errors
+LITERAL_OUTPUT=BUILD_EXIT=0
+LITERAL_OUTPUT=MODIFIED_DLL_SHA256=AE61F50BD3CF025F356D8395DB5E071B3155B28C8949CB6C077B73DE13D1C108
+EXIT_STATUS=0
+
+ASSEMBLY_TYPE_CHECK
+COMMAND=dnfile TypeDef inspection on artifacts\CompleteCheatMenu.dll
+INPUT=修改版程序集
+LITERAL_OUTPUT=TYPE_EspRendererV2=True
+LITERAL_OUTPUT=TYPE_GuiPrimitives=True
+EXIT_STATUS=0
+
+CODE_REVIEW
+COMMAND=requesting-code-review agent review of Task 12
+LITERAL_RESULT=性能缓存、Animator 有效性、稳定回退框、可见性一致性、兼容入口、双向目标层级和范围圆独立性问题已审查并修正。
+EXIT_STATUS=0
+
+ROLLBACK_POWERSHELL
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK12.ps1 -DestinationRoot .\artifacts\cnkx-port\rollback-task12-test-20260825a
+INPUT=包含全部 Task 12 修改文件的独立目录
+LITERAL_OUTPUT=ESP_RENDERER_SHA256=122A3AEBB550BC294C18710DC6FD2E9CD3975CB4C7DDDC52F99FA12FD296D87D
+LITERAL_OUTPUT=CHEATSTATE_SHA256=E028F72E3B5EDDC98786DBD89D322CD7B2DAA5F44C763ECC4D092284AF78640D
+LITERAL_OUTPUT=PLUGIN_SHA256=DAF9983F40DCAFCD2EFB936D346EABDEBFFCAC088E5F208E459D79594FA45BEC
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+
+ROLLBACK_BASH
+COMMAND=ROLLBACK_TASK12.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-task12-test-sh-20260825a
+INPUT=第二个独立修改副本
+LITERAL_OUTPUT=ESP_RENDERER_SHA256=122A3AEBB550BC294C18710DC6FD2E9CD3975CB4C7DDDC52F99FA12FD296D87D
+LITERAL_OUTPUT=CHEATSTATE_SHA256=E028F72E3B5EDDC98786DBD89D322CD7B2DAA5F44C763ECC4D092284AF78640D
+LITERAL_OUTPUT=PLUGIN_SHA256=DAF9983F40DCAFCD2EFB936D346EABDEBFFCAC088E5F208E459D79594FA45BEC
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=两个独立目录恢复到 Task 11 字节；工作目录继续保留 Task 12 修改版。
+
+MODIFIED_SOURCE_HASHES
+- EspRenderer.cs=0B5CC437330C4ED2C2EBD36BE3D816E9589C6986D22AAB1749DCDCAC8E20F92D
+- EspRendererV2.cs=7FCEC99A87C95B35166651DE844EFEDE0109C124A48FF97F50B4A3DC4F55199A
+- GuiPrimitives.cs=75544C4D5B9D0B69E6CF2F20B3EF683229D3EB98E4078B9E81F77B9E4771C592
+- CheatState.cs=1D1C0F4A86F8E5372958E5892C2B09864312A32705802E6D858E2261A6520F19
+- Plugin.cs=D5F1E5CC5C45CB167CD1B6C976339F91D8A1DBFFD88A639AFB9A27854AE75D8C
+- cnkx_esp_projection_impl.py=775844737131A2F28D7A78554587F431ACA40B5D200C61840B7711DED3F1A043
+- esp_projection_test.py=838CA72AFE5B2A3C930BCF043FA8C3282F7417DC8D3B750F76D525B197A337E3
+
+DIFF
+LINES=1098
+SHA256=8444FAD7F6EADABE285A6E4F03358D38F818B3B3EF32C4D8A04CAB04C5BE5215
+
+PLAN_MARK
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+RESULT=Task 12 marked complete with evidence path.
+
+DEPLOYMENT
+RESULT=NOT_DEPLOYED_GATE_A_IN_PROGRESS
+DEPLOYED_DLL_UNCHANGED_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+
+GIT
+RESULT=SKIPPED_NOT_A_GIT_REPOSITORY

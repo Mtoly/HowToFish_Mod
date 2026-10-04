@@ -1,0 +1,619 @@
+--- a/decompiled-src/CompleteCheatMenu/Plugin.cs
++++ b/decompiled-src/CompleteCheatMenu/Plugin.cs
+@@ -6,6 +6,7 @@
+ using CompleteCheatMenu.Cheats;
+ using CompleteCheatMenu.Game;
+ using CompleteCheatMenu.Runtime;
++using CompleteCheatMenu.Targeting;
+ using CompleteCheatMenu.UI;
+ using CompleteCheatMenu.UI.Tabs;
+ using HarmonyLib;
+@@ -70,6 +71,8 @@
+ 
+ 	private void OnDestroy()
+ 	{
++		SafeRun(MagicShotContext.Clear, "clear shot context");
++		SafeRun(ProjectileTracker.Clear, "clear projectile tracker");
+ 		SafeRun(WeaponCheats.RestoreAllWeapons, "restore weapons");
+ 		SafeRun(GuiPrimitives.Dispose, "dispose esp gui");
+ 		if (VisualCheats.FreeCamActive)
+--- a/decompiled-src/CompleteCheatMenu/Runtime/TickDriver.cs
++++ b/decompiled-src/CompleteCheatMenu/Runtime/TickDriver.cs
+@@ -1,5 +1,6 @@
+ using CompleteCheatMenu.Cheats;
+ using CompleteCheatMenu.Game;
++using CompleteCheatMenu.Targeting;
+ using UnityEngine;
+ 
+ namespace CompleteCheatMenu.Runtime;
+@@ -51,6 +52,7 @@
+ 		{
+ 			_nextRegistryPrune = Time.unscaledTime + 1f;
+ 			EntityRegistry.PruneAllDestroyed();
++			ProjectileTracker.PruneInvalid();
+ 		}
+ 		if (VisualCheats.FreeCamActive)
+ 		{
+--- a/decompiled-src/CompleteCheatMenu/UI/Tabs/DiagnosticsTab.cs
++++ b/decompiled-src/CompleteCheatMenu/UI/Tabs/DiagnosticsTab.cs
+@@ -1,6 +1,7 @@
+ using CompleteCheatMenu.Cheats;
+ using CompleteCheatMenu.Game;
+ using CompleteCheatMenu.Runtime;
++using CompleteCheatMenu.Targeting;
+ using UnityEngine;
+ 
+ namespace CompleteCheatMenu.UI.Tabs;
+@@ -38,6 +39,7 @@
+ 			int containers = EntityRegistry.Containers.Count;
+ 			Line("目标注册", creatures + players + items + containers > 0, $"生物 {creatures} / 玩家 {players} / 物品 {items} / 容器 {containers}");
+ 			Line("弹速字段", GameBinder.Field("Weapon", "_projSpeed") != null, "Weapon._projSpeed");
++			Line("弹丸生命周期绑定", ProjectileBindings.LifecycleAvailable, $"活动 {ProjectileTracker.ActiveCount} / 注册 {ProjectileTracker.RegisteredCount} / 清理 {ProjectileTracker.UnregisteredCount}");
+ 			Line("人体骨骼接口", typeof(Animator).GetMethod("GetBoneTransform") != null, "Animator.GetBoneTransform");
+ 			Line("包围盒回退", typeof(Renderer).GetProperty("bounds") != null, "Renderer.bounds");
+ 			Line("开火追踪入口", GameBinder.Method("Weapon", "Shoot", 0) != null && GameBinder.Property("Attachments", "FirePoint") != null, "Weapon.Shoot → FirePoint");
+@@ -69,6 +71,7 @@
+ 	}
+ 	internal static void RunChecks()
+ 	{
++		ProjectileBindings.ResolveAll();
+ 		_ = MoneyCheats.Available;
+ 		_ = MovementCheats.Available;
+ 		_ = SpawnCheats.Available;
+--- a/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
++++ b/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+@@ -813,3 +813,25 @@
+ → MagicShotContext
+ ```
+ 
++#### Task 17.2：Projectile 绑定与生命周期基础设施 ✅ 已完成（2026-08-25）
++
++**完成记录：**
++
++- 已依据当前游戏 `Assembly-CSharp.dll` 固定绑定 `ProjectileManager.AddProjectile`、`AddProjectiles`、`UpdateProjectileScan`、`AddToRemoveQueue`，以及弹丸所有权、位置、速度、来源和武器重力字段。
++- 新增 `ProjectileBindings`，集中解析生命周期与后续制导所需的类型、方法和字段，并在诊断页显示绑定状态。
++- 新增 `ProjectileOwnership`，只接受本地玩家持有的武器，以及 `IsLocal && Owner == LocalPlayer && !FromNpc` 的本地弹丸。
++- 新增 `MagicShotContext`，提供单次发射调用范围内的武器与目标上下文，并在结束、场景切换和插件卸载时显式清理。
++- 新增 `ProjectileTracker`，同时维护弹丸对象映射与 `Projectile.Id` 回退映射；支持注册、查询、注销、无效目标清理和生命周期诊断计数。
++- ID 回退查询会重新验证本地弹丸所有权，远端玩家和 NPC 弹丸即使复用相同 ID 也不会命中本地映射。
++- 同一对象与同一目标的重复注册不会重复累计；同 ID 新弹丸注册时会清理旧对象映射，避免活动计数和直接映射残留。
++- `TickDriver` 每秒清理失效目标映射，插件卸载时清除 ShotContext 与 Tracker；累计诊断计数不因普通场景清理而重置。
++- 新增静态行为测试和生产代码 Harness；Harness 29 项通过，Task 2–17.2 共 15 个 Python 回归测试全部通过。
++- 源码程序集与汉化程序集构建成功，版本均为 `0.7.0.0`，类型集和方法集一致，新增四个 Targeting 类型均存在，格式化占位符不匹配数为 0。
++- 本阶段只建立绑定、所有权、注册和上下文基础设施；尚未 Patch `AddProjectile/AddProjectiles`，尚未修改真实弹丸速度，尚未部署游戏目录。
++
++**下一模块：**
++
++```text
++Task 17.3：Weapon.Shoot Finalizer + AddProjectile/AddProjectiles 初始速度注入
++```
++
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Targeting/ProjectileBindings.cs
+@@ -0,0 +1,57 @@
++using System.Reflection;
++using CompleteCheatMenu.Game;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal static class ProjectileBindings
++{
++	internal static MethodInfo AddProjectile => GameBinder.Method("ProjectileManager", "AddProjectile", 8);
++
++	internal static MethodInfo AddProjectiles => GameBinder.Method("ProjectileManager", "AddProjectiles", 8);
++
++	internal static MethodInfo UpdateProjectileScan => GameBinder.Method("ProjectileManager", "UpdateProjectileScan", 2);
++
++	internal static MethodInfo AddToRemoveQueue => GameBinder.Method("ProjectileManager", "AddToRemoveQueue", 1);
++
++	internal static FieldInfo PlayerProjectiles => GameBinder.Field("ProjectileManager", "_playerProjectiles");
++
++	internal static FieldInfo CatchUpSpeed => GameBinder.Field("ProjectileManager", "_catchUpSpeed");
++
++	internal static FieldInfo SqrMaxProjectileRange => GameBinder.Field("ProjectileManager", "_sqrMaxProjRange");
++
++	internal static FieldInfo Id => GameBinder.Field("Projectile", "Id");
++
++	internal static FieldInfo Owner => GameBinder.Field("Projectile", "Owner");
++
++	internal static FieldInfo IsLocal => GameBinder.Field("Projectile", "IsLocal");
++
++	internal static FieldInfo Position => GameBinder.Field("Projectile", "Position");
++
++	internal static FieldInfo Velocity => GameBinder.Field("Projectile", "Velocity");
++
++	internal static FieldInfo FromNpc => GameBinder.Field("Projectile", "FromNpc");
++
++	internal static PropertyInfo ProjectileGravity => GameBinder.Property("WeaponInfo", "ProjectileGravity");
++
++	internal static bool LifecycleAvailable => AddProjectile != null && AddProjectiles != null && AddToRemoveQueue != null && Id != null && Owner != null && IsLocal != null && FromNpc != null;
++
++	internal static bool GuidanceAvailable => LifecycleAvailable && UpdateProjectileScan != null && Position != null && Velocity != null && ProjectileGravity != null;
++
++	internal static void ResolveAll()
++	{
++		_ = AddProjectile;
++		_ = AddProjectiles;
++		_ = UpdateProjectileScan;
++		_ = AddToRemoveQueue;
++		_ = PlayerProjectiles;
++		_ = CatchUpSpeed;
++		_ = SqrMaxProjectileRange;
++		_ = Id;
++		_ = Owner;
++		_ = IsLocal;
++		_ = Position;
++		_ = Velocity;
++		_ = FromNpc;
++		_ = ProjectileGravity;
++	}
++}
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Targeting/ProjectileOwnership.cs
+@@ -0,0 +1,34 @@
++using CompleteCheatMenu.Game;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal static class ProjectileOwnership
++{
++	internal static bool IsLocalWeapon(Weapon weapon)
++	{
++		if (weapon == null || Refs.LocalPlayer is not Player localPlayer)
++		{
++			return false;
++		}
++		Player holder = weapon.Holder;
++		if (holder == null || !ReferenceEquals(holder, localPlayer) || holder.Owner == null)
++		{
++			return false;
++		}
++		return holder.Owner.IsLocalClient;
++	}
++
++	internal static bool IsLocalProjectile(Projectile projectile)
++	{
++		if (projectile == null || projectile.FromNpc || !projectile.IsLocal || Refs.LocalPlayer is not Player localPlayer)
++		{
++			return false;
++		}
++		return projectile.Owner != null && ReferenceEquals(projectile.Owner, localPlayer);
++	}
++
++	internal static bool CanTrack(Weapon weapon, Projectile projectile)
++	{
++		return IsLocalWeapon(weapon) && IsLocalProjectile(projectile);
++	}
++}
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Targeting/ProjectileTracker.cs
+@@ -0,0 +1,177 @@
++using System.Collections.Generic;
++using CompleteCheatMenu.Game;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal static class ProjectileTracker
++{
++	private static readonly object Sync = new object();
++
++	private static readonly Dictionary<Projectile, TargetSolution> ProjectileToTarget = new Dictionary<Projectile, TargetSolution>();
++
++	private static readonly Dictionary<uint, TargetSolution> IdToTarget = new Dictionary<uint, TargetSolution>();
++
++	internal static int ActiveCount
++	{
++		get
++		{
++			lock (Sync)
++			{
++				return ProjectileToTarget.Count;
++			}
++		}
++	}
++
++	internal static long RegisteredCount { get; private set; }
++
++	internal static long UnregisteredCount { get; private set; }
++
++	internal static long InvalidTargetCount { get; private set; }
++
++	internal static long IdFallbackCount { get; private set; }
++
++	internal static bool Register(Projectile projectile, TargetSolution target)
++	{
++		if (!ProjectileOwnership.IsLocalProjectile(projectile) || !IsValidTarget(target))
++		{
++			return false;
++		}
++		lock (Sync)
++		{
++			List<Projectile> idCollisions = null;
++			foreach (Projectile tracked in ProjectileToTarget.Keys)
++			{
++				if (!ReferenceEquals(tracked, projectile) && tracked.Id == projectile.Id)
++				{
++					(idCollisions ??= new List<Projectile>()).Add(tracked);
++				}
++			}
++			if (idCollisions != null)
++			{
++				for (int i = 0; i < idCollisions.Count; i++)
++				{
++					ProjectileToTarget.Remove(idCollisions[i]);
++					UnregisteredCount++;
++				}
++			}
++
++			bool changed = !ProjectileToTarget.TryGetValue(projectile, out TargetSolution existing)
++				|| !ReferenceEquals(existing, target);
++			ProjectileToTarget[projectile] = target;
++			IdToTarget[projectile.Id] = target;
++			if (changed)
++			{
++				RegisteredCount++;
++			}
++		}
++		return true;
++	}
++
++	internal static bool TryGetTarget(Projectile projectile, out TargetSolution target)
++	{
++		target = null;
++		if (!ProjectileOwnership.IsLocalProjectile(projectile))
++		{
++			return false;
++		}
++		lock (Sync)
++		{
++			if (ProjectileToTarget.TryGetValue(projectile, out target))
++			{
++				if (IsValidTarget(target))
++				{
++					return true;
++				}
++				RemoveLocked(projectile, invalid: true);
++				target = null;
++				return false;
++			}
++			if (IdToTarget.TryGetValue(projectile.Id, out target))
++			{
++				if (IsValidTarget(target))
++				{
++					IdFallbackCount++;
++					return true;
++				}
++				IdToTarget.Remove(projectile.Id);
++				InvalidTargetCount++;
++				target = null;
++			}
++		}
++		return false;
++	}
++
++	internal static bool Unregister(Projectile projectile)
++	{
++		if (projectile == null)
++		{
++			return false;
++		}
++		lock (Sync)
++		{
++			return RemoveLocked(projectile, invalid: false);
++		}
++	}
++
++	internal static int PruneInvalid()
++	{
++		lock (Sync)
++		{
++			List<Projectile> invalid = null;
++			foreach (KeyValuePair<Projectile, TargetSolution> pair in ProjectileToTarget)
++			{
++				if (!IsValidTarget(pair.Value))
++				{
++					(invalid ??= new List<Projectile>()).Add(pair.Key);
++				}
++			}
++			if (invalid == null)
++			{
++				return 0;
++			}
++			for (int i = 0; i < invalid.Count; i++)
++			{
++				RemoveLocked(invalid[i], invalid: true);
++			}
++			return invalid.Count;
++		}
++	}
++
++	internal static void Clear()
++	{
++		lock (Sync)
++		{
++			ProjectileToTarget.Clear();
++			IdToTarget.Clear();
++		}
++	}
++
++	internal static bool IsValidTarget(TargetSolution target)
++	{
++		return target != null && Refs.IsAlive(target.Entity) && target.Transform != null;
++	}
++
++	private static bool RemoveLocked(Projectile projectile, bool invalid)
++	{
++		if (ReferenceEquals(projectile, null))
++		{
++			return false;
++		}
++		bool removed = ProjectileToTarget.TryGetValue(projectile, out TargetSolution removedTarget)
++			&& ProjectileToTarget.Remove(projectile);
++		if (removed && IdToTarget.TryGetValue(projectile.Id, out TargetSolution idTarget)
++			&& ReferenceEquals(idTarget, removedTarget))
++		{
++			IdToTarget.Remove(projectile.Id);
++		}
++		if (removed)
++		{
++			UnregisteredCount++;
++			if (invalid)
++			{
++				InvalidTargetCount++;
++			}
++		}
++		return removed;
++	}
++}
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Targeting/MagicShotContext.cs
+@@ -0,0 +1,35 @@
++namespace CompleteCheatMenu.Targeting;
++
++internal static class MagicShotContext
++{
++	internal static bool IsActive { get; private set; }
++
++	internal static Weapon ActiveWeapon { get; private set; }
++
++	internal static TargetSolution ActiveTarget { get; private set; }
++
++	internal static bool Begin(Weapon weapon, TargetSolution target)
++	{
++		Clear();
++		if (!ProjectileOwnership.IsLocalWeapon(weapon) || !ProjectileTracker.IsValidTarget(target))
++		{
++			return false;
++		}
++		ActiveWeapon = weapon;
++		ActiveTarget = target;
++		IsActive = true;
++		return true;
++	}
++
++	internal static void End()
++	{
++		Clear();
++	}
++
++	internal static void Clear()
++	{
++		IsActive = false;
++		ActiveWeapon = null;
++		ActiveTarget = null;
++	}
++}
+--- /dev/null
++++ b/tests/projectile_lifecycle_test.py
+@@ -0,0 +1,71 @@
++from pathlib import Path
++
++
++ROOT = Path(__file__).resolve().parents[1]
++SRC = ROOT / "decompiled-src" / "CompleteCheatMenu"
++
++bindings_path = SRC / "Targeting" / "ProjectileBindings.cs"
++tracker_path = SRC / "Targeting" / "ProjectileTracker.cs"
++ownership_path = SRC / "Targeting" / "ProjectileOwnership.cs"
++context_path = SRC / "Targeting" / "MagicShotContext.cs"
++
++for path in (bindings_path, tracker_path, ownership_path, context_path):
++    assert path.exists(), path
++
++bindings = bindings_path.read_text(encoding="utf-8")
++tracker = tracker_path.read_text(encoding="utf-8")
++ownership = ownership_path.read_text(encoding="utf-8")
++context = context_path.read_text(encoding="utf-8")
++diagnostics = (SRC / "UI" / "Tabs" / "DiagnosticsTab.cs").read_text(encoding="utf-8")
++plugin = (SRC / "Plugin.cs").read_text(encoding="utf-8")
++tick = (SRC / "Runtime" / "TickDriver.cs").read_text(encoding="utf-8")
++
++# Seam 1: the binding surface exactly matches the verified game assembly entry points.
++for token in (
++    'GameBinder.Method("ProjectileManager", "AddProjectile", 8)',
++    'GameBinder.Method("ProjectileManager", "AddProjectiles", 8)',
++    'GameBinder.Method("ProjectileManager", "UpdateProjectileScan", 2)',
++    'GameBinder.Method("ProjectileManager", "AddToRemoveQueue", 1)',
++    'GameBinder.Field("Projectile", "Id")',
++    'GameBinder.Field("Projectile", "Owner")',
++    'GameBinder.Field("Projectile", "IsLocal")',
++    'GameBinder.Field("Projectile", "Position")',
++    'GameBinder.Field("Projectile", "Velocity")',
++    'GameBinder.Field("Projectile", "FromNpc")',
++):
++    assert token in bindings, token
++assert "LifecycleAvailable" in bindings
++assert "GuidanceAvailable" in bindings
++
++# Seam 2: tracker supports object lookup, id fallback, invalid-target cleanup and counters.
++assert "Dictionary<Projectile, TargetSolution>" in tracker
++assert "Dictionary<uint, TargetSolution>" in tracker
++for method in ("Register", "TryGetTarget", "Unregister", "PruneInvalid", "Clear"):
++    assert f" {method}(" in tracker, method
++for counter in ("ActiveCount", "RegisteredCount", "UnregisteredCount", "InvalidTargetCount", "IdFallbackCount"):
++    assert counter in tracker, counter
++assert "ProjectileOwnership.IsLocalProjectile(projectile)" in tracker
++assert "tracked.Id == projectile.Id" in tracker
++assert "ReferenceEquals(existing, target)" in tracker
++assert "ReferenceEquals(idTarget, removedTarget)" in tracker
++
++# Seam 3: ownership rejects NPC and remote projectiles and requires the local weapon holder.
++for token in ("projectile.FromNpc", "projectile.IsLocal", "projectile.Owner", "weapon.Holder", "Refs.LocalPlayer"):
++    assert token in ownership, token
++assert "IsLocalWeapon" in ownership
++assert "IsLocalProjectile" in ownership
++
++# Seam 4: shot context only begins for a valid local weapon/target and always exposes an explicit clear path.
++for token in ("IsActive", "ActiveWeapon", "ActiveTarget", "Begin", "End", "Clear"):
++    assert token in context, token
++assert "ProjectileOwnership.IsLocalWeapon" in context
++assert "ProjectileTracker.IsValidTarget" in context
++
++# Seam 5: lifecycle state is visible in diagnostics, pruned periodically, and cleared on unload.
++assert "弹丸生命周期绑定" in diagnostics
++assert "ProjectileBindings.ResolveAll();" in diagnostics
++assert "ProjectileTracker.PruneInvalid();" in tick
++assert "ProjectileTracker.Clear" in plugin
++assert "MagicShotContext.Clear" in plugin
++
++print("PROJECTILE_LIFECYCLE_TESTS=PASS cases=5")
+--- /dev/null
++++ b/tests/projectile_lifecycle_harness.cs
+@@ -0,0 +1,137 @@
++using System;
++using CompleteCheatMenu.Game;
++using CompleteCheatMenu.Targeting;
++using UnityEngine;
++
++namespace UnityEngine
++{
++	internal sealed class Transform { }
++}
++
++internal sealed class NetworkConnection
++{
++	internal bool IsLocalClient;
++}
++
++internal sealed class Player
++{
++	internal NetworkConnection Owner;
++}
++
++internal sealed class Weapon
++{
++	internal Player Holder;
++}
++
++internal sealed class Projectile
++{
++	internal uint Id;
++	internal Player Owner;
++	internal bool IsLocal;
++	internal bool FromNpc;
++}
++
++namespace CompleteCheatMenu.Game
++{
++	internal static class Refs
++	{
++		internal static object LocalPlayer;
++
++		internal static bool IsAlive(object value) => value != null;
++	}
++}
++
++namespace CompleteCheatMenu.Targeting
++{
++	internal sealed class TargetSolution
++	{
++		internal object Entity;
++		internal Transform Transform;
++	}
++}
++
++internal static class ProjectileLifecycleHarness
++{
++	private static int _cases;
++
++	private static void Check(bool condition, string name)
++	{
++		_cases++;
++		if (!condition)
++		{
++			throw new InvalidOperationException(name);
++		}
++	}
++
++	private static TargetSolution Target()
++	{
++		return new TargetSolution
++		{
++			Entity = new object(),
++			Transform = new Transform()
++		};
++	}
++
++	public static int Main()
++	{
++		Player local = new Player { Owner = new NetworkConnection { IsLocalClient = true } };
++		Player remote = new Player { Owner = new NetworkConnection { IsLocalClient = false } };
++		Refs.LocalPlayer = local;
++
++		Weapon localWeapon = new Weapon { Holder = local };
++		Weapon remoteWeapon = new Weapon { Holder = remote };
++		Check(ProjectileOwnership.IsLocalWeapon(localWeapon), "local weapon accepted");
++		Check(!ProjectileOwnership.IsLocalWeapon(remoteWeapon), "remote weapon rejected");
++
++		Projectile localProjectile = new Projectile { Id = 41, Owner = local, IsLocal = true };
++		Projectile remoteProjectile = new Projectile { Id = 42, Owner = remote, IsLocal = true };
++		Projectile npcProjectile = new Projectile { Id = 43, Owner = local, IsLocal = true, FromNpc = true };
++		Check(ProjectileOwnership.IsLocalProjectile(localProjectile), "local projectile accepted");
++		Check(!ProjectileOwnership.IsLocalProjectile(remoteProjectile), "remote projectile rejected");
++		Check(!ProjectileOwnership.IsLocalProjectile(npcProjectile), "npc projectile rejected");
++
++		TargetSolution target = Target();
++		Check(MagicShotContext.Begin(localWeapon, target), "context begins");
++		Check(MagicShotContext.IsActive && ReferenceEquals(MagicShotContext.ActiveTarget, target), "context exposes target");
++		MagicShotContext.End();
++		Check(!MagicShotContext.IsActive && MagicShotContext.ActiveTarget == null, "context ends");
++
++		ProjectileTracker.Clear();
++		Check(ProjectileTracker.Register(localProjectile, target), "register local projectile");
++		Check(ProjectileTracker.ActiveCount == 1, "active count");
++		Check(ProjectileTracker.TryGetTarget(localProjectile, out TargetSolution direct) && ReferenceEquals(direct, target), "direct lookup");
++		Projectile copied = new Projectile { Id = 41, Owner = local, IsLocal = true };
++		Check(ProjectileTracker.TryGetTarget(copied, out TargetSolution fallback) && ReferenceEquals(fallback, target), "id fallback lookup");
++		Check(ProjectileTracker.IdFallbackCount == 1, "id fallback counter");
++		Projectile remoteCollision = new Projectile { Id = 41, Owner = remote, IsLocal = true };
++		Check(!ProjectileTracker.TryGetTarget(remoteCollision, out _), "remote id collision rejected");
++		Check(!ProjectileTracker.Register(remoteProjectile, target), "tracker rejects remote projectile");
++		long registrations = ProjectileTracker.RegisteredCount;
++		Check(ProjectileTracker.Register(localProjectile, target), "duplicate registration accepted");
++		Check(ProjectileTracker.RegisteredCount == registrations, "duplicate registration not recounted");
++
++		Projectile replacement = new Projectile { Id = 41, Owner = local, IsLocal = true };
++		TargetSolution replacementTarget = Target();
++		Check(ProjectileTracker.Register(replacement, replacementTarget), "same id replacement registered");
++		Check(ProjectileTracker.ActiveCount == 1, "same id replacement removes stale object mapping");
++		Check(ProjectileTracker.TryGetTarget(localProjectile, out TargetSolution staleFallback) && ReferenceEquals(staleFallback, replacementTarget), "stale object uses current id mapping only");
++		Check(ProjectileTracker.TryGetTarget(replacement, out TargetSolution replaced) && ReferenceEquals(replaced, replacementTarget), "replacement target available");
++		Check(!ProjectileTracker.Unregister(localProjectile), "stale object unregister ignored");
++		Check(ProjectileTracker.TryGetTarget(replacement, out replaced) && ReferenceEquals(replaced, replacementTarget), "stale unregister preserves replacement id mapping");
++
++		replacementTarget.Entity = null;
++		Check(!ProjectileTracker.TryGetTarget(replacement, out _), "invalid target removed");
++		Check(ProjectileTracker.ActiveCount == 0, "invalid cleanup active count");
++		Check(ProjectileTracker.InvalidTargetCount >= 1, "invalid counter");
++
++		TargetSolution target2 = Target();
++		Projectile projectile2 = new Projectile { Id = 44, Owner = local, IsLocal = true };
++		Check(ProjectileTracker.Register(projectile2, target2), "second register");
++		Check(ProjectileTracker.Unregister(projectile2), "explicit unregister");
++		Check(ProjectileTracker.ActiveCount == 0, "unregister active count");
++		ProjectileTracker.Clear();
++
++		Console.WriteLine($"PROJECTILE_LIFECYCLE_HARNESS=PASS cases={_cases}");
++		return 0;
++	}
++}

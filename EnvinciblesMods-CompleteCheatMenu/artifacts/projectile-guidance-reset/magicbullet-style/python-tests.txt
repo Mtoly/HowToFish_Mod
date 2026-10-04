@@ -1,0 +1,14 @@
+magic_bullet_style_test.py EXIT=0
+MAGIC_BULLET_STYLE_TESTS=PASS cases=6
+projectile_guidance_reset_test.py EXIT=0
+PROJECTILE_GUIDANCE_RESET_SPEC=PASS cases=5
+projectile_guidance_state_test.py EXIT=0
+PROJECTILE_GUIDANCE_STATE_TESTS=PASS cases=6
+projectile_lifecycle_test.py EXIT=0
+PROJECTILE_LIFECYCLE_TESTS=PASS cases=5
+projectile_target_lifecycle_test.py EXIT=0
+PROJECTILE_TARGET_LIFECYCLE_TESTS=PASS cases=5
+projectile_initial_velocity_test.py EXIT=0
+PROJECTILE_INITIAL_VELOCITY_TESTS=PASS cases=5
+localized_ui_preset_test.py EXIT=0
+LOCALIZED_UI_PRESET_TESTS=PASS cases=9

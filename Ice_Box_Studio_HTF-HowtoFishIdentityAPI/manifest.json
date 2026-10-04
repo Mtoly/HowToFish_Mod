@@ -1,0 +1,9 @@
+{
+    "name": "HowtoFishIdentityAPI",
+    "version_number": "1.0.1",
+    "website_url": "https://github.com/ibox233/IceBox_Mods_Issues",
+    "description": "HowtoFishIdentityAPI is a shared identity verification API for How to Fish mods. It gives server-authoritative mods a stable, verified player key.",
+    "dependencies": [
+        "BepInEx-BepInExPack-5.4.2305"
+    ]
+}

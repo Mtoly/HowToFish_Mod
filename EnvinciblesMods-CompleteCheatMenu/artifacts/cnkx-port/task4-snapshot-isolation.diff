@@ -1,0 +1,510 @@
+--- decompiled-src/CompleteCheatMenu/Cheats/VisualCheats.cs.baseline
++++ decompiled-src/CompleteCheatMenu/Cheats/VisualCheats.cs
+@@ -1,8 +1,8 @@
+ using System;
+-using System.Collections;
+ using System.Collections.Generic;
+ using System.Reflection;
+ using CompleteCheatMenu.Game;
++using CompleteCheatMenu.Runtime;
+ using UnityEngine;
+ using UnityEngine.Rendering;
+ 
+@@ -46,11 +46,7 @@
+ 
+ 	private static readonly List<EspTarget> _targets = new List<EspTarget>();
+ 
+-	private static float _nextScan;
+-
+-	private static MethodInfo _findAll;
+-
+-	private static bool _findAllResolved;
++	private static int _espSnapshotRevision = -1;
+ 
+ 	internal static bool FovAvailable => GameBinder.Method("PlayerCamera", "SetFOV", 1) != null;
+ 
+@@ -323,152 +319,34 @@
+ 
+ 	internal static void Rescan(bool creatures, bool items, bool players, float interval = 0.5f)
+ 	{
+-		if (!(Time.unscaledTime < _nextScan))
+-		{
+-			_nextScan = Time.unscaledTime + Mathf.Max(0.1f, interval);
+-			_targets.Clear();
+-			if (creatures)
+-			{
+-				ScanCreatures();
+-			}
+-			if (items)
+-			{
+-				ScanItems();
+-			}
+-			if (players)
+-			{
+-				ScanPlayers();
+-			}
+-		}
+-	}
+-
+-	private static void ScanCreatures()
+-	{
+-		Type type = GameBinder.Type("Creature");
+-		if (type == null)
++		EspSnapshot espSnapshot = EspSnapshotBuilder.Refresh(creatures, items, players, interval);
++		if (_espSnapshotRevision == espSnapshot.Revision)
+ 		{
+ 			return;
+ 		}
+-		foreach (object item in FindAll(type))
+-		{
+-			Component component = item as Component;
+-			if (component == null)
++		_espSnapshotRevision = espSnapshot.Revision;
++		_targets.Clear();
++		AppendTargets(espSnapshot.Creatures, EspKind.Creature);
++		AppendTargets(espSnapshot.Players, EspKind.Player);
++		AppendTargets(espSnapshot.Items, EspKind.Item);
++		AppendTargets(espSnapshot.Containers, EspKind.Item);
++	}
++
++	private static void AppendTargets(IReadOnlyList<EntityRecord> records, EspKind kind)
++	{
++		for (int i = 0; i < records.Count; i++)
++		{
++			EntityRecord entityRecord = records[i];
++			if (!entityRecord.IsAlive)
+ 			{
+ 				continue;
+ 			}
+-			PropertyInfo propertyInfo = GameBinder.Property("Creature", "IsDead");
+-			if (propertyInfo != null)
+-			{
+-				try
+-				{
+-					if ((bool)propertyInfo.GetValue(component))
+-					{
+-						continue;
+-					}
+-				}
+-				catch
+-				{
+-				}
+-			}
+ 			_targets.Add(new EspTarget
+ 			{
+-				Transform = component.transform,
+-				Label = component.name,
+-				Kind = EspKind.Creature
++				Transform = entityRecord.Transform,
++				Label = entityRecord.Name,
++				Kind = kind
+ 			});
+ 		}
+ 	}
+-
+-	private static void ScanItems()
+-	{
+-		PropertyInfo propertyInfo = GameBinder.Property("ItemManager", "Items");
+-		if (propertyInfo == null)
+-		{
+-			return;
+-		}
+-		try
+-		{
+-			if (!(propertyInfo.GetValue(null) is IDictionary dictionary))
+-			{
+-				return;
+-			}
+-			foreach (DictionaryEntry item in dictionary)
+-			{
+-				if (item.Key is Transform transform && !(transform == null))
+-				{
+-					_targets.Add(new EspTarget
+-					{
+-						Transform = transform,
+-						Label = ((item.Value as UnityEngine.Object)?.name ?? "item"),
+-						Kind = EspKind.Item
+-					});
+-				}
+-			}
+-		}
+-		catch
+-		{
+-		}
+-	}
+-
+-	private static void ScanPlayers()
+-	{
+-		foreach (object item in TeleportCheats.AlivePlayers())
+-		{
+-			if (item != Refs.LocalPlayer)
+-			{
+-				PropertyInfo propertyInfo = GameBinder.Property("Player", "Transform");
+-				Transform transform = null;
+-				try
+-				{
+-					transform = propertyInfo?.GetValue(item) as Transform;
+-				}
+-				catch
+-				{
+-				}
+-				if (!(transform == null))
+-				{
+-					_targets.Add(new EspTarget
+-					{
+-						Transform = transform,
+-						Label = TeleportCheats.PlayerName(item),
+-						Kind = EspKind.Player
+-					});
+-				}
+-			}
+-		}
+-	}
+-
+-	private static IEnumerable FindAll(Type t)
+-	{
+-		if (!_findAllResolved)
+-		{
+-			_findAllResolved = true;
+-			MethodInfo[] methods = typeof(UnityEngine.Object).GetMethods(BindingFlags.Static | BindingFlags.Public);
+-			foreach (MethodInfo methodInfo in methods)
+-			{
+-				if (!(methodInfo.Name != "FindObjectsByType"))
+-				{
+-					ParameterInfo[] parameters = methodInfo.GetParameters();
+-					if (parameters.Length == 2 && parameters[0].ParameterType == typeof(Type))
+-					{
+-						_findAll = methodInfo;
+-						break;
+-					}
+-				}
+-			}
+-		}
+-		try
+-		{
+-			if (_findAll != null)
+-			{
+-				object obj = Enum.Parse(_findAll.GetParameters()[1].ParameterType, "None");
+-				return (IEnumerable)_findAll.Invoke(null, new object[2] { t, obj });
+-			}
+-			return UnityEngine.Object.FindObjectsOfType(t);
+-		}
+-		catch
+-		{
+-			return Array.Empty<UnityEngine.Object>();
+-		}
+-	}
+ }
+--- decompiled-src/CompleteCheatMenu/Runtime/TickDriver.cs.baseline
++++ decompiled-src/CompleteCheatMenu/Runtime/TickDriver.cs
+@@ -1,5 +1,6 @@
+ using CompleteCheatMenu.Cheats;
+ using CompleteCheatMenu.Game;
++using UnityEngine;
+ 
+ namespace CompleteCheatMenu.Runtime;
+ 
+@@ -8,6 +9,8 @@
+ 	private static bool _wasFlying;
+ 
+ 	private static bool _wasBoatFlying;
++
++	private static float _nextRegistryPrune;
+ 
+ 	internal static void FixedTick()
+ 	{
+@@ -43,6 +46,11 @@
+ 
+ 	internal static void Tick()
+ 	{
++		if (Time.unscaledTime >= _nextRegistryPrune)
++		{
++			_nextRegistryPrune = Time.unscaledTime + 1f;
++			EntityRegistry.PruneAllDestroyed();
++		}
+ 		if (VisualCheats.FreeCamActive)
+ 		{
+ 			VisualCheats.FreeCamStep(CheatState.FreeCamSpeed, CheatState.FreeCamSensitivity);
+--- decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs.baseline
++++ decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs
+@@ -2,6 +2,7 @@
+ using System.Reflection;
+ using CompleteCheatMenu.Game;
+ using CompleteCheatMenu.Runtime;
++using CompleteCheatMenu.Targeting;
+ using UnityEngine;
+ 
+ namespace CompleteCheatMenu.Cheats;
+@@ -24,6 +25,8 @@
+ 	private static float _nextTargetPreview;
+ 
+ 	private static float _targetLockUntil;
++
++	private static readonly TargetingSnapshot _targetingSnapshot = new TargetingSnapshot();
+ 
+ 	internal static object HeldWeapon
+ 	{
+@@ -248,25 +251,27 @@
+ 		Target? current = null;
+ 		float bestScore = float.MaxValue;
+ 		Transform currentTransform = CurrentTarget.HasValue ? CurrentTarget.Value.Transform : null;
++		_targetingSnapshot.Refresh(CheatState.AimAtCreatures, CheatState.AimAtPlayers);
+ 
+ 		if (CheatState.AimAtCreatures)
+ 		{
+-			List<AimTargetRegistry.Entry> creatures = AimTargetRegistry.Creatures;
+-			for (int i = creatures.Count - 1; i >= 0; i--)
+-			{
+-				AimTargetRegistry.Entry entry = creatures[i];
+-				Creature creature = entry.Creature;
++			IReadOnlyList<EntityRecord> creatures = _targetingSnapshot.Creatures;
++			for (int i = 0; i < creatures.Count; i++)
++			{
++				EntityRecord entityRecord = creatures[i];
++				Creature creature = entityRecord.Entity as Creature;
+ 				if (creature == null)
+ 				{
+-					creatures.RemoveAt(i);
+ 					continue;
+ 				}
+ 				string name = creature.name;
+-				if (entry.Name != name)
++				if (entityRecord.Name != name)
+ 				{
+-					entry.RefreshName(name);
++					entityRecord.RefreshName(name);
+ 				}
+-				if (!creature.gameObject.activeInHierarchy || (CheatState.AimExcludeDead && creature.IsDead) || (CheatState.AimExcludeSeagulls && entry.IsSeagull))
++				bool flag = entityRecord.Name.IndexOf("seagull", System.StringComparison.OrdinalIgnoreCase) >= 0;
++				bool flag2 = entityRecord.Name.IndexOf("albatross", System.StringComparison.OrdinalIgnoreCase) >= 0;
++				if (!creature.gameObject.activeInHierarchy || (CheatState.AimExcludeDead && creature.IsDead) || (CheatState.AimExcludeSeagulls && flag))
+ 				{
+ 					continue;
+ 				}
+@@ -275,18 +280,20 @@
+ 				{
+ 					continue;
+ 				}
+-				EvaluateCandidate(position, forward, entry.Transform, entry.Name, entry.IsAlbatross, currentTransform, ref best, ref current, ref bestScore);
++				EvaluateCandidate(position, forward, entityRecord.Transform, entityRecord.Name, flag2, currentTransform, ref best, ref current, ref bestScore);
+ 			}
+ 		}
+ 
+ 		if (CheatState.AimAtPlayers)
+ 		{
+-			VisualCheats.Rescan(creatures: false, items: false, players: true, 0.15f);
+-			foreach (VisualCheats.EspTarget target in VisualCheats.Targets)
+-			{
+-				if (target.Kind == VisualCheats.EspKind.Player && target.Transform != null)
++			IReadOnlyList<EntityRecord> players = _targetingSnapshot.Players;
++			object localPlayer = Refs.LocalPlayer;
++			for (int j = 0; j < players.Count; j++)
++			{
++				EntityRecord entityRecord2 = players[j];
++				if (!ReferenceEquals(entityRecord2.Entity, localPlayer) && entityRecord2.IsAlive)
+ 				{
+-					EvaluateCandidate(position, forward, target.Transform, target.Label, albatross: false, currentTransform, ref best, ref current, ref bestScore);
++					EvaluateCandidate(position, forward, entityRecord2.Transform, entityRecord2.Name, albatross: false, currentTransform, ref best, ref current, ref bestScore);
+ 				}
+ 			}
+ 		}
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Runtime/EspSnapshot.cs
+@@ -0,0 +1,28 @@
++using System.Collections.Generic;
++
++namespace CompleteCheatMenu.Runtime;
++
++internal sealed class EspSnapshot
++{
++	internal readonly List<EntityRecord> Creatures = new List<EntityRecord>(128);
++	internal readonly List<EntityRecord> Players = new List<EntityRecord>(16);
++	internal readonly List<EntityRecord> Items = new List<EntityRecord>(256);
++	internal readonly List<EntityRecord> Containers = new List<EntityRecord>(32);
++
++	internal int Revision { get; private set; }
++
++	internal int TotalCount => Creatures.Count + Players.Count + Items.Count + Containers.Count;
++
++	internal void Clear()
++	{
++		Creatures.Clear();
++		Players.Clear();
++		Items.Clear();
++		Containers.Clear();
++	}
++
++	internal void CompleteRefresh()
++	{
++		Revision++;
++	}
++}
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Runtime/EspSnapshotBuilder.cs
+@@ -0,0 +1,59 @@
++using System.Collections.Generic;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Runtime;
++
++internal static class EspSnapshotBuilder
++{
++	private static readonly EspSnapshot _current = new EspSnapshot();
++	private static float _nextRefresh;
++	private static bool _lastCreatures;
++	private static bool _lastItems;
++	private static bool _lastPlayers;
++	private static bool _hasOptions;
++
++	internal static EspSnapshot Current => _current;
++
++	internal static EspSnapshot Refresh(bool creatures, bool items, bool players, float interval = 0.5f)
++	{
++		float unscaledTime = Time.unscaledTime;
++		bool flag = !_hasOptions || creatures != _lastCreatures || items != _lastItems || players != _lastPlayers;
++		if (!flag && unscaledTime < _nextRefresh)
++		{
++			return _current;
++		}
++		_hasOptions = true;
++		_lastCreatures = creatures;
++		_lastItems = items;
++		_lastPlayers = players;
++		_nextRefresh = unscaledTime + Mathf.Max(0.1f, interval);
++		_current.Clear();
++		if (creatures)
++		{
++			AddAlive(EntityRegistry.Creatures, _current.Creatures);
++		}
++		if (players)
++		{
++			AddAlive(EntityRegistry.Players, _current.Players);
++		}
++		if (items)
++		{
++			AddAlive(EntityRegistry.Items, _current.Items);
++			AddAlive(EntityRegistry.Containers, _current.Containers);
++		}
++		_current.CompleteRefresh();
++		return _current;
++	}
++
++	private static void AddAlive(IReadOnlyList<EntityRecord> source, List<EntityRecord> destination)
++	{
++		for (int i = 0; i < source.Count; i++)
++		{
++			EntityRecord entityRecord = source[i];
++			if (entityRecord.IsAlive)
++			{
++				destination.Add(entityRecord);
++			}
++		}
++	}
++}
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Targeting/TargetingSnapshot.cs
+@@ -0,0 +1,19 @@
++using System;
++using System.Collections.Generic;
++using CompleteCheatMenu.Runtime;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal sealed class TargetingSnapshot
++{
++	private static readonly IReadOnlyList<EntityRecord> Empty = Array.Empty<EntityRecord>();
++
++	internal IReadOnlyList<EntityRecord> Creatures { get; private set; } = Empty;
++	internal IReadOnlyList<EntityRecord> Players { get; private set; } = Empty;
++
++	internal void Refresh(bool creatures, bool players)
++	{
++		Creatures = (creatures ? EntityRegistry.Creatures : Empty);
++		Players = (players ? EntityRegistry.Players : Empty);
++	}
++}
+--- /dev/null
++++ tests/snapshot_isolation_test.py
+@@ -0,0 +1,82 @@
++from dataclasses import dataclass
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++
++
++@dataclass(frozen=True)
++class Record:
++    instance_id: int
++    kind: str
++
++
++class Registry:
++    def __init__(self):
++        self.creatures = [Record(1, "creature"), Record(2, "creature")]
++        self.players = [Record(3, "player"), Record(4, "player")]
++        self.items = [Record(5, "item"), Record(6, "item")]
++        self.containers = [Record(7, "container")]
++
++
++class EspSnapshotModel:
++    def __init__(self, registry):
++        self.registry = registry
++        self.creatures = []
++        self.players = []
++        self.items = []
++        self.containers = []
++
++    def refresh(self):
++        self.creatures[:] = self.registry.creatures
++        self.players[:] = self.registry.players
++        self.items[:] = self.registry.items
++        self.containers[:] = self.registry.containers
++
++    def counts(self):
++        return (len(self.creatures), len(self.players), len(self.items), len(self.containers))
++
++
++class TargetingSnapshotModel:
++    def __init__(self, registry):
++        self.registry = registry
++        self.creatures = ()
++        self.players = ()
++
++    def refresh(self, creatures, players):
++        self.creatures = self.registry.creatures if creatures else ()
++        self.players = self.registry.players if players else ()
++
++
++registry = Registry()
++esp = EspSnapshotModel(registry)
++targeting = TargetingSnapshotModel(registry)
++esp.refresh()
++before = esp.counts()
++
++targeting.refresh(creatures=False, players=True)
++assert len(targeting.players) == 2
++assert len(targeting.creatures) == 0
++assert esp.counts() == before == (2, 2, 2, 1)
++
++targeting.refresh(creatures=True, players=False)
++assert len(targeting.creatures) == 2
++assert len(targeting.players) == 0
++assert esp.counts() == before
++assert (len(registry.creatures), len(registry.players), len(registry.items), len(registry.containers)) == before
++
++visual = (ROOT / "decompiled-src/CompleteCheatMenu/Cheats/VisualCheats.cs").read_text(encoding="utf-8")
++weapon = (ROOT / "decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs").read_text(encoding="utf-8")
++esp_builder = (ROOT / "decompiled-src/CompleteCheatMenu/Runtime/EspSnapshotBuilder.cs").read_text(encoding="utf-8")
++target_snapshot = (ROOT / "decompiled-src/CompleteCheatMenu/Targeting/TargetingSnapshot.cs").read_text(encoding="utf-8")
++
++assert "EspSnapshotBuilder.Refresh" in visual
++assert "internal static IReadOnlyList<EspTarget> Targets => _targets" in visual
++assert "VisualCheats.Rescan(creatures: false" not in weapon
++assert "VisualCheats.Targets" not in weapon
++assert "_targetingSnapshot.Refresh" in weapon
++assert "EntityRegistry.Creatures" in target_snapshot
++assert "EntityRegistry.Players" in target_snapshot
++assert "EntityRegistry.Items" in esp_builder
++assert "EntityRegistry.Containers" in esp_builder
++
++print("SNAPSHOT_ISOLATION_TESTS=PASS cases=7")

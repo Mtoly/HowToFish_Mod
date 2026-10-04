@@ -1,0 +1,38 @@
+{
+  "id": "dust2_portal_island",
+  "name": "Dust2 传送岛",
+  "author": "华丽的小柠檬 & 小海同学ovo",
+  "bundle": "dust2_portal_island",
+  "scene": "Dust2PortalIsland",
+  "positionMode": "manual",
+  "position": {
+    "x": -200,
+    "y": -0.8,
+    "z": 1150
+  },
+  "moveScene": true,
+  "radarColor": "#25C8D8",
+  "islandSize": 55,
+  "runtime": {
+    "playerSpawn": "PlayerSpawnPoint",
+    "boatSpawn": "BoatSpawnPoint",
+    "defaultPlayerSpawn": {
+      "x": -1.26,
+      "y": 0.78,
+      "z": -9.0
+    },
+    "defaultBoatSpawn": {
+      "x": -1.9,
+      "y": 0.535,
+      "z": -12
+    }
+  },
+  "wildlife": {
+    "seagulls": false,
+    "clams": false,
+    "seagullMax": 3,
+    "seagullDelay": 60,
+    "clamMax": 3,
+    "clamDelay": 15
+  }
+}

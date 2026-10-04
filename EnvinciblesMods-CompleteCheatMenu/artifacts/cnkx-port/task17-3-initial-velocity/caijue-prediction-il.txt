@@ -1,0 +1,192 @@
+=== HowToFishMagicBullet.TargetPrediction::GetTargetVelocity RVA=0x4506 ===
+IL_0001: ldarg.0      
+IL_0002: call         UnityEngine.Object::op_Implicit
+IL_0007: brfalse.s    22
+IL_0009: ldarg.0      
+IL_000A: callvirt     Item::get_Rig
+IL_000F: call         UnityEngine.Object::op_Implicit
+IL_0014: brtrue.s     28
+IL_0016: call         UnityEngine.Vector3::get_zero
+IL_001B: ret          
+IL_001C: ldarg.0      
+IL_001D: callvirt     Item::get_Rig
+IL_0022: ldarg.1      
+IL_0023: callvirt     UnityEngine.Rigidbody::GetPointVelocity
+IL_0028: ret          
+=== HowToFishMagicBullet.TargetPrediction::PredictInterceptPoint RVA=0x4530 ===
+IL_000C: ldarg.s      argument(0x0004)
+IL_000E: ldc.r4       0.0
+IL_0013: stind.r4     
+IL_0014: ldarg.1      
+IL_0015: call         UnityEngine.Object::op_Implicit
+IL_001A: brtrue.s     30
+IL_001C: ldarg.0      
+IL_001D: ret          
+IL_001E: ldarg.1      
+IL_001F: call         ResolveAimPoint
+IL_0024: stloc.0      
+IL_0025: ldarg.1      
+IL_0026: ldloc.0      
+IL_0027: call         GetTargetVelocity
+IL_002C: stloc.1      
+IL_002D: call         get_MaxPredictionTime
+IL_0032: brtrue.s     59
+IL_0034: ldc.r4       2.0
+IL_0039: br.s         69
+IL_003B: call         get_MaxPredictionTime
+IL_0040: callvirt     ::get_Value
+IL_0045: stloc.2      
+IL_0046: ldarg.2      
+IL_0047: ldc.r4       0.0010000000474974513
+IL_004C: bgt.un.s     80
+IL_004E: ldloc.0      
+IL_004F: ret          
+IL_0050: ldloc.0      
+IL_0051: ldarg.0      
+IL_0052: call         UnityEngine.Vector3::op_Subtraction
+IL_0057: stloc.s      local(0x0006)
+IL_0059: ldloca.s     local(0x0006)
+IL_005B: call         UnityEngine.Vector3::get_magnitude
+IL_0060: stloc.3      
+IL_0061: ldloc.3      
+IL_0062: ldarg.2      
+IL_0063: div          
+IL_0064: stloc.s      local(0x0004)
+IL_0066: ldc.i4.0     
+IL_0067: stloc.s      local(0x0007)
+IL_0069: br.s         207
+IL_006B: ldloc.0      
+IL_006C: ldloc.1      
+IL_006D: ldloc.s      local(0x0004)
+IL_006F: call         UnityEngine.Vector3::op_Multiply
+IL_0074: call         UnityEngine.Vector3::op_Addition
+IL_0079: ldarg.0      
+IL_007A: call         UnityEngine.Vector3::op_Subtraction
+IL_007F: stloc.s      local(0x0006)
+IL_0081: ldloca.s     local(0x0006)
+IL_0083: call         UnityEngine.Vector3::get_magnitude
+IL_0088: ldarg.2      
+IL_0089: div          
+IL_008A: stloc.s      local(0x0008)
+IL_008C: ldloc.s      local(0x0008)
+IL_008E: call         System.Single::IsNaN
+IL_0093: brtrue.s     167
+IL_0095: ldloc.s      local(0x0008)
+IL_0097: call         System.Single::IsInfinity
+IL_009C: brtrue.s     167
+IL_009E: ldloc.s      local(0x0008)
+IL_00A0: ldc.r4       0.0
+IL_00A5: bge.un.s     174
+IL_00A7: ldloc.3      
+IL_00A8: ldarg.2      
+IL_00A9: div          
+IL_00AA: stloc.s      local(0x0004)
+IL_00AC: br.s         212
+IL_00AE: ldloc.s      local(0x0008)
+IL_00B0: ldloc.s      local(0x0004)
+IL_00B2: sub          
+IL_00B3: call         UnityEngine.Mathf::Abs
+IL_00B8: ldc.r4       0.0010000000474974513
+IL_00BD: bge.un.s     197
+IL_00BF: ldloc.s      local(0x0008)
+IL_00C1: stloc.s      local(0x0004)
+IL_00C3: br.s         212
+IL_00C5: ldloc.s      local(0x0008)
+IL_00C7: stloc.s      local(0x0004)
+IL_00C9: ldloc.s      local(0x0007)
+IL_00CB: ldc.i4.1     
+IL_00CC: add          
+IL_00CD: stloc.s      local(0x0007)
+IL_00CF: ldloc.s      local(0x0007)
+IL_00D1: ldc.i4.3     
+IL_00D2: blt.s        107
+IL_00D4: ldloc.s      local(0x0004)
+IL_00D6: ldc.r4       0.0
+IL_00DB: ldloc.2      
+IL_00DC: call         UnityEngine.Mathf::Clamp
+IL_00E1: stloc.s      local(0x0004)
+IL_00E3: ldarg.s      argument(0x0004)
+IL_00E5: ldloc.s      local(0x0004)
+IL_00E7: stind.r4     
+IL_00E8: ldloc.0      
+IL_00E9: ldloc.1      
+IL_00EA: ldloc.s      local(0x0004)
+IL_00EC: call         UnityEngine.Vector3::op_Multiply
+IL_00F1: call         UnityEngine.Vector3::op_Addition
+IL_00F6: stloc.s      local(0x0005)
+IL_00F8: ldarg.3      
+IL_00F9: ldc.r4       0.0
+IL_00FE: ble.un.s     288
+IL_0100: ldloc.s      local(0x0005)
+IL_0102: call         UnityEngine.Vector3::get_up
+IL_0107: ldc.r4       0.5
+IL_010C: ldarg.3      
+IL_010D: mul          
+IL_010E: ldloc.s      local(0x0004)
+IL_0110: mul          
+IL_0111: ldloc.s      local(0x0004)
+IL_0113: mul          
+IL_0114: call         UnityEngine.Vector3::op_Multiply
+IL_0119: call         UnityEngine.Vector3::op_Addition
+IL_011E: stloc.s      local(0x0005)
+IL_0120: ldloc.s      local(0x0005)
+IL_0122: ret          
+=== HowToFishMagicBullet.TargetPrediction::CalculateRedirectedVelocity RVA=0x4654 ===
+IL_000C: newobj       .ctor
+IL_0011: stloc.0      
+IL_0012: ldloc.0      
+IL_0013: ldarg.2      
+IL_0014: stfld        target
+IL_0019: ldloc.0      
+IL_001A: ldfld        target
+IL_001F: call         UnityEngine.Object::op_Implicit
+IL_0024: brtrue.s     40
+IL_0026: ldarg.1      
+IL_0027: ret          
+IL_0028: ldloc.0      
+IL_0029: ldarga.s     argument(0x0001)
+IL_002B: call         UnityEngine.Vector3::get_magnitude
+IL_0030: stfld        speed
+IL_0035: ldloc.0      
+IL_0036: ldfld        speed
+IL_003B: ldc.r4       0.0010000000474974513
+IL_0040: bgt.un.s     68
+IL_0042: ldarg.1      
+IL_0043: ret          
+IL_0044: ldloc.0      
+IL_0045: ldarg.3      
+IL_0046: brtrue.s     79
+IL_0048: ldc.r4       0.0
+IL_004D: br.s         85
+IL_004F: ldarg.3      
+IL_0050: callvirt     WeaponInfo::get_ProjectileGravity
+IL_0055: stfld        gravity
+IL_005A: ldarg.0      
+IL_005B: ldloc.0      
+IL_005C: ldfld        target
+IL_0061: ldloc.0      
+IL_0062: ldfld        speed
+IL_0067: ldloc.0      
+IL_0068: ldfld        gravity
+IL_006D: ldloc.0      
+IL_006E: ldflda       travelTime
+IL_0073: call         PredictInterceptPoint
+IL_0078: ldarg.0      
+IL_0079: call         UnityEngine.Vector3::op_Subtraction
+IL_007E: stloc.1      
+IL_007F: ldloca.s     local(0x0001)
+IL_0081: call         UnityEngine.Vector3::get_sqrMagnitude
+IL_0086: ldc.r4       9.999999747378752e-05
+IL_008B: bgt.un.s     143
+IL_008D: ldarg.1      
+IL_008E: ret          
+IL_008F: ldloc.0      
+IL_0090: ldftn        <CalculateRedirectedVelocity>b__0
+IL_0096: newobj       ::.ctor
+IL_009B: call         Debug
+IL_00A0: ldloca.s     local(0x0001)
+IL_00A2: call         UnityEngine.Vector3::get_normalized
+IL_00A7: ldloc.0      
+IL_00A8: ldfld        speed
+IL_00AD: call         UnityEngine.Vector3::op_Multiply
+IL_00B2: ret          

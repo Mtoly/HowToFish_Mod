@@ -1,0 +1,8 @@
+decompiled-src\CompleteCheatMenu\Targeting\TargetingSystem.cs_MATCH=True
+decompiled-src\CompleteCheatMenu\Targeting\VisibilityCache.cs_MATCH=True
+decompiled-src\CompleteCheatMenu\Runtime\EspRendererV2.cs_MATCH=True
+decompiled-src\CompleteCheatMenu\UI\Tabs\WeaponsTab.cs_MATCH=True
+tests\esp_projection_test.py_MATCH=True
+docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md_MATCH=True
+DLL_MATCH=True
+NEW_TEST_PRESENT=False

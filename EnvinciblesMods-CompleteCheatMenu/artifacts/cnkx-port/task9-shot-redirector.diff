@@ -1,0 +1,206 @@
+diff --git artifacts/cnkx-port/task9-original-src/WeaponShoot_Patch.cs decompiled-src/CompleteCheatMenu/Patches/WeaponShoot_Patch.cs
+index 25ab960..8993f74 100644
+--- artifacts/cnkx-port/task9-original-src/WeaponShoot_Patch.cs
++++ decompiled-src/CompleteCheatMenu/Patches/WeaponShoot_Patch.cs
+@@ -28,7 +28,7 @@ internal static class WeaponShoot_Patch
+ 	{
+ 		try
+ 		{
+-			WeaponCheats.AimBeforeShot();
++			WeaponCheats.PrepareShot();
+ 		}
+ 		catch (Exception ex)
+ 		{
+diff --git artifacts/cnkx-port/task9-original-src/WeaponCheats.cs decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs
+index a2f33ea..cddc8cc 100644
+--- artifacts/cnkx-port/task9-original-src/WeaponCheats.cs
++++ decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs
+@@ -178,7 +178,7 @@ internal static class WeaponCheats
+ 		}
+ 	}
+ 
+-	internal static void AimBeforeShot()
++	internal static void PrepareShot()
+ 	{
+ 		if (!CheatState.Aimbot && !CheatState.FireWhereLooking)
+ 		{
+@@ -190,21 +190,42 @@ internal static class WeaponCheats
+ 		{
+ 			return;
+ 		}
+-		Vector3 forward = currentCamera.transform.forward;
++		if (CheatState.FireWhereLooking)
++		{
++			AlignFirePointToView(currentCamera, firePoint);
++		}
+ 		if (CheatState.Aimbot)
+ 		{
+-			TargetSolution target = (CurrentTarget = _targetingSystem.Acquire(currentCamera));
+-			if (target != null && target.Transform != null)
++			TargetSolution solution;
++			if (ShotRedirector.TryRedirect(_targetingSystem, currentCamera, firePoint, ResolveProjectileSpeed(HeldWeapon), out solution))
+ 			{
+-				forward = (target.AimPoint - firePoint.position).normalized;
++				CurrentTarget = solution;
+ 			}
+ 		}
++	}
++
++	private static void AlignFirePointToView(Camera camera, Transform firePoint)
++	{
++		Vector3 forward = camera.transform.forward;
+ 		if (forward.sqrMagnitude > 0.0001f)
+ 		{
+ 			firePoint.rotation = Quaternion.LookRotation(forward, Vector3.up);
+ 		}
+ 	}
+ 
++	private static float ResolveProjectileSpeed(object weapon)
++	{
++		if (CheatState.FastBullets)
++		{
++			return CheatState.ProjectileSpeed;
++		}
++		if (weapon != null && GameBinder.TryGet<float>(GameBinder.Field("Weapon", "_projSpeed"), weapon, out var speed))
++		{
++			return speed;
++		}
++		return CheatState.ProjectileSpeed;
++	}
++
+ 	private static void ApplyInfiniteAmmo(object weapon)
+ 	{
+ 		FieldInfo fieldInfo = GameBinder.Field("Weapon", "<Ammo>k__BackingField");
+diff --git artifacts/cnkx-port/task9-original-src/CheatState.cs decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
+index f2741d8..cb2da13 100644
+--- artifacts/cnkx-port/task9-original-src/CheatState.cs
++++ decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
+@@ -90,6 +90,10 @@ internal static class CheatState
+ 
+ 	internal static float AimGravityScale = 1f;
+ 
++	internal static float AimTrackingChance = 100f;
++
++	internal static bool AimTrackingDiagnostics;
++
+ 	internal static bool KillScoreOverride;
+ 
+ 	internal static float KillFlatMultiplier = 1f;
+diff --git artifacts/cnkx-port/task9-original-src/cnkx_math_impl.py tests/cnkx_math_impl.py
+index bfe828b..e95ef28 100644
+--- artifacts/cnkx-port/task9-original-src/cnkx_math_impl.py
++++ tests/cnkx_math_impl.py
+@@ -91,3 +91,12 @@ def predict_point(origin, current_point, velocity, projectile_speed):
+         current_point[index] + velocity[index] * flight_time
+         for index in range(3)
+     )
++
++
++def should_track(percent, sample):
++    probability = min(1.0, max(0.0, percent / 100.0))
++    if probability <= 0.0:
++        return False
++    if probability >= 1.0:
++        return True
++    return sample < probability
+diff --git artifacts/cnkx-port/task9-original-src/tracking_probability_test.py tests/tracking_probability_test.py
+index dc4f231..3960a7b 100644
+--- artifacts/cnkx-port/task9-original-src/tracking_probability_test.py
++++ tests/tracking_probability_test.py
+@@ -27,4 +27,24 @@ assert not should_track(50.0, 0.5)
+ assert not should_track(-10.0, 0.0)
+ assert should_track(150.0, 0.999999)
+ 
++# 生产实现必须即时 Acquire，使用浮点 Random.value，并支持预测点与限速日志。
++PROJECT = Path(__file__).resolve().parents[1]
++redirector_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Targeting/ShotRedirector.cs"
++).read_text(encoding="utf-8")
++patch_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Patches/WeaponShoot_Patch.cs"
++).read_text(encoding="utf-8")
++weapon_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs"
++).read_text(encoding="utf-8")
++assert "Random.value" in redirector_source
++assert "return sample < probability" in redirector_source
++assert "targetingSystem.Acquire(camera)" in redirector_source
++assert "BallisticPredictor.Predict" in redirector_source
++assert "_nextDiagnostic = Time.unscaledTime + 2f" in redirector_source
++assert "WeaponCheats.PrepareShot()" in patch_source
++assert "AlignFirePointToView" in weapon_source
++assert "ShotRedirector.TryRedirect" in weapon_source
++
+ print("TRACKING_PROBABILITY_TESTS=PASS cases=6")
+diff --git decompiled-src/CompleteCheatMenu/Targeting/ShotRedirector.cs decompiled-src/CompleteCheatMenu/Targeting/ShotRedirector.cs
+new file mode 100644
+index 0000000..7b0e758
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Targeting/ShotRedirector.cs
+@@ -0,0 +1,66 @@
++using CompleteCheatMenu.Runtime;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal static class ShotRedirector
++{
++	private static float _nextDiagnostic;
++
++	internal static bool TryRedirect(TargetingSystem targetingSystem, Camera camera, Transform firePoint, float projectileSpeed, out TargetSolution solution)
++	{
++		solution = null;
++		if (targetingSystem == null || camera == null || firePoint == null || !CheatState.Aimbot)
++		{
++			return false;
++		}
++		if (!ShouldTrack(CheatState.AimTrackingChance, Random.value))
++		{
++			LogLimited("本次开火未触发方向追踪。");
++			return false;
++		}
++		solution = targetingSystem.Acquire(camera);
++		if (solution == null || solution.Transform == null)
++		{
++			LogLimited("开火时没有可用追踪目标。");
++			return false;
++		}
++		Vector3 point = solution.AimPoint;
++		if (CheatState.AimPrediction)
++		{
++			point = BallisticPredictor.Predict(firePoint.position, point, solution.Velocity, projectileSpeed, CheatState.AimGravityCompensation);
++		}
++		Vector3 direction = point - firePoint.position;
++		if (direction.sqrMagnitude <= 0.0001f)
++		{
++			return false;
++		}
++		firePoint.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
++		LogLimited("发射方向已更新到当前目标解算点。");
++		return true;
++	}
++
++	internal static bool ShouldTrack(float percent, float sample)
++	{
++		float probability = Mathf.Clamp01(percent / 100f);
++		if (probability <= 0f)
++		{
++			return false;
++		}
++		if (probability >= 1f)
++		{
++			return true;
++		}
++		return sample < probability;
++	}
++
++	private static void LogLimited(string message)
++	{
++		if (!CheatState.AimTrackingDiagnostics || Time.unscaledTime < _nextDiagnostic)
++		{
++			return;
++		}
++		_nextDiagnostic = Time.unscaledTime + 2f;
++		Plugin.Log.LogInfo((object)("[方向追踪] " + message));
++	}
++}

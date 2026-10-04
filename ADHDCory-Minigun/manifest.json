@@ -1,0 +1,9 @@
+{
+  "name": "Minigun",
+  "version_number": "1.0.3",
+  "website_url": "",
+  "description": "Add a minigun to purchase on some of the islands!",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2305"
+  ]
+}

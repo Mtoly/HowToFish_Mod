@@ -1,0 +1,9 @@
+{
+  "name": "ModMenu",
+  "version_number": "0.3.6",
+  "website_url": "",
+  "description": "A settings-only native Mod Settings menu available from the main menu and in-game pause screen, with automatic BepInEx config controls.",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2305"
+  ]
+}

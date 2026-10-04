@@ -1,0 +1,591 @@
+--- decompiled-src/CompleteCheatMenu/Cheats/AimTargetRegistry.cs.baseline
++++ decompiled-src/CompleteCheatMenu/Cheats/AimTargetRegistry.cs
+@@ -1,5 +1,6 @@
+ using System;
+ using System.Collections.Generic;
++using CompleteCheatMenu.Runtime;
+ using UnityEngine;
+ 
+ namespace CompleteCheatMenu.Cheats;
+@@ -30,44 +31,70 @@
+ 	}
+ 
+ 	private static readonly List<Entry> _creatures = new List<Entry>(128);
+-	private static bool _initialized;
+-
+ 	internal static List<Entry> Creatures
+ 	{
+ 		get
+ 		{
+-			EnsureInitialized();
++			Synchronize();
+ 			return _creatures;
+ 		}
+ 	}
+ 
+ 	internal static void EnsureInitialized()
+ 	{
+-		if (_initialized)
+-		{
+-			return;
+-		}
+-		_initialized = true;
+-		Creature[] existing = UnityEngine.Object.FindObjectsByType<Creature>();
+-		for (int i = 0; i < existing.Length; i++)
+-		{
+-			Register(existing[i]);
+-		}
++		EntityRegistry.EnsureCreaturesInitialized();
++		Synchronize();
+ 	}
+ 
+ 	internal static void Register(Creature creature)
+ 	{
+-		if (creature == null)
++		if (EntityRegistry.RegisterCreature(creature) != null)
+ 		{
+-			return;
++			Synchronize();
+ 		}
+-		for (int i = 0; i < _creatures.Count; i++)
++	}
++
++	private static void Synchronize()
++	{
++		IReadOnlyList<EntityRecord> creatures = EntityRegistry.Creatures;
++		for (int i = _creatures.Count - 1; i >= 0; i--)
+ 		{
+-			if (ReferenceEquals(_creatures[i].Creature, creature))
++			Entry entry = _creatures[i];
++			bool flag = false;
++			for (int j = 0; j < creatures.Count; j++)
+ 			{
+-				return;
++				if (ReferenceEquals(creatures[j].Entity, entry.Creature))
++				{
++					flag = true;
++					entry.RefreshName(creatures[j].Name);
++					break;
++				}
++			}
++			if (!flag)
++			{
++				_creatures.RemoveAt(i);
+ 			}
+ 		}
+-		_creatures.Add(new Entry(creature));
++		for (int k = 0; k < creatures.Count; k++)
++		{
++			Creature creature = creatures[k].Entity as Creature;
++			if (creature == null)
++			{
++				continue;
++			}
++			bool flag2 = false;
++			for (int l = 0; l < _creatures.Count; l++)
++			{
++				if (ReferenceEquals(_creatures[l].Creature, creature))
++				{
++					flag2 = true;
++					break;
++				}
++			}
++			if (!flag2)
++			{
++				_creatures.Add(new Entry(creature));
++			}
++		}
+ 	}
+ }
+--- decompiled-src/CompleteCheatMenu/Patches/CreatureRegistry_Patch.cs.baseline
++++ decompiled-src/CompleteCheatMenu/Patches/CreatureRegistry_Patch.cs
+@@ -1,4 +1,4 @@
+-using CompleteCheatMenu.Cheats;
++using CompleteCheatMenu.Runtime;
+ using HarmonyLib;
+ 
+ namespace CompleteCheatMenu.Patches;
+@@ -8,6 +8,6 @@
+ {
+ 	private static void Postfix(Creature __instance)
+ 	{
+-		AimTargetRegistry.Register(__instance);
++		EntityRegistry.RegisterCreature(__instance);
+ 	}
+ }
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Runtime/EntityRecord.cs
+@@ -0,0 +1,48 @@
++using CompleteCheatMenu.Game;
++using System.Runtime.CompilerServices;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Runtime;
++
++internal enum EntityKind
++{
++	Creature,
++	Player,
++	Item,
++	Container
++}
++
++internal sealed class EntityRecord
++{
++	internal readonly object Entity;
++
++	internal readonly Transform Transform;
++
++	internal readonly int InstanceId;
++
++	internal readonly EntityKind Kind;
++
++	internal readonly string TypeName;
++
++	internal string Name;
++
++	internal int SeenGeneration;
++
++	internal bool IsAlive => Refs.IsAlive(Entity) && Transform != null;
++
++	internal EntityRecord(object entity, Transform transform, string name, EntityKind kind, int generation)
++	{
++		Entity = entity;
++		Transform = transform;
++		Kind = kind;
++		SeenGeneration = generation;
++		InstanceId = RuntimeHelpers.GetHashCode(entity);
++		TypeName = entity.GetType().Name;
++		RefreshName(name);
++	}
++
++	internal void RefreshName(string name)
++	{
++		Name = (string.IsNullOrEmpty(name) ? TypeName : name);
++	}
++}
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Runtime/EntityRegistry.cs
+@@ -0,0 +1,290 @@
++using System;
++using System.Collections;
++using System.Collections.Generic;
++using System.Reflection;
++using System.Runtime.CompilerServices;
++using CompleteCheatMenu.Cheats;
++using CompleteCheatMenu.Game;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Runtime;
++
++internal static class EntityRegistry
++{
++	private static readonly List<EntityRecord> _creatures = new List<EntityRecord>(128);
++
++	private static readonly List<EntityRecord> _players = new List<EntityRecord>(16);
++
++	private static readonly List<EntityRecord> _items = new List<EntityRecord>(256);
++
++	private static readonly List<EntityRecord> _containers = new List<EntityRecord>(32);
++
++	private static bool _creaturesInitialized;
++
++	private static float _nextPlayerRefresh;
++
++	private static float _nextItemRefresh;
++
++	private static float _nextContainerRefresh;
++
++	private static int _playerGeneration;
++
++	private static int _itemGeneration;
++
++	private static int _containerGeneration;
++
++	internal static IReadOnlyList<EntityRecord> Creatures
++	{
++		get
++		{
++			EnsureCreaturesInitialized();
++			PruneDestroyed(_creatures);
++			return _creatures;
++		}
++	}
++
++	internal static IReadOnlyList<EntityRecord> Players
++	{
++		get
++		{
++			RefreshPlayers();
++			return _players;
++		}
++	}
++
++	internal static IReadOnlyList<EntityRecord> Items
++	{
++		get
++		{
++			RefreshItems();
++			return _items;
++		}
++	}
++
++	internal static IReadOnlyList<EntityRecord> Containers
++	{
++		get
++		{
++			RefreshContainers();
++			return _containers;
++		}
++	}
++
++	internal static void EnsureCreaturesInitialized()
++	{
++		if (_creaturesInitialized)
++		{
++			return;
++		}
++		_creaturesInitialized = true;
++		Creature[] array = UnityEngine.Object.FindObjectsByType<Creature>();
++		for (int i = 0; i < array.Length; i++)
++		{
++			RegisterCreature(array[i]);
++		}
++	}
++
++	internal static EntityRecord RegisterCreature(Creature creature)
++	{
++		if (creature == null)
++		{
++			return null;
++		}
++		return Register(_creatures, creature, creature.transform, creature.name, EntityKind.Creature, 0);
++	}
++
++	internal static EntityRecord RegisterPlayer(Player player)
++	{
++		if (player == null)
++		{
++			return null;
++		}
++		return Register(_players, player, player.transform, TeleportCheats.PlayerName(player), EntityKind.Player, _playerGeneration);
++	}
++
++	internal static EntityRecord RegisterItem(Item item)
++	{
++		if (item == null)
++		{
++			return null;
++		}
++		return Register(_items, item, item.transform, item.name, EntityKind.Item, _itemGeneration);
++	}
++
++	internal static EntityRecord RegisterContainer(Component container)
++	{
++		if (container == null)
++		{
++			return null;
++		}
++		return Register(_containers, container, container.transform, container.name, EntityKind.Container, _containerGeneration);
++	}
++
++	private static EntityRecord Register(List<EntityRecord> records, object entity, Transform transform, string name, EntityKind kind, int generation)
++	{
++		if (!Refs.IsAlive(entity) || transform == null)
++		{
++			return null;
++		}
++		int instanceId = RuntimeHelpers.GetHashCode(entity);
++		for (int i = 0; i < records.Count; i++)
++		{
++			EntityRecord entityRecord = records[i];
++			if (ReferenceEquals(entityRecord.Entity, entity) || entityRecord.InstanceId == instanceId)
++			{
++				entityRecord.SeenGeneration = generation;
++				entityRecord.RefreshName(name);
++				return entityRecord;
++			}
++		}
++		EntityRecord entityRecord2 = new EntityRecord(entity, transform, name, kind, generation);
++		records.Add(entityRecord2);
++		return entityRecord2;
++	}
++
++	internal static void RefreshPlayers(float interval = 0.1f)
++	{
++		float unscaledTime = Time.unscaledTime;
++		if (unscaledTime < _nextPlayerRefresh)
++		{
++			return;
++		}
++		_nextPlayerRefresh = unscaledTime + Mathf.Max(0.05f, interval);
++		_playerGeneration++;
++		IEnumerable enumerable = ReadEnumerableMember("PlayerManager", "AlivePlayers");
++		bool flag = enumerable != null;
++		if (enumerable != null)
++		{
++			foreach (object item in enumerable)
++			{
++				if (item is Player player && player != null)
++				{
++					RegisterPlayer(player);
++				}
++			}
++		}
++		if (flag)
++		{
++			RemoveStale(_players, _playerGeneration);
++		}
++		else
++		{
++			PruneDestroyed(_players);
++		}
++	}
++
++	internal static void RefreshItems(float interval = 0.5f)
++	{
++		float unscaledTime = Time.unscaledTime;
++		if (unscaledTime < _nextItemRefresh)
++		{
++			return;
++		}
++		_nextItemRefresh = unscaledTime + Mathf.Max(0.1f, interval);
++		_itemGeneration++;
++		PropertyInfo propertyInfo = GameBinder.Property("ItemManager", "Items");
++		bool flag = false;
++		try
++		{
++			if (propertyInfo?.GetValue(null) is IDictionary dictionary)
++			{
++				flag = true;
++				foreach (DictionaryEntry item in dictionary)
++				{
++					Item item2 = item.Value as Item;
++					if (item2 == null && item.Key is Transform transform && transform != null)
++					{
++						item2 = transform.GetComponent<Item>();
++					}
++					if (item2 != null)
++					{
++						RegisterItem(item2);
++					}
++				}
++			}
++		}
++		catch
++		{
++		}
++		if (flag)
++		{
++			RemoveStale(_items, _itemGeneration);
++		}
++		else
++		{
++			PruneDestroyed(_items);
++		}
++	}
++
++	internal static void RefreshContainers(float interval = 0.5f)
++	{
++		float unscaledTime = Time.unscaledTime;
++		if (unscaledTime < _nextContainerRefresh)
++		{
++			return;
++		}
++		_nextContainerRefresh = unscaledTime + Mathf.Max(0.1f, interval);
++		_containerGeneration++;
++		DeadPlayer[] array = UnityEngine.Object.FindObjectsByType<DeadPlayer>();
++		for (int i = 0; i < array.Length; i++)
++		{
++			RegisterContainer(array[i]);
++		}
++		RemoveStale(_containers, _containerGeneration);
++	}
++
++	internal static void PruneAllDestroyed()
++	{
++		PruneDestroyed(_creatures);
++		PruneDestroyed(_players);
++		PruneDestroyed(_items);
++		PruneDestroyed(_containers);
++	}
++
++	private static void PruneDestroyed(List<EntityRecord> records)
++	{
++		for (int i = records.Count - 1; i >= 0; i--)
++		{
++			if (!records[i].IsAlive)
++			{
++				records.RemoveAt(i);
++			}
++		}
++	}
++
++	private static void RemoveStale(List<EntityRecord> records, int generation)
++	{
++		for (int i = records.Count - 1; i >= 0; i--)
++		{
++			EntityRecord entityRecord = records[i];
++			if (!entityRecord.IsAlive || entityRecord.SeenGeneration != generation)
++			{
++				records.RemoveAt(i);
++			}
++		}
++	}
++
++	private static IEnumerable ReadEnumerableMember(string typeName, string memberName)
++	{
++		PropertyInfo propertyInfo = GameBinder.Property(typeName, memberName);
++		try
++		{
++			if (propertyInfo?.GetValue(null) is IEnumerable enumerable)
++			{
++				return enumerable;
++			}
++		}
++		catch
++		{
++		}
++		FieldInfo fieldInfo = GameBinder.Field(typeName, memberName);
++		try
++		{
++			return fieldInfo?.GetValue(null) as IEnumerable;
++		}
++		catch
++		{
++			return null;
++		}
++	}
++}
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Patches/PlayerRegistry_Patch.cs
+@@ -0,0 +1,13 @@
++using CompleteCheatMenu.Runtime;
++using HarmonyLib;
++
++namespace CompleteCheatMenu.Patches;
++
++[HarmonyPatch(typeof(Player), "Awake")]
++internal static class PlayerRegistry_Patch
++{
++	private static void Postfix(Player __instance)
++	{
++		EntityRegistry.RegisterPlayer(__instance);
++	}
++}
+--- /dev/null
++++ tests/entity_registry_test.py
+@@ -0,0 +1,113 @@
++from dataclasses import dataclass
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++REGISTRY_SOURCE = ROOT / "decompiled-src/CompleteCheatMenu/Runtime/EntityRegistry.cs"
++RECORD_SOURCE = ROOT / "decompiled-src/CompleteCheatMenu/Runtime/EntityRecord.cs"
++CREATURE_PATCH = ROOT / "decompiled-src/CompleteCheatMenu/Patches/CreatureRegistry_Patch.cs"
++PLAYER_PATCH = ROOT / "decompiled-src/CompleteCheatMenu/Patches/PlayerRegistry_Patch.cs"
++ADAPTER_SOURCE = ROOT / "decompiled-src/CompleteCheatMenu/Cheats/AimTargetRegistry.cs"
++
++
++@dataclass
++class Record:
++    instance_id: int
++    name: str
++    generation: int
++    alive: bool = True
++
++
++class RegistryModel:
++    def __init__(self):
++        self.records = []
++        self.generation = 0
++        self.next_refresh = 0.0
++
++    def register(self, instance_id, name):
++        for record in self.records:
++            if record.instance_id == instance_id:
++                record.name = name
++                record.generation = self.generation
++                return record
++        record = Record(instance_id, name, self.generation)
++        self.records.append(record)
++        return record
++
++    def refresh(self, now, interval, entities):
++        if now < self.next_refresh:
++            return False
++        self.next_refresh = now + interval
++        self.generation += 1
++        if entities is None:
++            self.prune_destroyed()
++            return True
++        for instance_id, name in entities:
++            self.register(instance_id, name)
++        for index in range(len(self.records) - 1, -1, -1):
++            record = self.records[index]
++            if not record.alive or record.generation != self.generation:
++                self.records.pop(index)
++        return True
++
++    def prune_destroyed(self):
++        for index in range(len(self.records) - 1, -1, -1):
++            if not self.records[index].alive:
++                self.records.pop(index)
++
++
++# 注册和去重：相同稳定 ID 不增加记录，并刷新名称。
++model = RegistryModel()
++first = model.register(100, "old")
++second = model.register(100, "new")
++assert first is second
++assert len(model.records) == 1
++assert model.records[0].name == "new"
++
++# 倒序清理：连续死亡记录不会因为 RemoveAt 导致跳项。
++model.register(101, "dead-a").alive = False
++model.register(102, "dead-b").alive = False
++model.register(103, "alive")
++model.prune_destroyed()
++assert [record.instance_id for record in model.records] == [100, 103]
++
++# 代次刷新：本轮未出现但仍存活的旧记录也会被移除。
++assert model.refresh(1.0, 0.1, [(103, "alive-renamed"), (104, "new")])
++assert [(record.instance_id, record.name) for record in model.records] == [
++    (103, "alive-renamed"),
++    (104, "new"),
++]
++
++# 独立刷新时间：玩家刷新不会推进物品或容器的时间门。
++players = RegistryModel()
++items = RegistryModel()
++containers = RegistryModel()
++assert players.refresh(1.0, 0.1, [(1, "player")])
++assert not players.refresh(1.05, 0.1, [(1, "player")])
++assert items.refresh(1.05, 0.5, [(2, "item")])
++assert containers.refresh(1.05, 0.5, [(3, "container")])
++
++# 暂时取不到管理器集合时只清理已销毁对象，不清空仍存活的缓存。
++items.records[0].alive = True
++assert items.refresh(2.0, 0.5, None)
++assert [record.instance_id for record in items.records] == [2]
++
++# 源码结构检查：四个集合、三个独立时间门、倒序清理、无 LINQ。
++registry = REGISTRY_SOURCE.read_text(encoding="utf-8")
++record = RECORD_SOURCE.read_text(encoding="utf-8")
++creature_patch = CREATURE_PATCH.read_text(encoding="utf-8")
++player_patch = PLAYER_PATCH.read_text(encoding="utf-8")
++adapter = ADAPTER_SOURCE.read_text(encoding="utf-8")
++
++for field in ("_creatures", "_players", "_items", "_containers"):
++    assert f"List<EntityRecord> {field}" in registry
++for field in ("_nextPlayerRefresh", "_nextItemRefresh", "_nextContainerRefresh"):
++    assert field in registry
++assert "for (int i = records.Count - 1; i >= 0; i--)" in registry
++assert "using System.Linq" not in registry
++assert "PruneDestroyed(_players)" in registry and "PruneDestroyed(_items)" in registry
++assert "InstanceId" in record and "TypeName" in record and "SeenGeneration" in record
++assert "EntityRegistry.RegisterCreature(__instance)" in creature_patch
++assert "EntityRegistry.RegisterPlayer(__instance)" in player_patch
++assert "EntityRegistry.Creatures" in adapter
++
++print("ENTITY_REGISTRY_TESTS=PASS cases=9")

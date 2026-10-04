@@ -1,0 +1,241 @@
+diff --git "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task2-baseline-source\\ProjectileTracker.cs" "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\ProjectileTracker.cs"
+index 4cf132e..456f157 100644
+--- "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task2-baseline-source\\ProjectileTracker.cs"
++++ "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\ProjectileTracker.cs"
+@@ -1,8 +1,21 @@
+ using System.Collections.Generic;
+ using CompleteCheatMenu.Game;
++using UnityEngine;
+ 
+ namespace CompleteCheatMenu.Targeting;
+ 
++internal readonly struct ProjectileLaunchData
++{
++	internal readonly Vector3 RawVelocity;
++	internal readonly Vector3 LaunchVelocity;
++
++	internal ProjectileLaunchData(Vector3 rawVelocity, Vector3 launchVelocity)
++	{
++		RawVelocity = rawVelocity;
++		LaunchVelocity = launchVelocity;
++	}
++}
++
+ internal static class ProjectileTracker
+ {
+ 	private static readonly object Sync = new object();
+@@ -11,6 +24,10 @@ internal static class ProjectileTracker
+ 
+ 	private static readonly Dictionary<uint, TargetSolution> IdToTarget = new Dictionary<uint, TargetSolution>();
+ 
++	private static readonly Dictionary<Projectile, ProjectileLaunchData> ProjectileToLaunchData = new Dictionary<Projectile, ProjectileLaunchData>();
++
++	private static readonly Dictionary<uint, ProjectileLaunchData> IdToLaunchData = new Dictionary<uint, ProjectileLaunchData>();
++
+ 	internal static int ActiveCount
+ 	{
+ 		get
+@@ -31,6 +48,11 @@ internal static class ProjectileTracker
+ 	internal static long IdFallbackCount { get; private set; }
+ 
+ 	internal static bool Register(Projectile projectile, TargetSolution target)
++	{
++		return Register(projectile, target, default, default);
++	}
++
++	internal static bool Register(Projectile projectile, TargetSolution target, Vector3 rawVelocity, Vector3 launchVelocity)
+ 	{
+ 		if (!ProjectileOwnership.IsLocalProjectile(projectile) || !IsValidTarget(target))
+ 		{
+@@ -51,6 +73,7 @@ internal static class ProjectileTracker
+ 				for (int i = 0; i < idCollisions.Count; i++)
+ 				{
+ 					ProjectileToTarget.Remove(idCollisions[i]);
++					ProjectileToLaunchData.Remove(idCollisions[i]);
+ 					UnregisteredCount++;
+ 				}
+ 			}
+@@ -59,6 +82,9 @@ internal static class ProjectileTracker
+ 				|| !ReferenceEquals(existing, target);
+ 			ProjectileToTarget[projectile] = target;
+ 			IdToTarget[projectile.Id] = target;
++			ProjectileLaunchData launchData = new ProjectileLaunchData(rawVelocity, launchVelocity);
++			ProjectileToLaunchData[projectile] = launchData;
++			IdToLaunchData[projectile.Id] = launchData;
+ 			if (changed)
+ 			{
+ 				RegisteredCount++;
+@@ -101,6 +127,23 @@ internal static class ProjectileTracker
+ 		return false;
+ 	}
+ 
++	internal static bool TryGetLaunchData(Projectile projectile, out ProjectileLaunchData launchData)
++	{
++		launchData = default;
++		if (!ProjectileOwnership.IsLocalProjectile(projectile))
++		{
++			return false;
++		}
++		lock (Sync)
++		{
++			if (ProjectileToLaunchData.TryGetValue(projectile, out launchData))
++			{
++				return true;
++			}
++			return IdToLaunchData.TryGetValue(projectile.Id, out launchData);
++		}
++	}
++
+ 	internal static bool Unregister(Projectile projectile)
+ 	{
+ 		if (projectile == null)
+@@ -143,6 +186,8 @@ internal static class ProjectileTracker
+ 		{
+ 			ProjectileToTarget.Clear();
+ 			IdToTarget.Clear();
++			ProjectileToLaunchData.Clear();
++			IdToLaunchData.Clear();
+ 		}
+ 	}
+ 
+@@ -159,6 +204,8 @@ internal static class ProjectileTracker
+ 		}
+ 		bool removed = ProjectileToTarget.TryGetValue(projectile, out TargetSolution removedTarget)
+ 			&& ProjectileToTarget.Remove(projectile);
++		ProjectileToLaunchData.Remove(projectile);
++		IdToLaunchData.Remove(projectile.Id);
+ 		if (removed && IdToTarget.TryGetValue(projectile.Id, out TargetSolution idTarget)
+ 			&& ReferenceEquals(idTarget, removedTarget))
+ 		{
+diff --git "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task2-baseline-source\\ProjectileSpawnRegistration.cs" "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\ProjectileSpawnRegistration.cs"
+index e9c6578..8a3f9d8 100644
+--- "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task2-baseline-source\\ProjectileSpawnRegistration.cs"
++++ "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\ProjectileSpawnRegistration.cs"
+@@ -1,6 +1,7 @@
+ using System;
+ using System.Collections;
+ using CompleteCheatMenu.Game;
++using UnityEngine;
+ 
+ namespace CompleteCheatMenu.Targeting;
+ 
+@@ -15,6 +16,14 @@ internal struct ProjectileSpawnState
+ 	internal int Count;
+ 
+ 	internal TargetSolution Target;
++
++	internal Vector3 RawVelocity;
++
++	internal Vector3 LaunchVelocity;
++
++	internal Vector3[] RawVelocities;
++
++	internal Vector3[] LaunchVelocities;
+ }
+ 
+ internal static class ProjectileSpawnRegistration
+@@ -29,20 +38,32 @@ internal static class ProjectileSpawnRegistration
+ 	}
+ 
+ 	internal static bool RegisterCreated(ProjectileManager manager, Player owner, uint id, TargetSolution target)
++	{
++		return RegisterCreated(manager, owner, id, target, default, default);
++	}
++
++	internal static bool RegisterCreated(ProjectileManager manager, Player owner, uint id, TargetSolution target, Vector3 rawVelocity, Vector3 launchVelocity)
+ 	{
+ 		if (!TryFind(manager, owner, id, out Projectile projectile))
+ 		{
+ 			return false;
+ 		}
+-		return ProjectileTracker.Register(projectile, target);
++		return ProjectileTracker.Register(projectile, target, rawVelocity, launchVelocity);
+ 	}
+ 
+ 	internal static int RegisterCreatedRange(ProjectileManager manager, Player owner, uint baseId, int count, TargetSolution target)
++	{
++		return RegisterCreatedRange(manager, owner, baseId, count, target, null, null);
++	}
++
++	internal static int RegisterCreatedRange(ProjectileManager manager, Player owner, uint baseId, int count, TargetSolution target, Vector3[] rawVelocities, Vector3[] launchVelocities)
+ 	{
+ 		int registered = 0;
+ 		for (int i = 0; i < Math.Max(0, count); i++)
+ 		{
+-			if (RegisterCreated(manager, owner, unchecked(baseId + (uint)i), target))
++			Vector3 rawVelocity = rawVelocities != null && i < rawVelocities.Length ? rawVelocities[i] : default;
++			Vector3 launchVelocity = launchVelocities != null && i < launchVelocities.Length ? launchVelocities[i] : default;
++			if (RegisterCreated(manager, owner, unchecked(baseId + (uint)i), target, rawVelocity, launchVelocity))
+ 			{
+ 				registered++;
+ 			}
+diff --git "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task2-baseline-source\\WeaponAddProjectile_Patch.cs" "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Patches\\WeaponAddProjectile_Patch.cs"
+index 248ea6e..edc2e7d 100644
+--- "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task2-baseline-source\\WeaponAddProjectile_Patch.cs"
++++ "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Patches\\WeaponAddProjectile_Patch.cs"
+@@ -31,8 +31,9 @@ internal static class WeaponAddProjectile_Patch
+ 				return;
+ 			}
+ 			TargetSolution target = MagicShotContext.ActiveTarget;
++			Vector3 rawVelocity = velocity;
+ 			uint baseId = ProjectileSpawnRegistration.CaptureBaseId(__instance, isLocal, id);
+-			if (!InitialVelocityRedirector.TryRedirect(pos, velocity, target, weaponInfo.ProjectileGravity, CheatState.AimPrediction, CheatState.AimGravityCompensation, out Vector3 redirected))
++			if (!InitialVelocityRedirector.TryRedirect(pos, rawVelocity, target, weaponInfo.ProjectileGravity, CheatState.AimPrediction, CheatState.AimGravityCompensation, out Vector3 redirected))
+ 			{
+ 				return;
+ 			}
+@@ -43,7 +44,9 @@ internal static class WeaponAddProjectile_Patch
+ 				Owner = owner,
+ 				BaseId = baseId,
+ 				Count = 1,
+-				Target = target
++				Target = target,
++				RawVelocity = rawVelocity,
++				LaunchVelocity = redirected
+ 			};
+ 		}
+ 		catch (Exception ex)
+@@ -56,7 +59,7 @@ internal static class WeaponAddProjectile_Patch
+ 	{
+ 		if (__state.Active)
+ 		{
+-			ProjectileSpawnRegistration.RegisterCreated(__instance, __state.Owner, __state.BaseId, __state.Target);
++			ProjectileSpawnRegistration.RegisterCreated(__instance, __state.Owner, __state.BaseId, __state.Target, __state.RawVelocity, __state.LaunchVelocity);
+ 		}
+ 	}
+ }
+diff --git "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task2-baseline-source\\WeaponAddProjectiles_Patch.cs" "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Patches\\WeaponAddProjectiles_Patch.cs"
+index ffbb9b5..b936fa7 100644
+--- "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task2-baseline-source\\WeaponAddProjectiles_Patch.cs"
++++ "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Patches\\WeaponAddProjectiles_Patch.cs"
+@@ -31,8 +31,9 @@ internal static class WeaponAddProjectiles_Patch
+ 				return;
+ 			}
+ 			TargetSolution target = MagicShotContext.ActiveTarget;
++			Vector3[] rawVelocities = velocities != null ? (Vector3[])velocities.Clone() : null;
+ 			uint baseId = ProjectileSpawnRegistration.CaptureBaseId(__instance, isLocal, id);
+-			if (!InitialVelocityRedirector.TryRedirectAll(pos, velocities, target, weaponInfo.ProjectileGravity, CheatState.AimPrediction, CheatState.AimGravityCompensation, out Vector3[] redirected))
++			if (!InitialVelocityRedirector.TryRedirectAll(pos, rawVelocities, target, weaponInfo.ProjectileGravity, CheatState.AimPrediction, CheatState.AimGravityCompensation, out Vector3[] redirected))
+ 			{
+ 				return;
+ 			}
+@@ -43,7 +44,9 @@ internal static class WeaponAddProjectiles_Patch
+ 				Owner = owner,
+ 				BaseId = baseId,
+ 				Count = redirected.Length,
+-				Target = target
++				Target = target,
++				RawVelocities = rawVelocities,
++				LaunchVelocities = redirected
+ 			};
+ 		}
+ 		catch (Exception ex)
+@@ -56,7 +59,7 @@ internal static class WeaponAddProjectiles_Patch
+ 	{
+ 		if (__state.Active)
+ 		{
+-			ProjectileSpawnRegistration.RegisterCreatedRange(__instance, __state.Owner, __state.BaseId, __state.Count, __state.Target);
++			ProjectileSpawnRegistration.RegisterCreatedRange(__instance, __state.Owner, __state.BaseId, __state.Count, __state.Target, __state.RawVelocities, __state.LaunchVelocities);
+ 		}
+ 	}
+ }

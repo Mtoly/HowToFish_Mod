@@ -1,0 +1,9 @@
+{
+  "name": "BetterSwimming",
+  "version_number": "1.0.3",
+  "website_url": "https://discord.gg/pdHgy6Bsng",
+  "description": "Hold to swim instead of mashing jump. Treading water, diving, wave-accurate buoyancy, all configurable.",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2305"
+  ]
+}

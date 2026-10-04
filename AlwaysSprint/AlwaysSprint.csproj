@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>AlwaysSprint</AssemblyName>
+    <RootNamespace>HowToFish.AlwaysSprint</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BepInEx"><HintPath>E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\core\BepInEx.dll</HintPath></Reference>
+    <Reference Include="0Harmony"><HintPath>E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\BepInEx\core\0Harmony.dll</HintPath></Reference>
+    <Reference Include="UnityEngine"><HintPath>E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish_Data\Managed\UnityEngine.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish_Data\Managed\UnityEngine.CoreModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.IMGUIModule"><HintPath>E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath></Reference>
+    <Reference Include="FishNet.Runtime"><HintPath>E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish_Data\Managed\FishNet.Runtime.dll</HintPath></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>E:\SteamLibrary\steamapps\common\How to Fish\How to Fish\How to Fish_Data\Managed\Assembly-CSharp.dll</HintPath></Reference>
+  </ItemGroup>
+</Project>

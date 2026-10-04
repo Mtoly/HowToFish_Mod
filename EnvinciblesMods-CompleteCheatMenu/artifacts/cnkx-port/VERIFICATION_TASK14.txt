@@ -1,0 +1,168 @@
+TASK=14 PERFORMANCE TEST AND REGRESSION REVIEW
+DATE=2026-08-25
+STATUS=PASS
+GIT=SKIPPED_NOT_A_GIT_REPOSITORY
+
+CHANGED_BRANCH_OR_FIELD
+- Added deterministic performance branch for OLD_FIXED_MARKER_ACQUIRE versus NEW_SCORER_ACQUIRE.
+- Added multi-bone point selection and two-iteration ballistic prediction benchmarks.
+- Reviewed UI fields from Task 13 through their production consumers.
+- Runtime plugin source was not changed by Task 14.
+
+FOUR_PRIMARY_ARTIFACTS
+MODIFIED_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\cnkx_performance_harness.cs
+DIFF_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task14-performance-review.diff
+VERIFICATION=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK14.txt
+ROLLBACK=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK14.ps1
+ROLLBACK_BASH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK14.sh
+PERFORMANCE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\performance.txt
+REVIEW=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\review.md
+BASELINE_COPY=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task14-original-src\CompleteCheatMenu.baseline.dll
+
+BASELINE
+COMMAND=Test-Path .\tests\cnkx_performance_harness.cs; Test-Path .\artifacts\cnkx-port\performance.txt; Test-Path .\artifacts\cnkx-port\review.md
+INPUT=Task 13 completed workspace before Task 14 artifacts were created
+LITERAL_OUTPUT=False
+LITERAL_OUTPUT=False
+LITERAL_OUTPUT=False
+EXIT_STATUS=0
+OBSERVED_RESULT=Task 14 harness, performance report and review report did not exist.
+
+COMMAND=Get-FileHash .\artifacts\CompleteCheatMenu.dll -Algorithm SHA256
+INPUT=Task 13 development assembly before Task 14 build verification
+LITERAL_OUTPUT=AB57B01D8326EC3472CA8AC306EB1D434A4B046A819EFC07D456DC36A2498391
+EXIT_STATUS=0
+BASELINE_PRESERVED_AT=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task14-original-src\CompleteCheatMenu.baseline.dll
+BASELINE_PRESERVED_SHA256=AB57B01D8326EC3472CA8AC306EB1D434A4B046A819EFC07D456DC36A2498391
+
+MODIFIED PERFORMANCE
+COMMAND=D:\Code\How2fish\Kai935-FishAimbot\.tools\roslyn\tasks\net472\csc.exe /nologo /optimize+ /target:exe /out:artifacts\cnkx-port\cnkx_performance_harness.exe /reference:System.Numerics.dll tests\cnkx_performance_harness.cs
+INPUT=300 deterministic candidates, 3-8 bone points per target, seed 935
+LITERAL_OUTPUT=HARNESS_COMPILE_EXIT=0
+EXIT_STATUS=0
+
+COMMAND=.\artifacts\cnkx-port\cnkx_performance_harness.exe
+INPUT=1000 warmup operations followed by 10000 measured iterations
+LITERAL_OUTPUT=HARNESS=CNKX_PERFORMANCE_V1
+LITERAL_OUTPUT=RUNTIME=4.0.30319.42000
+LITERAL_OUTPUT=CANDIDATES=300
+LITERAL_OUTPUT=BONES_PER_TARGET=3-8
+LITERAL_OUTPUT=ITERATIONS=10000
+LITERAL_OUTPUT=OLD_FIXED_MARKER_ACQUIRE_TOTAL_MS=2.984
+LITERAL_OUTPUT=OLD_FIXED_MARKER_ACQUIRE_PER_ITER_US=0.298410
+LITERAL_OUTPUT=OLD_FIXED_MARKER_ACQUIRE_ALLOCATED_BYTES=40
+LITERAL_OUTPUT=NEW_SCORER_ACQUIRE_TOTAL_MS=4.888
+LITERAL_OUTPUT=NEW_SCORER_ACQUIRE_PER_ITER_US=0.488830
+LITERAL_OUTPUT=NEW_SCORER_ACQUIRE_ALLOCATED_BYTES=40
+LITERAL_OUTPUT=BONE_POINT_SELECTION_TOTAL_MS=21.965
+LITERAL_OUTPUT=BONE_POINT_SELECTION_PER_ITER_US=2.196540
+LITERAL_OUTPUT=BONE_POINT_SELECTION_ALLOCATED_BYTES=40
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TOTAL_MS=109.497
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_PER_ITER_US=10.949720
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_ALLOCATED_BYTES=40
+LITERAL_OUTPUT=OLD_BASELINE_TARGET=17
+LITERAL_OUTPUT=NEW_BASELINE_TARGET=17
+LITERAL_OUTPUT=NEW_ENHANCED_TARGET=211
+LITERAL_OUTPUT=SEMANTIC_BASELINE_MATCH=True
+LITERAL_OUTPUT=ENHANCED_WEIGHTING_CHANGES_RESULT=True
+LITERAL_OUTPUT=DETERMINISTIC_RESULT=True
+LITERAL_OUTPUT=PREDICTION_FINITE=True
+LITERAL_OUTPUT=HARNESS_RESULT=PASS
+EXIT_STATUS=0
+OBSERVED_RESULT=Legacy-equivalent settings preserve target choice; enhanced scoring intentionally changes the choice; repeated input and prediction remain deterministic and finite.
+
+FULL REGRESSION
+COMMAND=python .\tests\localized_ui_preset_test.py
+LITERAL_OUTPUT=LOCALIZED_UI_PRESET_TESTS=PASS cases=8
+EXIT_STATUS=0
+COMMAND=python .\tests\esp_projection_test.py
+LITERAL_OUTPUT=ESP_PROJECTION_TESTS=PASS cases=8
+EXIT_STATUS=0
+COMMAND=python .\tests\weapon_restore_test.py
+LITERAL_OUTPUT=WEAPON_RESTORE_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\visible_aim_test.py
+LITERAL_OUTPUT=VISIBLE_AIM_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\tracking_probability_test.py
+LITERAL_OUTPUT=TRACKING_PROBABILITY_TESTS=PASS cases=6
+EXIT_STATUS=0
+COMMAND=python .\tests\ballistic_prediction_test.py
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\target_lock_test.py
+LITERAL_OUTPUT=TARGET_LOCK_TESTS=PASS cases=8
+EXIT_STATUS=0
+COMMAND=python .\tests\bone_selection_test.py
+LITERAL_OUTPUT=BONE_SELECTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\targeting_math_test.py
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=PASS cases=10
+EXIT_STATUS=0
+COMMAND=python .\tests\snapshot_isolation_test.py
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\entity_registry_test.py
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+EXIT_STATUS=0
+COMMAND=python .\tests\aim_scoring_test.py
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Entity registry, snapshot isolation, scoring, bone selection, lock, prediction, tracking probability, visible aim, weapon restoration, ESP projection, localized UI and presets all remain passing.
+
+BUILD
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File .\decompiled-src\build.ps1
+INPUT=Task 13 runtime source plus Task 14 non-runtime test/report additions
+LITERAL_OUTPUT=0 compiler errors
+LITERAL_OUTPUT=BUILD_EXIT=0
+LITERAL_OUTPUT=MODIFIED_DLL_SHA256=4CE216173E3E2629D2F527971AFF38A69628DC17B3537F3C02C719451C64242C
+EXIT_STATUS=0
+OBSERVED_RESULT=Runtime source is unchanged; rebuilt PE hash differs because the compiler emits fresh build metadata.
+
+REVIEW GATE
+COMMAND=review of null handling, Unity destroyed-object semantics, restore paths, snapshots, caches, log rate, Animator/Avatar, GUI state and UI consumers
+LITERAL_OUTPUT=GATE_A=PASS
+LITERAL_OUTPUT=GATE_B=PASS
+LITERAL_OUTPUT=GATE_C=PASS
+LITERAL_OUTPUT=P0=0
+LITERAL_OUTPUT=P1=0
+LITERAL_OUTPUT=P2=2
+LITERAL_OUTPUT=READY_FOR_TASK15=True
+EXIT_STATUS=0
+OBSERVED_RESULT=No P0/P1 deployment blocker. P2 items are short-lived BoneResolver collections and VisibilityCache string keys.
+
+ROLLBACK POWERSHELL
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK14.ps1 -DestinationRoot .\artifacts\cnkx-port\rollback-task14-test-20260825c
+INPUT=Independent copy containing the modified Task 14 plan, harness, reports, harness executable and rebuilt DLL
+LITERAL_OUTPUT=PLAN_SHA256=C0AF13A5DCD282C7A41F9EDB16FC8BDE67088B89441D425E155C136302E36E0C
+LITERAL_OUTPUT=DLL_SHA256=AB57B01D8326EC3472CA8AC306EB1D434A4B046A819EFC07D456DC36A2498391
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+LITERAL_OUTPUT=POWERSHELL_ROLLBACK_EXIT=0
+EXIT_STATUS=0
+RESTORED_STATUS=Independent copy restored the Task 13 plan and exact baseline DLL; all Task 14 created runtime/test/report files were removed.
+
+ROLLBACK BASH
+COMMAND=ROLLBACK_TASK14.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-task14-test-sh-20260825c
+INPUT=Second independent modified copy
+LITERAL_OUTPUT=PLAN_SHA256=C0AF13A5DCD282C7A41F9EDB16FC8BDE67088B89441D425E155C136302E36E0C
+LITERAL_OUTPUT=DLL_SHA256=AB57B01D8326EC3472CA8AC306EB1D434A4B046A819EFC07D456DC36A2498391
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+LITERAL_OUTPUT=BASH_ROLLBACK_EXIT=0
+EXIT_STATUS=0
+RESTORED_STATUS=Second independent copy restored the same baseline bytes.
+
+WORKSPACE FINAL STATE
+HARNESS_SHA256=770563927EA7CF23E727E100F3DBCD275A7C5CC74C83B26882D8A64D9505D980
+PERFORMANCE_SHA256=A2D6584B613A6111DC77CFE2BDCB19E59695F9138EAB47417918DA8549EC710C
+REVIEW_SHA256=4E0BBA23F2D289007E7A5D5B27EA5C59EE845F489849A732BBBF711A144CA2A9
+DIFF_SHA256=5C41615C558CC29070EB474A4C39B63F6EEEDC4309F55A2D67578422E9DB4077
+ROLLBACK_PS1_SHA256=379A99381EA7C81EC767A9E6CC4EDE7DF980316B30489A3CE16C7E57F0CCE2F0
+ROLLBACK_SH_SHA256=475A81E14CCCB120D3AFC774B73A458FFA8EE9FCAD1856CEE8BD6724985578DF
+GAME_DLL_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+GAME_DLL_CHANGED=False
+PLAN_TASK14_MARKED=True
+WORKSPACE_RETAINS_MODIFIED_TASK14=True
+NEXT=Task 15 build, localization, deployment, BepInEx/Harmony startup verification and deployment rollback.
+

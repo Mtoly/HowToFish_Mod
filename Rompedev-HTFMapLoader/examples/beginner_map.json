@@ -1,0 +1,38 @@
+{
+  "id": "my_island",
+  "name": "My Island",
+  "author": "YourName",
+  "bundle": "my_island",
+  "scene": "MyIsland",
+  "positionMode": "auto",
+  "position": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "moveScene": true,
+  "radarColor": "#FF4FA3",
+  "islandSize": 55,
+  "runtime": {
+    "playerSpawn": "PlayerSpawnPoint",
+    "boatSpawn": "BoatSpawnPoint",
+    "defaultPlayerSpawn": {
+      "x": 0,
+      "y": 6,
+      "z": 0
+    },
+    "defaultBoatSpawn": {
+      "x": 0,
+      "y": 0.5,
+      "z": -25
+    }
+  },
+  "wildlife": {
+    "seagulls": false,
+    "clams": false,
+    "seagullMax": 3,
+    "seagullDelay": 60,
+    "clamMax": 3,
+    "clamDelay": 15
+  }
+}

@@ -1,0 +1,117 @@
+CompleteCheatMenu cnKX port - Task 6 verification
+DATE=2026-08-25
+TASK=实现骨骼与瞄准点解析
+STATUS=COMPLETE
+
+CHANGED_BRANCH_OR_FIELD
+- AimPoint: 保存 Transform/Position/Bone/Source/ScreenPosition/ScreenDistance，并从有效前方投影中选择屏幕中心最近点。
+- BoneResolver player branch: Animator.GetBoneTransform(Head/Chest/Hips)。
+- BoneResolver creature branch: 命名层级骨骼 -> SkinnedMeshRenderer.bones -> Renderer Bounds -> 固定高度。
+- RendererBoundsResolver: 合并全部子 Renderer Bounds，生成上部与中心点，过滤无效/零尺寸 Bounds。
+- decompiled-src/build.ps1: 新增 UnityEngine.AnimationModule.dll 编译引用。
+
+ARTIFACTS
+- MODIFIED_FILE_1: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\AimPoint.cs
+- MODIFIED_FILE_2: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\BoneResolver.cs
+- MODIFIED_FILE_3: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\RendererBoundsResolver.cs
+- MODIFIED_FILE_4: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\build.ps1
+- TEST_HELPER: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\cnkx_bone_impl.py
+- TEST_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\bone_selection_test.py
+- MODIFIED_DLL: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\CompleteCheatMenu.dll
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task6-bone-resolver.diff
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK6.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK6.sh
+- WINDOWS_ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK6.ps1
+- ORIGINAL_SOURCE_DIR: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task6-original-src
+
+RED_TEST
+COMMAND=python .\tests\bone_selection_test.py
+INPUT=测试已创建，但骨骼解析参考实现及生产源码尚不存在
+LITERAL_OUTPUT=BONE_SELECTION_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+
+BASELINE_BUILD
+COMMAND=.\decompiled-src\build.ps1
+INPUT=Task 5 completed source；Task 6 文件尚不存在
+LITERAL_OUTPUT=0 compiler errors
+LITERAL_OUTPUT=BASELINE_BUILD_EXIT=0
+LITERAL_OUTPUT=BASELINE_DLL_SHA256=1C89BD051FDE05A0911C78C0BF4A3F621DC68FA024055C01659ADC6E86269354
+EXIT_STATUS=0
+
+MODIFIED_BONE_TEST
+COMMAND=python .\tests\bone_selection_test.py
+INPUT=Humanoid 骨骼优先、生物命名/Skinned 骨骼、Bounds 回退、固定高度及前方投影选择
+LITERAL_OUTPUT=BONE_SELECTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+OBSERVED_RESULT=玩家顺序为 head/chest/pelvis；无骨骼目标输出 bounds-upper/body-center/fixed-height；后方与非有限投影被排除。
+
+REGRESSION_TESTS
+COMMAND=python .\tests\targeting_math_test.py
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=PASS cases=10
+EXIT_STATUS=0
+COMMAND=python .\tests\snapshot_isolation_test.py
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\entity_registry_test.py
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+EXIT_STATUS=0
+COMMAND=python .\tests\aim_scoring_test.py
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Task 3-5 的实体注册、快照隔离及评分行为保持通过。
+
+MODIFIED_BUILD
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File .\decompiled-src\build.ps1
+INPUT=Task 6 骨骼与瞄准点解析源码及 AnimationModule 引用
+LITERAL_OUTPUT=0 compiler errors
+LITERAL_OUTPUT=MODIFIED_BUILD_EXIT=0
+LITERAL_OUTPUT=MODIFIED_DLL_SHA256=18BBE7E1656DD7BDE06B3622575229C645C5BB7650F46B7695AF48EE578308BD
+EXIT_STATUS=0
+
+ASSEMBLY_TYPE_CHECK
+COMMAND=dnfile TypeDef inspection on artifacts\CompleteCheatMenu.dll
+INPUT=修改版程序集
+LITERAL_OUTPUT=TYPE_AimPoint=True
+LITERAL_OUTPUT=TYPE_BoneResolver=True
+LITERAL_OUTPUT=TYPE_RendererBoundsResolver=True
+EXIT_STATUS=0
+
+ROLLBACK_POWERSHELL
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK6.ps1 -DestinationRoot .\artifacts\cnkx-port\rollback-task6-test-20260825a
+INPUT=包含全部 Task 6 修改文件的独立目录
+LITERAL_OUTPUT=BUILD_PS1_SHA256=894DA10D6AF69655BCC47AAF900CCB479B3577D1502DE63EADF10D8D91087253
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=build.ps1 恢复 Task 5 字节，五个 Task 6 新文件被移除；工作目录继续保留修改版。
+
+ROLLBACK_BASH
+COMMAND=ROLLBACK_TASK6.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-task6-test-sh-20260825a
+INPUT=第二个独立修改副本
+LITERAL_OUTPUT=BUILD_PS1_SHA256=894DA10D6AF69655BCC47AAF900CCB479B3577D1502DE63EADF10D8D91087253
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+
+MODIFIED_SOURCE_HASHES
+- AimPoint.cs=AE6C3741740A51DCFA8FB931DCE7CF337671B78CAC46206E85A93C84F273445D
+- BoneResolver.cs=23343E08A89B48A01D3FA3E55B9BCB8B1E904740CE77368CDAB2A4F0FBCF7397
+- RendererBoundsResolver.cs=FB6DF4F1DD0A181313FBE720208E7D9C3968A297FA766E293BB8499F42BBF753
+- cnkx_bone_impl.py=D2E68235F693965B11EC8B5389E47D8E231703C14855265F7812904DC5384217
+- bone_selection_test.py=EB2BEF379D0A34291B5D6223FD0A020B0D55E32A39A8931D1DFEE04B2547F42B
+- build.ps1=D6A00476E2FE7E16DFA4B0859B429F1BCEE5A1E5997FBC2493B24F6812C1290D
+
+DIFF
+LINES=465
+SHA256=30AE25A53E3999B859655BF6D9375B75EC2C94AA6320EEB1A05FB79CB68C5864
+
+PLAN_MARK
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+RESULT=Task 6 marked complete with evidence path.
+
+DEPLOYMENT
+RESULT=NOT_DEPLOYED_GATE_A_IN_PROGRESS
+DEPLOYED_DLL_UNCHANGED_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+
+GIT
+RESULT=SKIPPED_NOT_A_GIT_REPOSITORY

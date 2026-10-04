@@ -1,0 +1,188 @@
+
+diff --git "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task4-baseline-source\\ProjectileGuidance.cs" "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\ProjectileGuidance.cs"
+index a6d9770..b183430 100644
+--- "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task4-baseline-source\\ProjectileGuidance.cs"
++++ "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\ProjectileGuidance.cs"
+@@ -7,12 +7,24 @@ namespace CompleteCheatMenu.Targeting;
+ 
+ internal static class ProjectileGuidance
+ {
++	private enum GuidanceMode
++	{
++		Tracking,
++		Returning,
++		NaturalFlight
++	}
++
+ 	private sealed class GuidanceState
+ 	{
+ 		internal float StartTime;
+ 		internal float NextUpdate;
++		internal float InvalidatedAt;
+ 		internal Vector3 AimOffset;
++		internal Vector3 RawVelocity;
++		internal Vector3 LaunchVelocity;
++		internal Vector3 ReturnStartVelocity;
+ 		internal TargetSolution Target;
++		internal GuidanceMode Mode;
+ 	}
+ 
+ 	private static readonly Dictionary<Projectile, GuidanceState> States = new Dictionary<Projectile, GuidanceState>();
+@@ -38,22 +50,41 @@ internal static class ProjectileGuidance
+ 			Forget(projectile);
+ 			return false;
+ 		}
+-		if (!ProjectileTracker.TryGetTarget(projectile, out TargetSolution target))
+-		{
+-			Forget(projectile);
+-			return false;
+-		}
+-		if (!States.TryGetValue(projectile, out GuidanceState state) || !ReferenceEquals(state.Target, target))
++		if (!States.TryGetValue(projectile, out GuidanceState state))
+ 		{
+ 			state = new GuidanceState
+ 			{
+ 				StartTime = now,
+ 				NextUpdate = now,
+-				AimOffset = target.AimPoint - target.Transform.position,
+-				Target = target
++				Mode = GuidanceMode.Tracking,
++				RawVelocity = projectile.Velocity,
++				LaunchVelocity = projectile.Velocity
+ 			};
++			if (ProjectileTracker.TryGetLaunchData(projectile, out ProjectileLaunchData launchData))
++			{
++				state.RawVelocity = launchData.RawVelocity;
++				state.LaunchVelocity = launchData.LaunchVelocity;
++			}
+ 			States[projectile] = state;
+ 		}
++		if (state.Mode == GuidanceMode.Returning)
++		{
++			return StepReturn(projectile, state, now, deltaTime);
++		}
++		if (state.Mode == GuidanceMode.NaturalFlight)
++		{
++			Forget(projectile);
++			return false;
++		}
++		if (!ProjectileTracker.TryGetTarget(projectile, out TargetSolution target))
++		{
++			return Invalidate(projectile, state, now, deltaTime);
++		}
++		if (!ReferenceEquals(state.Target, target))
++		{
++			state.AimOffset = target.AimPoint - target.Transform.position;
++			state.Target = target;
++		}
+ 		if (now - state.StartTime > Mathf.Max(0f, CheatState.AimProjectileTrackingTime))
+ 		{
+ 			ExpiredCount++;
+@@ -78,6 +109,48 @@ internal static class ProjectileGuidance
+ 		return true;
+ 	}
+ 
++	private static bool Invalidate(Projectile projectile, GuidanceState state, float now, float deltaTime)
++	{
++		state.InvalidatedAt = now;
++		state.Target = null;
++		if (CheatState.AimReturnToLaunchVelocity && CheatState.AimReturnDuration > 0f && state.LaunchVelocity.sqrMagnitude > 0.0001f)
++		{
++			state.Mode = GuidanceMode.Returning;
++			state.ReturnStartVelocity = projectile.Velocity;
++			ProjectileTracker.Unregister(projectile);
++			return StepReturn(projectile, state, now, deltaTime);
++		}
++		state.Mode = GuidanceMode.NaturalFlight;
++		ProjectileTracker.Unregister(projectile);
++		Forget(projectile);
++		return false;
++	}
++
++	private static bool StepReturn(Projectile projectile, GuidanceState state, float now, float deltaTime)
++	{
++		float duration = Mathf.Max(0.0001f, CheatState.AimReturnDuration);
++		if (now - state.InvalidatedAt >= duration)
++		{
++			projectile.Velocity = state.LaunchVelocity;
++			Forget(projectile);
++			return true;
++		}
++		float turnSpeed = Mathf.Max(0f, CheatState.AimReturnTurnSpeed);
++		float radians = turnSpeed * Mathf.Deg2Rad * Mathf.Max(0f, deltaTime);
++		Vector3 targetVelocity = state.LaunchVelocity;
++		Vector3 currentVelocity = projectile.Velocity;
++		if (currentVelocity.sqrMagnitude <= 0.0001f || targetVelocity.sqrMagnitude <= 0.0001f)
++		{
++			projectile.Velocity = targetVelocity;
++		}
++		else
++		{
++			Vector3 steered = turnSpeed > 0f ? Vector3.RotateTowards(currentVelocity, targetVelocity, radians, 0f) : currentVelocity;
++			projectile.Velocity = steered.normalized * targetVelocity.magnitude;
++		}
++		return true;
++	}
++
+ 	internal static void Forget(Projectile projectile)
+ 	{
+ 		if (projectile != null)
+diff --git "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task4-baseline-source\\CheatState.cs" "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Runtime\\CheatState.cs"
+index ef8615f..d26b812 100644
+--- "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task4-baseline-source\\CheatState.cs"
++++ "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Runtime\\CheatState.cs"
+@@ -113,6 +113,11 @@ internal static class CheatState
+ 
+ 	internal static float AimProjectileTurnSpeed = 720f;
+ 
++	internal static bool AimReturnToLaunchVelocity;
++
++	internal static float AimReturnDuration = 0.15f;
++
++	internal static float AimReturnTurnSpeed = 720f;
+ 
+ 	internal static bool AimTrackingDiagnostics;
+ 
+diff --git "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task4-baseline-source\\Presets.cs" "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Runtime\\Presets.cs"
+index 9aecac8..107f3e6 100644
+--- "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task4-baseline-source\\Presets.cs"
++++ "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Runtime\\Presets.cs"
+@@ -88,6 +88,9 @@ internal static class Presets
+ 				F("aimProjectileTrackingTime", CheatState.AimProjectileTrackingTime),
+ 				F("aimProjectileUpdateInterval", CheatState.AimProjectileUpdateInterval),
+ 				F("aimProjectileTurnSpeed", CheatState.AimProjectileTurnSpeed),
++				B("aimReturnToLaunchVelocity", CheatState.AimReturnToLaunchVelocity),
++				F("aimReturnDuration", CheatState.AimReturnDuration),
++				F("aimReturnTurnSpeed", CheatState.AimReturnTurnSpeed),
+ 				B("aimTrackingDiagnostics", CheatState.AimTrackingDiagnostics),
+ 				B("aimVisibleAssist", CheatState.AimVisibleAssist),
+ 				F("aimVisibleResponse", CheatState.AimVisibleResponse),
+@@ -228,6 +231,9 @@ internal static class Presets
+ 				case "aimProjectileTrackingTime": if (TryFloat(text3, out var aimProjectileTrackingTime)) CheatState.AimProjectileTrackingTime = aimProjectileTrackingTime; break;
+ 				case "aimProjectileUpdateInterval": if (TryFloat(text3, out var aimProjectileUpdateInterval)) CheatState.AimProjectileUpdateInterval = aimProjectileUpdateInterval; break;
+ 				case "aimProjectileTurnSpeed": if (TryFloat(text3, out var aimProjectileTurnSpeed)) CheatState.AimProjectileTurnSpeed = aimProjectileTurnSpeed; break;
++				case "aimReturnToLaunchVelocity": CheatState.AimReturnToLaunchVelocity = text3 == "1"; break;
++				case "aimReturnDuration": if (TryFloat(text3, out var aimReturnDuration)) CheatState.AimReturnDuration = aimReturnDuration; break;
++				case "aimReturnTurnSpeed": if (TryFloat(text3, out var aimReturnTurnSpeed)) CheatState.AimReturnTurnSpeed = aimReturnTurnSpeed; break;
+ 				case "aimTrackingDiagnostics": CheatState.AimTrackingDiagnostics = text3 == "1"; break;
+ 				case "aimVisibleAssist": CheatState.AimVisibleAssist = text3 == "1"; break;
+ 				case "aimVisibleResponse": if (TryFloat(text3, out var aimVisibleResponse)) CheatState.AimVisibleResponse = aimVisibleResponse; break;
+diff --git "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task4-baseline-source\\WeaponsTab.cs" "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\UI\\Tabs\\WeaponsTab.cs"
+index 165fa1f..5cc81d0 100644
+--- "a/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\projectile-guidance-reset\\task4-baseline-source\\WeaponsTab.cs"
++++ "b/D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\UI\\Tabs\\WeaponsTab.cs"
+@@ -112,7 +112,13 @@ internal static class WeaponsTab
+ 		CheatState.AimProjectileTrackingTime = Widgets.SliderRow("弹丸追踪时长", CheatState.AimProjectileTrackingTime, 0f, 10f, "0.##", 3f);
+ 		CheatState.AimProjectileUpdateInterval = Widgets.SliderRow("制导更新间隔", CheatState.AimProjectileUpdateInterval, 0f, 0.2f, "0.###", 0.02f);
+ 		CheatState.AimProjectileTurnSpeed = Widgets.SliderRow("最大转向速度", CheatState.AimProjectileTurnSpeed, 0f, 3600f, "0", 720f);
+-		Widgets.Note("追踪时长为 0 时仅修正初始方向；最大转向速度为 0 时立即转向。制导不会在飞行中切换目标。");
++		CheatState.AimReturnToLaunchVelocity = Widgets.ToggleRow("目标失效后回正", CheatState.AimReturnToLaunchVelocity, OnOff(CheatState.AimReturnToLaunchVelocity));
++		if (CheatState.AimReturnToLaunchVelocity)
++		{
++			CheatState.AimReturnDuration = Widgets.SliderRow("回正持续时间", CheatState.AimReturnDuration, 0.01f, 1f, "0.##", 0.15f);
++			CheatState.AimReturnTurnSpeed = Widgets.SliderRow("回正转向速度", CheatState.AimReturnTurnSpeed, 0f, 3600f, "0", 720f);
++		}
++		Widgets.Note("追踪时长为 0 时仅修正初始方向；最大转向速度为 0 时立即转向。制导不会在飞行中切换目标；目标失效后默认保持自然飞行，可选平滑回到出膛方向。");
+ 		CheatState.AimVisibleAssist = Widgets.ToggleRow("可见拉枪", CheatState.AimVisibleAssist, OnOff(CheatState.AimVisibleAssist));
+ 		if (CheatState.AimVisibleAssist)
+ 		{

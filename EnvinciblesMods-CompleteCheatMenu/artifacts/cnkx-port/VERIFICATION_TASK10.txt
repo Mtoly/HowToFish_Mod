@@ -1,0 +1,133 @@
+CompleteCheatMenu cnKX port - Task 10 verification
+DATE=2026-08-25
+TASK=实现开火拉枪与压枪模式
+STATUS=COMPLETE
+
+CHANGED_BRANCH_OR_FIELD
+- FIRE_STATE=Weapon._holdingFireInput: 使用游戏真实开火保持字段，不使用 Input.GetMouseButton 推测。
+- CAMERA_INPUT_STATE=PlayerCamera._rot: 读写游戏相机输入旋转状态，不直接长期覆盖 Camera Transform。
+- VisibleAimController.Step: 仅 AimVisibleAssist + Aimbot + 有效目标 + 正在开火时执行；停止开火立即停止写入。
+- FRAME_INDEPENDENT_SMOOTHING: alpha = 1 - exp(-AimVisibleResponse * unscaledDeltaTime)，Quaternion.Slerp。
+- DISTANCE_DROP: AimDistanceDropPerUnit 单独下调世界目标点。
+- RECOIL_COMPENSATION: 读取 PlayerCamera._recoilCur/_screenShakeRotMulti，使用 AimRecoilCompensationStrength；ZeroRecoil 开启时跳过。
+- WeaponCheats.VisibleAimTick: 汇集当前武器、PlayerCamera、Camera 与 TargetSolution。
+- TickDriver.Tick: 使用 Time.unscaledDeltaTime 驱动 VisibleAimTick。
+- CheatState: 新增 AimVisibleAssist/AimVisibleResponse/AimDistanceDropPerUnit/AimRecoilCompensation/AimRecoilCompensationStrength。
+
+ARTIFACTS
+- MODIFIED_FILE_1: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\VisibleAimController.cs
+- MODIFIED_FILE_2: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Cheats\WeaponCheats.cs
+- MODIFIED_FILE_3: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\CheatState.cs
+- MODIFIED_FILE_4: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\TickDriver.cs
+- TEST_HELPER: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\cnkx_visible_aim_impl.py
+- TEST_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\visible_aim_test.py
+- MODIFIED_DLL: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\CompleteCheatMenu.dll
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task10-visible-aim-controller.diff
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK10.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK10.sh
+- WINDOWS_ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK10.ps1
+- ORIGINAL_SOURCE_DIR: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task10-original-src
+
+RED_TEST
+COMMAND=python .\tests\visible_aim_test.py
+INPUT=测试已创建；VisibleAimController 和参考模型尚不存在
+LITERAL_OUTPUT=VISIBLE_AIM_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+
+BASELINE
+COMMAND=Get-FileHash -Algorithm SHA256 .\artifacts\CompleteCheatMenu.dll
+INPUT=Task 9 完成版程序集
+LITERAL_OUTPUT=SHA256 6F7A44640BF72A55128D9C65BF5E1562D6B050286893AD70F0C33F9C34EE829B
+EXIT_STATUS=0
+
+MODIFIED_VISIBLE_AIM_TEST
+COMMAND=python .\tests\visible_aim_test.py
+INPUT=30/60/120 FPS 一秒响应、停止开火门控、距离下调、后坐补偿和 ZeroRecoil 共存
+LITERAL_OUTPUT=VISIBLE_AIM_TESTS=PASS cases=7
+EXIT_STATUS=0
+OBSERVED_RESULT=30/60/120 FPS 最终角度误差在 1e-9 容差内一致；未开火时 45 度误差保持 45；ZeroRecoil 开启时后坐补偿量为 0。
+
+REGRESSION_TESTS
+COMMAND=python .\tests\tracking_probability_test.py
+LITERAL_OUTPUT=TRACKING_PROBABILITY_TESTS=PASS cases=6
+EXIT_STATUS=0
+COMMAND=python .\tests\ballistic_prediction_test.py
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\target_lock_test.py
+LITERAL_OUTPUT=TARGET_LOCK_TESTS=PASS cases=8
+EXIT_STATUS=0
+COMMAND=python .\tests\bone_selection_test.py
+LITERAL_OUTPUT=BONE_SELECTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\targeting_math_test.py
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=PASS cases=10
+EXIT_STATUS=0
+COMMAND=python .\tests\snapshot_isolation_test.py
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\entity_registry_test.py
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+EXIT_STATUS=0
+COMMAND=python .\tests\aim_scoring_test.py
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Task 3-9 的注册、目标、骨骼、可见性、预测和发射追踪行为全部继续通过。
+
+MODIFIED_BUILD
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File .\decompiled-src\build.ps1
+INPUT=VisibleAimController、真实开火门控、相机输入旋转与独立补偿配置
+LITERAL_OUTPUT=0 compiler errors
+LITERAL_OUTPUT=MODIFIED_BUILD_EXIT=0
+LITERAL_OUTPUT=MODIFIED_DLL_SHA256=62D81A92ED140746C6363AAB0D0F7B2D5B60B7BD607A5A90BF63A95B04B65ADF
+EXIT_STATUS=0
+
+ASSEMBLY_TYPE_CHECK
+COMMAND=dnfile TypeDef inspection on artifacts\CompleteCheatMenu.dll
+INPUT=修改版程序集
+LITERAL_OUTPUT=TYPE_VisibleAimController=True
+EXIT_STATUS=0
+
+ROLLBACK_POWERSHELL
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK10.ps1 -DestinationRoot .\artifacts\cnkx-port\rollback-task10-test-20260825a
+INPUT=包含全部 Task 10 修改文件的独立目录
+LITERAL_OUTPUT=WEAPON_SHA256=A7E0E2256CFEE9709246F084B129EF6C62313A545DC201E24604EB33BCABB051
+LITERAL_OUTPUT=CHEATSTATE_SHA256=9A118E2E4D033EAB6D1FD91B5C9109D7C6D77E96421AFA6F7EB1051C08E71DF9
+LITERAL_OUTPUT=TICK_DRIVER_SHA256=C0E7760C49980B50EAA316DCA0BCEE88881DA47CCA7E0A6F4480E56CE7818AF4
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=三个既有文件恢复 Task 9 字节，三个 Task 10 新文件被移除；工作目录继续保留修改版。
+
+ROLLBACK_BASH
+COMMAND=ROLLBACK_TASK10.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-task10-test-sh-20260825a
+INPUT=第二个独立修改副本
+LITERAL_OUTPUT=WEAPON_SHA256=A7E0E2256CFEE9709246F084B129EF6C62313A545DC201E24604EB33BCABB051
+LITERAL_OUTPUT=CHEATSTATE_SHA256=9A118E2E4D033EAB6D1FD91B5C9109D7C6D77E96421AFA6F7EB1051C08E71DF9
+LITERAL_OUTPUT=TICK_DRIVER_SHA256=C0E7760C49980B50EAA316DCA0BCEE88881DA47CCA7E0A6F4480E56CE7818AF4
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+
+MODIFIED_SOURCE_HASHES
+- VisibleAimController.cs=B6C4EDD70090C769B9F54C27A81378E0832C06772212C1216FD653400327B566
+- WeaponCheats.cs=C5E2A322C2B0BF65A57E52C44F8D09A574936DF026D78480858CDC4DB868732F
+- CheatState.cs=11BC1B747042BD019FC1B5126084FFB5D00CEE4770C093BF21E4FE97176CB5D5
+- TickDriver.cs=104F7497E958409C08312FE3221880DD4421E721DCE3905EBBB2BB19BFD08927
+- cnkx_visible_aim_impl.py=E1362214FC87A6C0A0D695D84A6FFDD88AE0792BE722FD05EFC0AACB64109C64
+- visible_aim_test.py=CDDF74EC428665C9BEC748EE1FA5261551B14C1AFDB99A67C61D92EE1CF591AF
+
+DIFF
+LINES=321
+SHA256=D5F7693FD07F28DA97F3D577EF94F0ECDC75D2607E7EB3FAC6B8C5E206191BC1
+
+PLAN_MARK
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+RESULT=Task 10 marked complete with evidence path.
+
+DEPLOYMENT
+RESULT=NOT_DEPLOYED_GATE_A_IN_PROGRESS
+DEPLOYED_DLL_UNCHANGED_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+
+GIT
+RESULT=SKIPPED_NOT_A_GIT_REPOSITORY

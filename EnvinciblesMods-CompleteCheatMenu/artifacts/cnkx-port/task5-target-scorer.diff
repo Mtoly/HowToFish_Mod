@@ -1,0 +1,350 @@
+diff --git artifacts/cnkx-port/task5-original-src/CheatState.cs decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
+index 58215a7..2e4ade5 100644
+--- artifacts/cnkx-port/task5-original-src/CheatState.cs
++++ decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
+@@ -66,6 +66,14 @@ internal static class CheatState
+ 
+ 	internal static float AimAngleWeight = 0.5f;
+ 
++	internal static float AimScreenRadius = 250f;
++
++	internal static float AimScreenDistanceWeight;
++
++	internal static float AimPriorityBonus = 50f;
++
++	internal static float AimPriorityBonusLimit = 200f;
++
+ 	internal static float AimLockDuration = 0.2f;
+ 
+ 	internal static float AimSwitchPenalty = 8f;
+diff --git artifacts/cnkx-port/task5-original-src/targeting_math_test.py tests/targeting_math_test.py
+index eb38bd3..4ef1d4b 100644
+--- artifacts/cnkx-port/task5-original-src/targeting_math_test.py
++++ tests/targeting_math_test.py
+@@ -70,4 +70,17 @@ selected = select_target(
+ )
+ assert selected["name"] == "near-with-far-bone"
+ 
++# C# 生产实现必须保留圆形半径判断以及骨骼/实体两级独立评分。
++PROJECT = Path(__file__).resolve().parents[1]
++scorer_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Targeting/TargetScorer.cs"
++).read_text(encoding="utf-8")
++candidate_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Targeting/TargetCandidate.cs"
++).read_text(encoding="utf-8")
++assert "delta.sqrMagnitude <= radius * radius" in scorer_source
++assert "Mathf.Clamp(settings.PriorityBonus, 0f, settings.PriorityBonusLimit)" in scorer_source
++assert "BoneScore" in candidate_source
++assert "EntityScore" in candidate_source
++
+ print("TARGETING_MATH_TESTS=PASS cases=10")
+diff --git decompiled-src/CompleteCheatMenu/Targeting/TargetCandidate.cs decompiled-src/CompleteCheatMenu/Targeting/TargetCandidate.cs
+new file mode 100644
+index 0000000..d924986
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Targeting/TargetCandidate.cs
+@@ -0,0 +1,35 @@
++using CompleteCheatMenu.Runtime;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal sealed class TargetCandidate
++{
++	internal EntityRecord Record;
++
++	internal object Entity;
++
++	internal Transform Transform;
++
++	internal Vector3 AimPoint;
++
++	internal string Bone;
++
++	internal float Distance;
++
++	internal float Angle;
++
++	internal Vector2 ScreenPosition;
++
++	internal float ScreenDistance;
++
++	internal bool Visible;
++
++	internal Vector3 Velocity;
++
++	internal bool Priority;
++
++	internal float BoneScore;
++
++	internal float EntityScore;
++}
+diff --git decompiled-src/CompleteCheatMenu/Targeting/TargetSolution.cs decompiled-src/CompleteCheatMenu/Targeting/TargetSolution.cs
+new file mode 100644
+index 0000000..52ff1d2
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Targeting/TargetSolution.cs
+@@ -0,0 +1,53 @@
++using UnityEngine;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal sealed class TargetSolution
++{
++	internal object Entity;
++
++	internal Transform Transform;
++
++	internal Vector3 AimPoint;
++
++	internal string Bone;
++
++	internal float Distance;
++
++	internal Vector2 ScreenPosition;
++
++	internal float ScreenDistance;
++
++	internal float Angle;
++
++	internal bool Visible;
++
++	internal Vector3 Velocity;
++
++	internal float Score;
++
++	internal float Timestamp;
++
++	internal static TargetSolution FromCandidate(TargetCandidate candidate, float timestamp)
++	{
++		if (candidate == null)
++		{
++			return null;
++		}
++		return new TargetSolution
++		{
++			Entity = candidate.Entity,
++			Transform = candidate.Transform,
++			AimPoint = candidate.AimPoint,
++			Bone = candidate.Bone,
++			Distance = candidate.Distance,
++			ScreenPosition = candidate.ScreenPosition,
++			ScreenDistance = candidate.ScreenDistance,
++			Angle = candidate.Angle,
++			Visible = candidate.Visible,
++			Velocity = candidate.Velocity,
++			Score = candidate.EntityScore,
++			Timestamp = timestamp
++		};
++	}
++}
+diff --git decompiled-src/CompleteCheatMenu/Targeting/TargetingSettings.cs decompiled-src/CompleteCheatMenu/Targeting/TargetingSettings.cs
+new file mode 100644
+index 0000000..26eb140
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Targeting/TargetingSettings.cs
+@@ -0,0 +1,43 @@
++using CompleteCheatMenu.Runtime;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal sealed class TargetingSettings
++{
++	internal float MaxDistance;
++
++	internal float MaxAngle;
++
++	internal float ScreenRadius;
++
++	internal float DistanceWeight;
++
++	internal float AngleWeight;
++
++	internal float ScreenDistanceWeight;
++
++	internal float SwitchPenalty;
++
++	internal float PriorityBonus;
++
++	internal float PriorityBonusLimit;
++
++	internal bool RequireLineOfSight;
++
++	internal static TargetingSettings FromCheatState()
++	{
++		return new TargetingSettings
++		{
++			MaxDistance = CheatState.AimRange,
++			MaxAngle = CheatState.AimFov,
++			ScreenRadius = CheatState.AimScreenRadius,
++			DistanceWeight = CheatState.AimDistanceWeight,
++			AngleWeight = CheatState.AimAngleWeight,
++			ScreenDistanceWeight = CheatState.AimScreenDistanceWeight,
++			SwitchPenalty = CheatState.AimSwitchPenalty,
++			PriorityBonus = CheatState.AimPriorityBonus,
++			PriorityBonusLimit = CheatState.AimPriorityBonusLimit,
++			RequireLineOfSight = CheatState.AimRequireLineOfSight
++		};
++	}
++}
+diff --git decompiled-src/CompleteCheatMenu/Targeting/TargetScorer.cs decompiled-src/CompleteCheatMenu/Targeting/TargetScorer.cs
+new file mode 100644
+index 0000000..cfd97f1
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Targeting/TargetScorer.cs
+@@ -0,0 +1,84 @@
++using System.Collections.Generic;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal static class TargetScorer
++{
++	internal static bool InsideScreenRadius(Vector2 position, Vector2 center, float radius)
++	{
++		if (radius < 0f)
++		{
++			return false;
++		}
++		Vector2 delta = position - center;
++		return delta.sqrMagnitude <= radius * radius;
++	}
++
++	internal static float ScoreEntity(TargetCandidate candidate, TargetingSettings settings, object currentEntity)
++	{
++		if (candidate == null || settings == null)
++		{
++			return float.PositiveInfinity;
++		}
++		float score = candidate.Distance * Mathf.Max(0f, settings.DistanceWeight)
++			+ candidate.Angle * Mathf.Max(0f, settings.AngleWeight)
++			+ candidate.ScreenDistance * Mathf.Max(0f, settings.ScreenDistanceWeight);
++		if (currentEntity != null && !ReferenceEquals(candidate.Entity, currentEntity))
++		{
++			score += Mathf.Max(0f, settings.SwitchPenalty);
++		}
++		if (candidate.Priority)
++		{
++			score -= Mathf.Clamp(settings.PriorityBonus, 0f, settings.PriorityBonusLimit);
++		}
++		candidate.EntityScore = score;
++		return score;
++	}
++
++	internal static TargetCandidate SelectBest(IReadOnlyList<TargetCandidate> candidates, TargetingSettings settings, object currentEntity)
++	{
++		if (candidates == null || settings == null)
++		{
++			return null;
++		}
++		TargetCandidate best = null;
++		float bestScore = float.PositiveInfinity;
++		for (int i = 0; i < candidates.Count; i++)
++		{
++			TargetCandidate candidate = candidates[i];
++			if (!IsEligible(candidate, settings))
++			{
++				continue;
++			}
++			float score = ScoreEntity(candidate, settings, currentEntity);
++			if (score < bestScore)
++			{
++				bestScore = score;
++				best = candidate;
++			}
++		}
++		return best;
++	}
++
++	private static bool IsEligible(TargetCandidate candidate, TargetingSettings settings)
++	{
++		if (candidate == null || candidate.Entity == null || candidate.Transform == null)
++		{
++			return false;
++		}
++		if (candidate.Distance < 0f || candidate.Distance > settings.MaxDistance)
++		{
++			return false;
++		}
++		if (candidate.Angle < 0f || candidate.Angle > settings.MaxAngle)
++		{
++			return false;
++		}
++		if (settings.RequireLineOfSight && !candidate.Visible)
++		{
++			return false;
++		}
++		return candidate.ScreenDistance <= settings.ScreenRadius;
++	}
++}
+diff --git tests/cnkx_math_impl.py tests/cnkx_math_impl.py
+new file mode 100644
+index 0000000..0d9106c
+--- /dev/null
++++ tests/cnkx_math_impl.py
+@@ -0,0 +1,64 @@
++def inside_screen_radius(dx, dy, radius):
++    if radius < 0:
++        return False
++    return dx * dx + dy * dy <= radius * radius
++
++
++def score_entity(
++    distance,
++    angle,
++    screen_distance,
++    is_switch,
++    distance_weight,
++    angle_weight,
++    screen_weight,
++    switch_penalty,
++):
++    score = (
++        distance * max(0.0, distance_weight)
++        + angle * max(0.0, angle_weight)
++        + screen_distance * max(0.0, screen_weight)
++    )
++    if is_switch:
++        score += max(0.0, switch_penalty)
++    return score
++
++
++def select_best_bone(bones, require_visible=True):
++    best = None
++    best_score = float("inf")
++    for bone in bones:
++        if require_visible and not bone.get("visible", False):
++            continue
++        score = float(bone.get("screen_distance", float("inf")))
++        if score < best_score:
++            best = bone
++            best_score = score
++    return best
++
++
++def select_target(
++    targets,
++    current_name,
++    distance_weight,
++    angle_weight,
++    screen_weight,
++    switch_penalty,
++):
++    best = None
++    best_score = float("inf")
++    for target in targets:
++        score = score_entity(
++            float(target.get("distance", 0.0)),
++            float(target.get("angle", 0.0)),
++            float(target.get("screen_distance", 0.0)),
++            current_name is not None and target.get("name") != current_name,
++            distance_weight,
++            angle_weight,
++            screen_weight,
++            switch_penalty,
++        )
++        if score < best_score:
++            best = target
++            best_score = score
++    return best

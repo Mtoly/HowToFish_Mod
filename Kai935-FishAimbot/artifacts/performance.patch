@@ -1,0 +1,309 @@
+diff --git "a/decompiled\\FishAimbotMod/AimAssistPatch.cs" b/src/AimAssistPatch.cs
+index 47b7cd6..2a55d93 100644
+--- "a/decompiled\\FishAimbotMod/AimAssistPatch.cs"
++++ b/src/AimAssistPatch.cs
+@@ -1,50 +1,38 @@
+ using HarmonyLib;
+ using UnityEngine;
+ 
+-namespace FishAimbotMod;
+-
+-[HarmonyPatch(typeof(PlayerCamera), "ApplyAimAssist")]
+-public class AimAssistPatch
++namespace FishAimbotMod
+ {
+-	private static readonly FieldRef<PlayerCamera, Vector3> GetRot = AccessTools.FieldRefAccess<PlayerCamera, Vector3>("_rot");
++    [HarmonyPatch(typeof(PlayerCamera), "ApplyAimAssist")]
++    internal static class AimAssistPatch
++    {
++        private static readonly AccessTools.FieldRef<PlayerCamera, Vector3> GetRot =
++            AccessTools.FieldRefAccess<PlayerCamera, Vector3>("_rot");
++
++        private const KeyCode AimKey = (KeyCode)324;
++        private const float FovAngle = 180f;
+ 
+-	private static readonly KeyCode AimKey = (KeyCode)324;
++        private static void Postfix(PlayerCamera __instance)
++        {
++            if (!Input.GetKey(AimKey))
++            {
++                return;
++            }
+ 
+-	private const float FovAngle = 180f;
++            Transform camera = __instance.CamTransform;
++            Vector3 cameraPosition = camera.position;
++            Transform bestTarget = FishTargeting.GetBestTarget(cameraPosition, camera.forward, FovAngle);
++            if (bestTarget == null)
++            {
++                return;
++            }
+ 
+-	private static void Postfix(PlayerCamera __instance)
+-	{
+-		//IL_0001: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_001f: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0024: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_002b: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0030: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0031: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0032: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_004e: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0053: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0054: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0059: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_005d: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0062: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0063: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_0069: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_007c: Unknown result type (might be due to invalid IL or missing references)
+-		if (Input.GetKey(AimKey))
+-		{
+-			Vector3 position = __instance.CamTransform.position;
+-			Vector3 forward = __instance.CamTransform.forward;
+-			Transform bestTarget = FishTargeting.GetBestTarget(position, forward, 180f);
+-			if (!((Object)(object)bestTarget == (Object)null))
+-			{
+-				Vector3 val = bestTarget.position - position;
+-				Vector3 normalized = ((Vector3)(ref val)).normalized;
+-				float y = Mathf.Atan2(normalized.x, normalized.z) * 57.29578f;
+-				float num = (0f - Mathf.Asin(normalized.y)) * 57.29578f;
+-				ref Vector3 reference = ref GetRot.Invoke(__instance);
+-				reference.x = Mathf.Clamp(num, -90f, 90f);
+-				reference.y = y;
+-			}
+-		}
+-	}
++            Vector3 direction = (bestTarget.position - cameraPosition).normalized;
++            float yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
++            float pitch = -Mathf.Asin(direction.y) * Mathf.Rad2Deg;
++            ref Vector3 rotation = ref GetRot(__instance);
++            rotation.x = Mathf.Clamp(pitch, -90f, 90f);
++            rotation.y = yaw;
++        }
++    }
+ }
+diff --git a/src/CreatureRegistryPatch.cs b/src/CreatureRegistryPatch.cs
+new file mode 100644
+index 0000000..d820b58
+--- /dev/null
++++ b/src/CreatureRegistryPatch.cs
+@@ -0,0 +1,13 @@
++using HarmonyLib;
++
++namespace FishAimbotMod
++{
++    [HarmonyPatch(typeof(Creature), "Awake")]
++    internal static class CreatureRegistryPatch
++    {
++        private static void Postfix(Creature __instance)
++        {
++            FishTargeting.Register(__instance);
++        }
++    }
++}
+diff --git "a/decompiled\\FishAimbotMod/FishTargeting.cs" b/src/FishTargeting.cs
+index 0d7a9c0..e7367e9 100644
+--- "a/decompiled\\FishAimbotMod/FishTargeting.cs"
++++ b/src/FishTargeting.cs
+@@ -1,58 +1,117 @@
++using System;
++using System.Collections.Generic;
+ using UnityEngine;
+ 
+-namespace FishAimbotMod;
+-
+-public static class FishTargeting
++namespace FishAimbotMod
+ {
+-	public static Transform GetBestTarget(Vector3 camPos, Vector3 lookDir, float maxFov)
+-	{
+-		//IL_0095: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_009a: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_009c: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_009e: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_009f: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00a4: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00a8: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00ad: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00af: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00b0: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00cc: Unknown result type (might be due to invalid IL or missing references)
+-		//IL_00cd: Unknown result type (might be due to invalid IL or missing references)
+-		Creature[] array = Object.FindObjectsByType<Creature>((FindObjectsSortMode)0);
+-		Transform result = null;
+-		float num = float.MaxValue;
+-		Creature[] array2 = array;
+-		foreach (Creature val in array2)
+-		{
+-			if ((Object)(object)val == (Object)null || val.IsDead)
+-			{
+-				continue;
+-			}
+-			Fish val2 = (Fish)(object)((val is Fish) ? val : null);
+-			if (val2 != null && (Object)(object)((Item)val2).AttachedRod != (Object)null)
+-			{
+-				continue;
+-			}
+-			string text = ((Object)val).name.ToLower();
+-			if (text.Contains("seagull"))
+-			{
+-				continue;
+-			}
+-			Vector3 position = ((Component)val).transform.position;
+-			Vector3 val3 = position - camPos;
+-			Vector3 normalized = ((Vector3)(ref val3)).normalized;
+-			float num2 = Vector3.Angle(lookDir, normalized);
+-			if (!(num2 > maxFov / 2f))
+-			{
+-				float num3 = Vector3.Distance(camPos, position);
+-				float num4 = (text.Contains("albatross") ? (num2 * 0.2f) : (num3 + num2 * 0.5f));
+-				if (num4 < num)
+-				{
+-					num = num4;
+-					result = ((Component)val).transform;
+-				}
+-			}
+-		}
+-		return result;
+-	}
++    public static class FishTargeting
++    {
++        private sealed class TargetEntry
++        {
++            internal readonly Creature Creature;
++            internal readonly Transform Transform;
++            internal string Name;
++            internal bool IsAlbatross;
++            internal bool IsSeagull;
++
++            internal TargetEntry(Creature creature)
++            {
++                Creature = creature;
++                Transform = creature.transform;
++                UpdateName(creature.name);
++            }
++
++            internal void UpdateName(string name)
++            {
++                Name = name;
++                IsAlbatross = name.IndexOf("albatross", StringComparison.OrdinalIgnoreCase) >= 0;
++                IsSeagull = name.IndexOf("seagull", StringComparison.OrdinalIgnoreCase) >= 0;
++            }
++        }
++
++        private static readonly List<TargetEntry> Targets = new List<TargetEntry>(128);
++
++        internal static void Initialize()
++        {
++            Targets.Clear();
++            Creature[] existing = UnityEngine.Object.FindObjectsByType<Creature>();
++            for (int i = 0; i < existing.Length; i++)
++            {
++                Register(existing[i]);
++            }
++        }
++
++        internal static void Register(Creature creature)
++        {
++            if (creature == null)
++            {
++                return;
++            }
++
++            for (int i = 0; i < Targets.Count; i++)
++            {
++                if (ReferenceEquals(Targets[i].Creature, creature))
++                {
++                    return;
++                }
++            }
++
++            Targets.Add(new TargetEntry(creature));
++        }
++
++        public static Transform GetBestTarget(Vector3 camPos, Vector3 lookDir, float maxFov)
++        {
++            Transform bestTarget = null;
++            float bestScore = float.MaxValue;
++            float halfFov = maxFov * 0.5f;
++
++            for (int i = 0; i < Targets.Count; i++)
++            {
++                TargetEntry entry = Targets[i];
++                Creature creature = entry.Creature;
++
++                if (creature == null)
++                {
++                    Targets.RemoveAt(i);
++                    i--;
++                    continue;
++                }
++
++                string currentName = creature.name;
++                if (!ReferenceEquals(entry.Name, currentName) && entry.Name != currentName)
++                {
++                    entry.UpdateName(currentName);
++                }
++
++                if (!creature.gameObject.activeInHierarchy || creature.IsDead || entry.IsSeagull)
++                {
++                    continue;
++                }
++
++                Fish fish = creature as Fish;
++                if (fish != null && fish.AttachedRod != null)
++                {
++                    continue;
++                }
++
++                Vector3 delta = entry.Transform.position - camPos;
++                float distance = delta.magnitude;
++                Vector3 direction = distance > 0.00001f ? delta / distance : Vector3.zero;
++                float angle = Vector3.Angle(lookDir, direction);
++                if (angle > halfFov)
++                {
++                    continue;
++                }
++
++                float score = entry.IsAlbatross ? angle * 0.2f : distance + angle * 0.5f;
++                if (score < bestScore)
++                {
++                    bestScore = score;
++                    bestTarget = entry.Transform;
++                }
++            }
++
++            return bestTarget;
++        }
++    }
+ }
+diff --git "a/decompiled\\FishAimbotMod/Plugin.cs" b/src/Plugin.cs
+index ee64cd0..2e325a1 100644
+--- "a/decompiled\\FishAimbotMod/Plugin.cs"
++++ b/src/Plugin.cs
+@@ -1,14 +1,15 @@
+ using BepInEx;
+ using HarmonyLib;
+ 
+-namespace FishAimbotMod;
+-
+-[BepInPlugin("com.yourname.fishaimbot", "Fish Aimbot", "1.0.1")]
+-public class Plugin : BaseUnityPlugin
++namespace FishAimbotMod
+ {
+-	private void Awake()
+-	{
+-		//IL_0006: Unknown result type (might be due to invalid IL or missing references)
+-		new Harmony("com.yourname.fishaimbot").PatchAll();
+-	}
++    [BepInPlugin("com.yourname.fishaimbot", "Fish Aimbot", "1.1.0")]
++    public sealed class Plugin : BaseUnityPlugin
++    {
++        private void Awake()
++        {
++            new Harmony("com.yourname.fishaimbot").PatchAll();
++            FishTargeting.Initialize();
++        }
++    }
+ }

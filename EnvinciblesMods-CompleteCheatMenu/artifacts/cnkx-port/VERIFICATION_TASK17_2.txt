@@ -1,0 +1,144 @@
+TASK=17.2 PROJECTILE BINDINGS AND LIFECYCLE INFRASTRUCTURE
+DATE=2026-08-25
+STATUS=PASS
+DEPLOYMENT=NOT_PERFORMED_GAME_DLL_UNCHANGED
+
+CHANGED_BRANCH_OR_FIELD
+- ProjectileBindings resolves ProjectileManager.AddProjectile(8), AddProjectiles(8), UpdateProjectileScan(2), AddToRemoveQueue(1), projectile identity/ownership/position/velocity fields, manager lifecycle fields, and WeaponInfo.ProjectileGravity.
+- ProjectileOwnership accepts only local-player weapons and projectiles satisfying IsLocal && Owner == LocalPlayer && !FromNpc.
+- MagicShotContext holds one valid local weapon/target pair and exposes Begin, End, and Clear lifecycle boundaries.
+- ProjectileTracker maintains Projectile -> TargetSolution and Projectile.Id -> TargetSolution mappings.
+- ID fallback re-validates local ownership; remote/NPC projectiles cannot consume a local ID mapping.
+- Duplicate same-object/same-target registration is not recounted; same-ID replacement removes stale direct mappings.
+- Unregistering a stale same-ID object does not remove the replacement projectile's ID mapping.
+- TickDriver prunes invalid targets every second; plugin unload clears MagicShotContext and ProjectileTracker.
+- AddProjectile/AddProjectiles are not patched in this stage and real projectile velocity is unchanged.
+
+FOUR_PRIMARY_ARTIFACTS
+MODIFIED_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-2-projectile-lifecycle\CompleteCheatMenu.task17-2.zh-CN.dll
+MODIFIED_SHA256=9361B9E43A3C77E9E32FD5421C23E51739BB569A099538DA024B5877E7558DB2
+DIFF_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-2-projectile-lifecycle\task17-2-projectile-lifecycle.diff
+DIFF_SHA256=0E85EDDCA3898713AFAA27D635F52035436939DB0560C8FAB7AAB7AC7FFEC732
+VERIFICATION=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK17_2.txt
+ROLLBACK=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-2-projectile-lifecycle\ROLLBACK_TASK17_2.ps1
+ROLLBACK_SHA256=A9A96400281DED1AC9DCA1DD86C8395BB961EBD10D72B6E0AAE0231BD28C85DF
+ROLLBACK_SH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-2-projectile-lifecycle\ROLLBACK_TASK17_2.sh
+ROLLBACK_SH_SHA256=A332B4E89F17A3C588751E7ED9E7D1A4F3174EB31EFE24856C37288A9E272F79
+
+BASELINE RED TEST
+COMMAND=python rollback-test-ps-20260825\tests\projectile_lifecycle_test.py
+INPUT=Task 17.1 restored source snapshot with the Task 17.2 static behavior test copied into tests
+LITERAL_OUTPUT=AssertionError: ...\Targeting\ProjectileBindings.cs
+LITERAL_OUTPUT=RED_EXIT=1
+EXIT_STATUS=1
+OBSERVED_RESULT=Projectile lifecycle binding infrastructure was absent from the Task 17.1 baseline.
+
+MODIFIED GREEN HARNESS
+COMMAND=csc projectile_lifecycle_harness.cs ProjectileOwnership.cs ProjectileTracker.cs MagicShotContext.cs && projectile_lifecycle_harness.exe
+INPUT=production ownership/tracker/context sources with stub game types
+LITERAL_OUTPUT=PROJECTILE_LIFECYCLE_HARNESS=PASS cases=29
+LITERAL_OUTPUT=EXIT_CODE=0
+EXIT_STATUS=0
+OBSERVED_RESULT=local/remote/NPC isolation, context lifecycle, direct and ID lookup, duplicate counting, same-ID replacement, stale unregister protection, invalid cleanup, explicit unregister, and clear behavior passed.
+
+MODIFIED GREEN STATIC TEST
+COMMAND=python .\tests\projectile_lifecycle_test.py
+INPUT=modified Task 17.2 source
+LITERAL_OUTPUT=PROJECTILE_LIFECYCLE_TESTS=PASS cases=5
+LITERAL_OUTPUT=EXIT_CODE=0
+EXIT_STATUS=0
+
+FULL REGRESSION
+COMMAND=for each tests\*_test.py: python TEST
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=PASS cases=7
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=BONE_SELECTION_TESTS=PASS cases=7
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=CLIENT_MODE_CAPABILITY_TESTS=PASS cases=5
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=ESP_PROJECTION_TESTS=PASS cases=8
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=LOCALIZED_UI_PRESET_TESTS=PASS cases=9
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=PROJECTILE_LIFECYCLE_TESTS=PASS cases=5
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=TARGET_LOCK_TESTS=PASS cases=8
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=PASS cases=10
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=TRACKING_PROBABILITY_TESTS=PASS cases=6
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=VISIBILITY_UI_SEMANTICS_TESTS=PASS cases=4
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=VISIBLE_AIM_TESTS=PASS cases=7
+LITERAL_OUTPUT=EXIT_CODE=0
+LITERAL_OUTPUT=WEAPON_RESTORE_TESTS=PASS cases=7
+LITERAL_OUTPUT=EXIT_CODE=0
+EXIT_STATUS=0
+OBSERVED_RESULT=15 Python regression suites passed.
+
+BUILD
+COMMAND=powershell -File .\decompiled-src\build.ps1 -GameRoot GAME_ROOT -OutputPath .\artifacts\cnkx-port\task17-2-projectile-lifecycle\CompleteCheatMenu.task17-2.dll
+INPUT=87 C# source files
+LITERAL_OUTPUT=BUILD_SOURCE_COUNT=87
+LITERAL_OUTPUT=BUILD_SHA256=ABA45FB9C4ED78501111E562326742D7C0A3E0EF8DB8E5DDE0CBFEC2C554BC51
+LITERAL_OUTPUT=EXIT_CODE=0
+EXIT_STATUS=0
+
+LOCALIZATION
+COMMAND=python .\tools\localize_dll.py CompleteCheatMenu.task17-2.dll CompleteCheatMenu.task17-2.zh-CN.dll
+INPUT=Task 17.2 raw assembly
+LITERAL_OUTPUT={"changed": 261, "source_sha256": "aba45fb9c4ed78501111e562326742d7c0a3e0ef8db8e5dde0cbfec2c554bc51", "modified_sha256": "9361b9e43a3c77e9e32fd5421c23e51739bb569a099538da024b5877e7558db2"}
+LITERAL_OUTPUT=EXIT_CODE=0
+EXIT_STATUS=0
+
+METADATA VERIFICATION
+COMMAND=python verify_metadata.py CompleteCheatMenu.task17-2.dll CompleteCheatMenu.task17-2.zh-CN.dll
+LITERAL_OUTPUT=RAW_VERSION=0.7.0.0
+LITERAL_OUTPUT=LOCALIZED_VERSION=0.7.0.0
+LITERAL_OUTPUT=TYPESET_EQUAL=True
+LITERAL_OUTPUT=METHODSET_EQUAL=True
+LITERAL_OUTPUT=REQUIRED_TYPES_PRESENT=True
+LITERAL_OUTPUT=LOCALIZATION_CHANGED=261
+LITERAL_OUTPUT=PLACEHOLDER_MISMATCHES=0
+LITERAL_OUTPUT=TASK17_2_METADATA=PASS
+EXIT_STATUS=0
+
+DEPLOYMENT INVARIANT
+COMMAND=Get-FileHash game CompleteCheatMenu.dll -Algorithm SHA256
+INPUT=game plugin directory
+LITERAL_OUTPUT=224A13AE043E203D3EBCBFF840241BB32588A7549B8F8DC8326236513A4AAB0A
+EXIT_STATUS=0
+OBSERVED_RESULT=game directory remains on the Task 16 deployment; Task 17.2 is a validated build artifact only.
+
+ROLLBACK POWERSHELL
+COMMAND=ROLLBACK_TASK17_2.ps1 -DestinationRoot rollback-test-ps-20260825 -DestinationDll rollback-test-ps-20260825\deployed.dll
+INPUT=independent Task 17.2 source and localized DLL copy
+LITERAL_OUTPUT=RESTORED_DLL_SHA256=ED9F679FD8AE6DCF12A0171A01252DBB2CF0A3CF5C63DD2E02A4FAD6E9192B6B
+LITERAL_OUTPUT=RESTORED_SOURCE_FILES=4
+LITERAL_OUTPUT=CREATED_FILES_PRESENT=0
+LITERAL_OUTPUT=all four restored files SOURCE_MATCH=True
+LITERAL_OUTPUT=14 pre-Task17.2 Python regression suites PASS
+LITERAL_OUTPUT=ROLLBACK_PS_VERIFICATION=PASS
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Task 17.2 types/tests are absent, Task 17.1 source hashes are restored, prior regressions pass, and the restored DLL is the exact Task 17.1 artifact.
+
+ROLLBACK BASH
+COMMAND=bash ROLLBACK_TASK17_2.sh rollback-test-sh-20260825 deployed.dll Task17.1.dll
+INPUT=independent Task 17.2 source and localized DLL copy
+LITERAL_OUTPUT=RESTORED_SOURCE_FILES=4
+LITERAL_OUTPUT=CREATED_FILES_PRESENT=0
+LITERAL_OUTPUT=ROLLBACK_SH_DLL_SHA256=ed9f679fd8ae6dcf12a0171a01252dbb2cf0a3cf5c63dd2e02a4fad6e9192b6b
+LITERAL_OUTPUT=ROLLBACK_SH_VERIFICATION=PASS
+EXIT_STATUS=0
+
+PLAN
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+SHA256=7B354085CAA9A160991CF06996EA0357FAD5627EE4DF922A1E4A6F7DF914213E
+STATUS=Task 17.2 marked complete; next module is Task 17.3 Weapon.Shoot Finalizer plus AddProjectile/AddProjectiles initial velocity injection.

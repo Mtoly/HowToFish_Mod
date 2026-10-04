@@ -1,0 +1,8 @@
+decompiled-src\CompleteCheatMenu\Game\Refs.cs(188,10): warning CS0618: “Object.FindObjectOfType(Type)”已过时:“Object.FindObjectOfType has been deprecated. Use Object.FindFirstObjectByType instead or if finding any instance is acceptable the faster Object.FindAnyObjectByType”
+decompiled-src\CompleteCheatMenu\Cheats\VisualCheats.cs(467,11): warning CS0618: “Object.FindObjectsOfType(Type)”已过时:“Object.FindObjectsOfType has been deprecated. Use Object.FindObjectsByType instead which lets you decide whether you need the results sorted or not.  FindObjectsOfType sorts the results by InstanceID, but if you do not need this using FindObjectSortMode.None is considerably faster.”
+decompiled-src\CompleteCheatMenu\Runtime\CheatState.cs(117,22): warning CS0649: 从未对字段“CheatState.BetColorIndex”赋值，字段将一直保持其默认值 0
+
+Algorithm       Hash                                                                   Path
+---------       ----                                                                   ----
+SHA256          044A0852B599CEA23511AADF9AECEE83973529D2E2051DB02ECA366B584DD2F4       D:\Code\How2fish\EnvinciblesMods…
+

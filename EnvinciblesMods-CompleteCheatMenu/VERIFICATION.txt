@@ -1,0 +1,24 @@
+CompleteCheatMenu 游戏内汉化验证
+变更分支/字段：#US 用户字符串流中的菜单、按钮、提示、诊断文本；IL 与逻辑未改动。
+
+BASELINE
+命令：Get-FileHash CompleteCheatMenu.dll -Algorithm SHA256
+输出：E51F5D0A7630E54B76F70DEF8FDA9E38DD1ED12067D535CCBA4187B3C0E28FA3
+退出状态：0
+命令：[Reflection.AssemblyName]::GetAssemblyName((Resolve-Path CompleteCheatMenu.dll)).FullName
+输出：CompleteCheatMenu, Version=0.6.1.0, Culture=neutral, PublicKeyToken=null
+退出状态：0
+
+MODIFIED
+命令：python tools/localize_dll.py
+输出：{"changed": 371, "source_sha256": "e51f5d0a7630e54b76f70def8fda9e38dd1ed12067d535ccba4187b3c0e28fa3", "modified_sha256": "1154f3aae7e5a55d1664a31d3bf00142b15c7260a8a13147ff50f5022beb718d"}
+退出状态：0
+命令：[Reflection.AssemblyName]::GetAssemblyName((Resolve-Path CompleteCheatMenu.zh-CN.dll)).FullName
+输出：CompleteCheatMenu, Version=0.6.1.0, Culture=neutral, PublicKeyToken=null
+退出状态：0
+
+ROLLBACK
+命令：& .\ROLLBACK.ps1 -Source CompleteCheatMenu.dll -Destination rollback-test.dll
+输出：E51F5D0A7630E54B76F70DEF8FDA9E38DD1ED12067D535CCBA4187B3C0E28FA3
+退出状态：0
+结果：回滚副本哈希与基线一致；汉化副本哈希不同，恢复行为已验证。

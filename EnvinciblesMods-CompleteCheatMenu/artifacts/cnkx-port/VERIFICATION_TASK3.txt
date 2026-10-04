@@ -1,0 +1,97 @@
+CompleteCheatMenu cnKX port - Task 3 verification
+DATE=2026-08-25
+TASK=创建独立实体注册表
+STATUS=COMPLETE
+
+CHANGED_BRANCH_OR_FIELD
+- EntityRegistry._creatures/_players/_items/_containers: 四个独立实体集合。
+- EntityRegistry._nextPlayerRefresh/_nextItemRefresh/_nextContainerRefresh: 三个独立刷新时间门。
+- EntityRecord: 缓存 Entity、Transform、InstanceId、Kind、TypeName、Name、SeenGeneration。
+- Creature.Awake Postfix: EntityRegistry.RegisterCreature。
+- Player.Awake Postfix: EntityRegistry.RegisterPlayer。
+- AimTargetRegistry: EntityRegistry.Creatures 兼容适配器。
+- RemoveStale/PruneDestroyed: 倒序清理 Unity 已销毁或不属于当前扫描代次的记录。
+
+ARTIFACTS
+- MODIFIED_FILE_1: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\EntityRegistry.cs
+- MODIFIED_FILE_2: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\EntityRecord.cs
+- MODIFIED_FILE_3: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Patches\PlayerRegistry_Patch.cs
+- MODIFIED_FILE_4: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Patches\CreatureRegistry_Patch.cs
+- MODIFIED_FILE_5: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Cheats\AimTargetRegistry.cs
+- TEST_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\entity_registry_test.py
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task3-entity-registry.diff
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK3.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK3.sh
+- WINDOWS_ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK3.ps1
+- ORIGINAL_SOURCE_DIR: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task3-original-src
+
+BASELINE_BUILD
+COMMAND=Roslyn csc with all Task 1 source files, original AimTargetRegistry.cs and original CreatureRegistry_Patch.cs; Task 3 new files excluded
+INPUT=Task 1 completed source baseline
+LITERAL_OUTPUT=3 compiler warnings; 0 compiler errors
+LITERAL_OUTPUT=BASELINE_BUILD_EXIT=0
+LITERAL_OUTPUT=BASELINE_DLL_SHA256=F62193F7791E217BC5FC6C51EC52C8561BDD1973AC4C0E50678D8C4208801276
+EXIT_STATUS=0
+
+MODIFIED_BUILD
+COMMAND=& .\decompiled-src\build.ps1
+INPUT=EntityRecord、EntityRegistry、PlayerRegistry_Patch、修改后的 CreatureRegistry_Patch 和 AimTargetRegistry
+LITERAL_OUTPUT=3 compiler warnings; 0 compiler errors
+LITERAL_OUTPUT=MODIFIED_BUILD_EXIT=0
+LITERAL_OUTPUT=MODIFIED_DLL_SHA256=7295AEFDC323B59680480378125B5A2D5E5F4CB6706270F43337D26520FC8302
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=现有 AimTargetRegistry.Creatures 和 Register(Creature) 调用接口继续有效，但数据源改为 EntityRegistry。
+
+ENTITY_REGISTRY_TEST
+COMMAND=python .\tests\entity_registry_test.py
+INPUT=注册、重复注册、连续销毁、代次清理、独立刷新时间、扫描失败缓存保留和源码结构检查
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+EXIT_STATUS=0
+
+AIM_REGRESSION_TEST
+COMMAND=python .\tests\aim_scoring_test.py
+INPUT=现有 9 个自瞄过滤和评分用例
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+
+ROLLBACK_POWERSHELL
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK3.ps1 -DestinationRoot .\artifacts\cnkx-port\rollback-task3-final-test
+INPUT=包含全部 Task 3 修改文件的独立目录
+LITERAL_OUTPUT=AIM_REGISTRY_SHA256=E9D43AEC1E04035C58F3E9E3F691FC7B7D00E98E0823E65D1A07BC74EAABF988
+LITERAL_OUTPUT=CREATURE_PATCH_SHA256=F6F139BF865BD944C957039528617E3619B7A5E3A341D07EB67F0A5E4697ABEB
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=两个既有文件恢复原始字节，四个 Task 3 新文件被移除；工作目录继续保留修改版。
+
+ROLLBACK_BASH
+COMMAND=ROLLBACK_TASK3.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-task3-final-test-sh
+INPUT=第二个独立修改副本
+LITERAL_OUTPUT=AIM_REGISTRY_SHA256=E9D43AEC1E04035C58F3E9E3F691FC7B7D00E98E0823E65D1A07BC74EAABF988
+LITERAL_OUTPUT=CREATURE_PATCH_SHA256=F6F139BF865BD944C957039528617E3619B7A5E3A341D07EB67F0A5E4697ABEB
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+
+MODIFIED_SOURCE_HASHES
+- EntityRegistry.cs=C9138FDF795D34F57B55B3D5CFF54B833C45C23701FF809DEFDD714EC6F9B7D7
+- EntityRecord.cs=0AA24E6A9776657536942B614575EFCCDF3FC01811414C861FF1A4EFB864B5E9
+- PlayerRegistry_Patch.cs=13E6A7DC2B5E7E538231C963AEB2DFC75D171BAE8F18395683967E0E2970024C
+- CreatureRegistry_Patch.cs=A7ED4A9C9C759942A71C6AFC6DE4F6CA27F8AA3CBD3FD08D083EEF2E57141CBA
+- AimTargetRegistry.cs=482EEDFFEDC49A670F68A07DBF43792F7CE83C29B67FD0F4556A547FE91C3837
+- entity_registry_test.py=CF1479D290A41329B9E66BCD891B376C42D8F9EBA3F2C797E645241B9D110F7C
+
+DIFF
+LINES=591
+SHA256=9051E37940C567A38CBC1515788BF6C9D16FAC6E32B26A7F8B261173C3EB9A33
+
+PLAN_MARK
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+RESULT=Task 3 marked complete with evidence path.
+
+DEPLOYMENT
+RESULT=NOT_DEPLOYED_GATE_A_IN_PROGRESS
+DEPLOYED_DLL_UNCHANGED_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+
+GIT
+RESULT=SKIPPED_NOT_A_GIT_REPOSITORY

@@ -1,0 +1,175 @@
+=== HowToFishMagicBullet.ProjectileTracker::Register RVA=0x3AAC ===
+IL_000C: newobj       .ctor
+IL_0011: stloc.0      
+IL_0012: ldloc.0      
+IL_0013: ldarg.0      
+IL_0014: stfld        projectile
+IL_0019: ldloc.0      
+IL_001A: ldarg.1      
+IL_001B: stfld        target
+IL_0020: ldloc.0      
+IL_0021: ldfld        projectile
+IL_0026: brfalse.s    54
+IL_0028: ldloc.0      
+IL_0029: ldfld        target
+IL_002E: ldnull       
+IL_002F: call         UnityEngine.Object::op_Equality
+IL_0034: brfalse.s    55
+IL_0036: ret          
+IL_0037: ldsfld       _projectileToTarget
+IL_003C: stloc.1      
+IL_003D: ldc.i4.0     
+IL_003E: stloc.2      
+IL_003F: ldloc.1      
+IL_0040: ldloca.s     local(0x0002)
+IL_0042: call         System.Threading.Monitor::Enter
+IL_0047: ldsfld       _projectileToTarget
+IL_004C: ldloc.0      
+IL_004D: ldfld        projectile
+IL_0052: ldloc.0      
+IL_0053: ldfld        target
+IL_0058: callvirt     ::set_Item
+IL_005D: ldsfld       _idToTarget
+IL_0062: ldloc.0      
+IL_0063: ldfld        projectile
+IL_0068: ldfld        Projectile::Id
+IL_006D: ldloc.0      
+IL_006E: ldfld        target
+IL_0073: callvirt     ::set_Item
+IL_0078: leave.s      132
+IL_007A: ldloc.2      
+IL_007B: brfalse.s    131
+IL_007D: ldloc.1      
+IL_007E: call         System.Threading.Monitor::Exit
+IL_0083: endfinally   
+IL_0084: ldloc.0      
+IL_0085: ldftn        <Register>b__0
+IL_008B: newobj       ::.ctor
+IL_0090: call         Debug
+IL_0095: ret          
+=== HowToFishMagicBullet.ProjectileTracker::TryGetTarget RVA=0x3B54 ===
+IL_000C: ldarg.1      
+IL_000D: ldnull       
+IL_000E: stind.ref    
+IL_000F: ldarg.0      
+IL_0010: brtrue.s     20
+IL_0012: ldc.i4.0     
+IL_0013: ret          
+IL_0014: ldsfld       _projectileToTarget
+IL_0019: stloc.0      
+IL_001A: ldc.i4.0     
+IL_001B: stloc.1      
+IL_001C: ldloc.0      
+IL_001D: ldloca.s     local(0x0001)
+IL_001F: call         System.Threading.Monitor::Enter
+IL_0024: ldsfld       _projectileToTarget
+IL_0029: ldarg.0      
+IL_002A: ldarg.1      
+IL_002B: callvirt     ::TryGetValue
+IL_0030: brfalse.s    82
+IL_0032: ldarg.1      
+IL_0033: ldind.ref    
+IL_0034: ldnull       
+IL_0035: call         UnityEngine.Object::op_Inequality
+IL_003A: brfalse.s    82
+IL_003C: ldarg.1      
+IL_003D: ldind.ref    
+IL_003E: callvirt     Creature::get_IsDead
+IL_0043: brtrue.s     82
+IL_0045: ldarg.1      
+IL_0046: ldind.ref    
+IL_0047: callvirt     Item::get_IsDestroying
+IL_004C: brtrue.s     82
+IL_004E: ldc.i4.1     
+IL_004F: stloc.2      
+IL_0050: leave.s      147
+IL_0052: ldsfld       _idToTarget
+IL_0057: ldarg.0      
+IL_0058: ldfld        Projectile::Id
+IL_005D: ldarg.1      
+IL_005E: callvirt     ::TryGetValue
+IL_0063: brfalse.s    133
+IL_0065: ldarg.1      
+IL_0066: ldind.ref    
+IL_0067: ldnull       
+IL_0068: call         UnityEngine.Object::op_Inequality
+IL_006D: brfalse.s    133
+IL_006F: ldarg.1      
+IL_0070: ldind.ref    
+IL_0071: callvirt     Creature::get_IsDead
+IL_0076: brtrue.s     133
+IL_0078: ldarg.1      
+IL_0079: ldind.ref    
+IL_007A: callvirt     Item::get_IsDestroying
+IL_007F: brtrue.s     133
+IL_0081: ldc.i4.1     
+IL_0082: stloc.2      
+IL_0083: leave.s      147
+IL_0085: leave.s      145
+IL_0087: ldloc.1      
+IL_0088: brfalse.s    144
+IL_008A: ldloc.0      
+IL_008B: call         System.Threading.Monitor::Exit
+IL_0090: endfinally   
+IL_0091: ldc.i4.0     
+IL_0092: ret          
+IL_0093: ldloc.2      
+IL_0094: ret          
+=== HowToFishMagicBullet.ProjectileTracker::Unregister RVA=0x3BFC ===
+IL_000C: newobj       .ctor
+IL_0011: stloc.0      
+IL_0012: ldloc.0      
+IL_0013: ldarg.0      
+IL_0014: stfld        projectile
+IL_0019: ldloc.0      
+IL_001A: ldfld        projectile
+IL_001F: brtrue.s     34
+IL_0021: ret          
+IL_0022: ldsfld       _projectileToTarget
+IL_0027: stloc.1      
+IL_0028: ldc.i4.0     
+IL_0029: stloc.2      
+IL_002A: ldloc.1      
+IL_002B: ldloca.s     local(0x0002)
+IL_002D: call         System.Threading.Monitor::Enter
+IL_0032: ldsfld       _projectileToTarget
+IL_0037: ldloc.0      
+IL_0038: ldfld        projectile
+IL_003D: callvirt     ::Remove
+IL_0042: pop          
+IL_0043: ldsfld       _idToTarget
+IL_0048: ldloc.0      
+IL_0049: ldfld        projectile
+IL_004E: ldfld        Projectile::Id
+IL_0053: callvirt     ::Remove
+IL_0058: pop          
+IL_0059: leave.s      101
+IL_005B: ldloc.2      
+IL_005C: brfalse.s    100
+IL_005E: ldloc.1      
+IL_005F: call         System.Threading.Monitor::Exit
+IL_0064: endfinally   
+IL_0065: ldloc.0      
+IL_0066: ldftn        <Unregister>b__0
+IL_006C: newobj       ::.ctor
+IL_0071: call         Debug
+IL_0076: ret          
+=== HowToFishMagicBullet.ProjectileTracker::Clear RVA=0x3C84 ===
+IL_000C: ldsfld       _projectileToTarget
+IL_0011: stloc.0      
+IL_0012: ldc.i4.0     
+IL_0013: stloc.1      
+IL_0014: ldloc.0      
+IL_0015: ldloca.s     local(0x0001)
+IL_0017: call         System.Threading.Monitor::Enter
+IL_001C: ldsfld       _projectileToTarget
+IL_0021: callvirt     ::Clear
+IL_0026: ldsfld       _idToTarget
+IL_002B: callvirt     ::Clear
+IL_0030: leave.s      60
+IL_0032: ldloc.1      
+IL_0033: brfalse.s    59
+IL_0035: ldloc.0      
+IL_0036: call         System.Threading.Monitor::Exit
+IL_003B: endfinally   
+IL_003C: ret          

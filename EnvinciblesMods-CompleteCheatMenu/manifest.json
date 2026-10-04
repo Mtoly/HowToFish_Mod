@@ -1,0 +1,9 @@
+{
+  "name": "CompleteCheatMenu",
+  "version_number": "0.6.1",
+  "website_url": "",
+  "description": "Complete cheat menu with a clean UI: god mode, flight, ESP, free camera, teleport, boats, items, every skin, money, bosses, baits, and a rigged roulette where the ball really lands on your colour. Press Insert.",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2305"
+  ]
+}

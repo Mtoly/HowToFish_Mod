@@ -1,0 +1,34 @@
+TASK9_MAGICBULLET_FLIGHT_VERIFICATION
+DATE=2026-09-05
+
+CHANGED_FIELDS:
+  CheatState.AimMagicBulletStyle=true (default)
+  Presets key=aimMagicBulletStyle
+  UI label=静默弹道模式
+
+BEHAVIOR:
+  When enabled, AddProjectile/AddProjectiles perform one-time velocity redirection before spawn.
+  ProjectileGuidance.Step performs lifecycle bookkeeping only and does not write Projectile.Velocity during flight.
+  When disabled, legacy continuous guidance remains available.
+
+BUILD:
+  CompleteCheatMenu.magicbullet-style.task9.dll SHA256=1C9E4204E71A5C340D0E128E3208816F90E95EEF1345C7BD95D26C4E3DA42741
+  CompleteCheatMenu.magicbullet-style.task9.zh-CN.dll SHA256=803A31D624C82170AD5D38283698985E84E5FD325F853CECCFFD22BBF6414851
+  BUILD_SOURCE_COUNT=97
+  EXIT_STATUS=0
+
+TESTS:
+  MAGIC_BULLET_STYLE_TESTS=PASS cases=6
+  MAGIC_BULLET_FLIGHT_MODE_TESTS=PASS cases=5
+  PROJECTILE_GUIDANCE_TESTS=PASS cases=5
+  PROJECTILE_GUIDANCE_STATE_TESTS=PASS cases=6
+  PROJECTILE_GUIDANCE_RESET_SPEC=PASS cases=5
+  PROJECTILE_LIFECYCLE_TESTS=PASS cases=5
+  PROJECTILE_TARGET_LIFECYCLE_TESTS=PASS cases=5
+  PROJECTILE_INITIAL_VELOCITY_TESTS=PASS cases=5
+  PROJECTILE_SPAWN_METADATA_TESTS=PASS cases=4
+  LOCALIZED_UI_PRESET_TESTS=PASS cases=9
+  EXIT_STATUS=0
+
+DEPLOYMENT:
+  Not deployed. Awaiting game runtime verification of the new silent one-time velocity mode.

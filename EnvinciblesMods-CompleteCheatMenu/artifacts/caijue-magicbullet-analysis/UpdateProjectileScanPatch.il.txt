@@ -1,0 +1,226 @@
+=== HowToFishMagicBullet.UpdateProjectileScanPatch::Prefix RVA=0x35B8 ===
+IL_000C: newobj       .ctor
+IL_0011: stloc.0      
+IL_0012: ldloc.0      
+IL_0013: ldarg.1      
+IL_0014: stfld        projectile
+IL_0019: call         get_Enabled
+IL_001E: brfalse.s    44
+IL_0020: call         get_Enabled
+IL_0025: callvirt     ::get_Value
+IL_002A: brtrue.s     46
+IL_002C: ldc.i4.1     
+IL_002D: ret          
+IL_002E: call         get_WallPenetration
+IL_0033: brfalse.s    72
+IL_0035: call         get_WallPenetration
+IL_003A: callvirt     ::get_Value
+IL_003F: brfalse.s    72
+IL_0041: call         get_WallPenetrationSupported
+IL_0046: brtrue.s     74
+IL_0048: ldc.i4.1     
+IL_0049: ret          
+IL_004A: ldloc.0      
+IL_004B: ldfld        projectile
+IL_0050: brfalse.s    137
+IL_0052: ldloc.0      
+IL_0053: ldfld        projectile
+IL_0058: ldfld        Projectile::IsLocal
+IL_005D: brfalse.s    137
+IL_005F: ldloc.0      
+IL_0060: ldfld        projectile
+IL_0065: ldfld        Projectile::Owner
+IL_006A: ldnull       
+IL_006B: call         UnityEngine.Object::op_Equality
+IL_0070: brtrue.s     137
+IL_0072: ldloc.0      
+IL_0073: ldfld        projectile
+IL_0078: ldfld        Projectile::Owner
+IL_007D: ldsfld       Player::LocalPlayer
+IL_0082: call         UnityEngine.Object::op_Inequality
+IL_0087: brfalse.s    139
+IL_0089: ldc.i4.1     
+IL_008A: ret          
+IL_008B: ldloc.0      
+IL_008C: ldfld        projectile
+IL_0091: ldloc.0      
+IL_0092: ldflda       target
+IL_0097: call         TryGetTarget
+IL_009C: brtrue.s     160
+IL_009E: ldc.i4.1     
+IL_009F: ret          
+IL_00A0: ldarg.0      
+IL_00A1: call         GetCatchUpSpeed
+IL_00A6: stloc.1      
+IL_00A7: ldarg.0      
+IL_00A8: call         GetSqrMaxProjRange
+IL_00AD: stloc.2      
+IL_00AE: ldc.r4       1.0
+IL_00B3: ldloc.0      
+IL_00B4: ldfld        projectile
+IL_00B9: ldfld        Projectile::CatchingUpToDo
+IL_00BE: conv.r.un    
+IL_00BF: conv.r4      
+IL_00C0: ldloc.1      
+IL_00C1: mul          
+IL_00C2: add          
+IL_00C3: stloc.3      
+IL_00C4: ldloc.0      
+IL_00C5: ldfld        projectile
+IL_00CA: ldfld        Projectile::Owner
+IL_00CF: call         UnityEngine.Object::op_Implicit
+IL_00D4: brfalse.s    263
+IL_00D6: ldloc.0      
+IL_00D7: ldfld        projectile
+IL_00DC: ldfld        Projectile::Position
+IL_00E1: ldloc.0      
+IL_00E2: ldfld        projectile
+IL_00E7: ldfld        Projectile::Owner
+IL_00EC: callvirt     Player::get_Transform
+IL_00F1: callvirt     UnityEngine.Transform::get_position
+IL_00F6: call         UnityEngine.Vector3::op_Subtraction
+IL_00FB: stloc.s      local(0x0007)
+IL_00FD: ldloca.s     local(0x0007)
+IL_00FF: call         UnityEngine.Vector3::get_sqrMagnitude
+IL_0104: ldloc.2      
+IL_0105: ble.un.s     277
+IL_0107: ldarg.0      
+IL_0108: ldloc.0      
+IL_0109: ldfld        projectile
+IL_010E: call         CallAddToRemoveQueue
+IL_0113: ldc.i4.0     
+IL_0114: ret          
+IL_0115: ldloc.0      
+IL_0116: ldfld        projectile
+IL_011B: ldflda       Projectile::Position
+IL_0120: ldfld        UnityEngine.Vector3::y
+IL_0125: call         WaterManager::get_WaterHeight
+IL_012A: ldc.r4       0.5
+IL_012F: sub          
+IL_0130: bge.un.s     332
+IL_0132: ldarg.0      
+IL_0133: ldloc.0      
+IL_0134: ldfld        projectile
+IL_0139: call         CallAddToRemoveQueue
+IL_013E: ldarg.0      
+IL_013F: ldloc.0      
+IL_0140: ldfld        projectile
+IL_0145: call         CallHitWater
+IL_014A: ldc.i4.0     
+IL_014B: ret          
+IL_014C: ldloc.0      
+IL_014D: ldfld        projectile
+IL_0152: ldflda       Projectile::Velocity
+IL_0157: call         UnityEngine.Vector3::get_magnitude
+IL_015C: ldloc.3      
+IL_015D: mul          
+IL_015E: call         UnityEngine.Time::get_fixedDeltaTime
+IL_0163: mul          
+IL_0164: stloc.s      local(0x0004)
+IL_0166: call         GameInfo::get_ProjectileHitLayer
+IL_016B: stloc.s      local(0x0005)
+IL_016D: ldloc.0      
+IL_016E: ldfld        projectile
+IL_0173: ldfld        Projectile::Position
+IL_0178: ldarg.2      
+IL_0179: ldfld        ProjectileType::WidthRadius
+IL_017E: ldloc.0      
+IL_017F: ldfld        projectile
+IL_0184: ldfld        Projectile::Velocity
+IL_0189: ldloc.s      local(0x0004)
+IL_018B: ldloc.s      local(0x0005)
+IL_018D: call         UnityEngine.LayerMask::op_Implicit
+IL_0192: call         UnityEngine.Physics::SphereCastAll
+IL_0197: stloc.s      local(0x0006)
+IL_0199: ldloc.s      local(0x0006)
+IL_019B: brfalse      672
+IL_01A0: ldloc.s      local(0x0006)
+IL_01A2: ldlen        
+IL_01A3: brfalse      672
+IL_01A8: ldloc.s      local(0x0006)
+IL_01AA: ldsfld       <>9__0_0
+IL_01AF: dup          
+IL_01B0: brtrue.s     457
+IL_01B2: pop          
+IL_01B3: ldsfld       <>9
+IL_01B8: ldftn        <Prefix>b__0_0
+IL_01BE: newobj       ::.ctor
+IL_01C3: dup          
+IL_01C4: stsfld       <>9__0_0
+IL_01C9: call         <dnfile.mdtable.MethodSpecRow object at 0x0000024F01C14E20>
+IL_01CE: ldc.i4.0     
+IL_01CF: stloc.s      local(0x0008)
+IL_01D1: br           642
+IL_01D6: ldloc.s      local(0x0006)
+IL_01D8: ldloc.s      local(0x0008)
+IL_01DA: ldelem       <dnfile.mdtable.TypeRefRow object at 0x0000024F7FF96200>
+IL_01DF: stloc.s      local(0x0009)
+IL_01E1: ldloca.s     local(0x0009)
+IL_01E3: call         UnityEngine.RaycastHit::get_collider
+IL_01E8: call         UnityEngine.Object::op_Implicit
+IL_01ED: brfalse      636
+IL_01F2: ldloca.s     local(0x0009)
+IL_01F4: call         UnityEngine.RaycastHit::get_collider
+IL_01F9: call         ItemManager::Get
+IL_01FE: stloc.s      local(0x000A)
+IL_0200: ldloc.s      local(0x000A)
+IL_0202: ldnull       
+IL_0203: call         UnityEngine.Object::op_Inequality
+IL_0208: brfalse.s    537
+IL_020A: ldloc.s      local(0x000A)
+IL_020C: ldloc.0      
+IL_020D: ldfld        target
+IL_0212: call         UnityEngine.Object::op_Equality
+IL_0217: brtrue.s     567
+IL_0219: ldloca.s     local(0x0009)
+IL_021B: call         UnityEngine.RaycastHit::get_collider
+IL_0220: callvirt     UnityEngine.Component::get_transform
+IL_0225: ldloc.0      
+IL_0226: ldfld        target
+IL_022B: callvirt     UnityEngine.Component::get_transform
+IL_0230: callvirt     UnityEngine.Transform::IsChildOf
+IL_0235: br.s         568
+IL_0237: ldc.i4.1     
+IL_0238: brfalse.s    636
+IL_023A: ldloc.0      
+IL_023B: ldfld        <>9__2
+IL_0240: dup          
+IL_0241: brtrue.s     603
+IL_0243: pop          
+IL_0244: ldloc.0      
+IL_0245: ldloc.0      
+IL_0246: ldftn        <Prefix>b__2
+IL_024C: newobj       ::.ctor
+IL_0251: dup          
+IL_0252: stloc.s      local(0x000B)
+IL_0254: stfld        <>9__2
+IL_0259: ldloc.s      local(0x000B)
+IL_025B: call         Debug
+IL_0260: ldloc.0      
+IL_0261: ldfld        projectile
+IL_0266: call         Unregister
+IL_026B: ldarg.0      
+IL_026C: ldloc.0      
+IL_026D: ldfld        projectile
+IL_0272: ldarg.2      
+IL_0273: ldloc.s      local(0x0009)
+IL_0275: call         CallHit
+IL_027A: ldc.i4.0     
+IL_027B: ret          
+IL_027C: ldloc.s      local(0x0008)
+IL_027E: ldc.i4.1     
+IL_027F: add          
+IL_0280: stloc.s      local(0x0008)
+IL_0282: ldloc.s      local(0x0008)
+IL_0284: ldloc.s      local(0x0006)
+IL_0286: ldlen        
+IL_0287: conv.i4      
+IL_0288: blt          470
+IL_028D: ldloc.0      
+IL_028E: ldftn        <Prefix>b__1
+IL_0294: newobj       ::.ctor
+IL_0299: call         Debug
+IL_029E: ldc.i4.0     
+IL_029F: ret          
+IL_02A0: ldc.i4.0     
+IL_02A1: ret          

@@ -1,0 +1,76 @@
+=== HowToFishMagicBullet.WeaponShootPatch::Prefix RVA=0x3244 ===
+IL_000C: newobj       .ctor
+IL_0011: stloc.0      
+IL_0012: ldloc.0      
+IL_0013: ldarg.0      
+IL_0014: stfld        __instance
+IL_0019: call         get_Enabled
+IL_001E: brfalse.s    44
+IL_0020: call         get_Enabled
+IL_0025: callvirt     ::get_Value
+IL_002A: brtrue.s     45
+IL_002C: ret          
+IL_002D: ldloc.0      
+IL_002E: ldfld        __instance
+IL_0033: ldnull       
+IL_0034: call         UnityEngine.Object::op_Equality
+IL_0039: brtrue.s     112
+IL_003B: ldloc.0      
+IL_003C: ldfld        __instance
+IL_0041: callvirt     Item::get_Holder
+IL_0046: call         UnityEngine.Object::op_Implicit
+IL_004B: brfalse.s    112
+IL_004D: ldsfld       Player::LocalPlayer
+IL_0052: call         UnityEngine.Object::op_Implicit
+IL_0057: brfalse.s    112
+IL_0059: ldloc.0      
+IL_005A: ldfld        __instance
+IL_005F: callvirt     Item::get_Holder
+IL_0064: ldsfld       Player::LocalPlayer
+IL_0069: call         UnityEngine.Object::op_Inequality
+IL_006E: brfalse.s    113
+IL_0070: ret          
+IL_0071: ldloc.0      
+IL_0072: ldfld        __instance
+IL_0077: callvirt     Item::get_Holder
+IL_007C: callvirt     FishNet.Object.NetworkBehaviour::get_Owner
+IL_0081: ldnull       
+IL_0082: call         FishNet.Connection.NetworkConnection::op_Equality
+IL_0087: brtrue.s     160
+IL_0089: ldloc.0      
+IL_008A: ldfld        __instance
+IL_008F: callvirt     Item::get_Holder
+IL_0094: callvirt     FishNet.Object.NetworkBehaviour::get_Owner
+IL_0099: callvirt     FishNet.Connection.NetworkConnection::get_IsLocalClient
+IL_009E: brtrue.s     161
+IL_00A0: ret          
+IL_00A1: call         UpdateLiveTargeting
+IL_00A6: ldloc.0      
+IL_00A7: call         get_CurrentTarget
+IL_00AC: stfld        target
+IL_00B1: ldloc.0      
+IL_00B2: ldfld        __instance
+IL_00B7: ldloc.0      
+IL_00B8: ldfld        target
+IL_00BD: call         Begin
+IL_00C2: ldloc.0      
+IL_00C3: ldftn        <Prefix>b__0
+IL_00C9: newobj       ::.ctor
+IL_00CE: call         Debug
+IL_00D3: ret          
+=== HowToFishMagicBullet.WeaponShootPatch::Finalizer RVA=0x3318 ===
+IL_0001: call         get_IsActive
+IL_0006: brfalse.s    49
+IL_0008: call         End
+IL_000D: ldsfld       <>9__1_0
+IL_0012: dup          
+IL_0013: brtrue.s     44
+IL_0015: pop          
+IL_0016: ldsfld       <>9
+IL_001B: ldftn        <Finalizer>b__1_0
+IL_0021: newobj       ::.ctor
+IL_0026: dup          
+IL_0027: stsfld       <>9__1_0
+IL_002C: call         Debug
+IL_0031: ldarg.0      
+IL_0032: ret          

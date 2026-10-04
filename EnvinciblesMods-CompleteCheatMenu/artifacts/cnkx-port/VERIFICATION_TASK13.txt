@@ -1,0 +1,166 @@
+CompleteCheatMenu cnKX port - Task 13 verification
+DATE=2026-08-25
+TASK=补齐中文 UI、预设和诊断
+STATUS=COMPLETE
+
+CHANGED_BRANCH_OR_FIELD
+- AimTargetMode: Creatures / Players / CreaturesAndPlayers 三种互斥目标模式，替代 AimAtCreatures/AimAtPlayers 冲突布尔值。
+- TargetingSystem: 统一消费 AimTargetsCreatures/AimTargetsPlayers 枚举派生状态。
+- WeaponsTab: 接入瞬击、预测、速度采样、传送过滤、最大目标速度、追踪概率、可见拉枪、距离下调和后坐补偿中文控件。
+- VisualsTab: 接入 EspRendererV2 全部主要绘制开关和中文说明。
+- MenuWindow: 19 个页面标题直接使用中文，配置节名称继续保持稳定。
+- Presets: 保存/读取 Task 5-12 新增设置；旧 aimAtCreatures/aimAtPlayers 迁移到 AimTargetMode，新字段优先。
+- DiagnosticsTab: 显示实体注册数量、Weapon._projSpeed、Animator.GetBoneTransform、Renderer.bounds、Weapon.Shoot -> FirePoint。
+- localize_dll.py: 默认输入 artifacts/CompleteCheatMenu.dll；验证 EspRendererV2/WeaponStateStore/VisibleAimController 类型标记；报告输出到目标 DLL 同目录。
+- UTF8: WeaponsTab/VisualsTab/DiagnosticsTab/MenuWindow replacement_chars=0。
+
+ARTIFACTS
+- MODIFIED_FILE_1: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\UI\Tabs\VisualsTab.cs
+- MODIFIED_FILE_2: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\UI\Tabs\WeaponsTab.cs
+- MODIFIED_FILE_3: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\UI\Tabs\DiagnosticsTab.cs
+- MODIFIED_FILE_4: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\UI\MenuWindow.cs
+- MODIFIED_FILE_5: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\Presets.cs
+- MODIFIED_FILE_6: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\CheatState.cs
+- MODIFIED_FILE_7: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\TargetingSystem.cs
+- MODIFIED_FILE_8: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tools\localize_dll.py
+- TEST_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\localized_ui_preset_test.py
+- MODIFIED_DLL: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\CompleteCheatMenu.dll
+- LOCALIZED_TEST_DLL: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task13-localized-test.dll
+- LOCALIZATION_REPORT: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task13-localized-test.localization.diff.json
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task13-localized-ui-presets.diff
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK13.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK13.sh
+- WINDOWS_ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK13.ps1
+- ORIGINAL_SOURCE_DIR: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task13-original-src
+
+RED_TEST
+COMMAND=python .\tests\localized_ui_preset_test.py
+INPUT=测试已创建；AimTargetMode、完整中文控件和新增预设字段尚不存在
+LITERAL_OUTPUT=AssertionError: internal enum AimTargetMode missing
+LITERAL_OUTPUT=RED_EXIT=1
+EXIT_STATUS=1
+
+BASELINE
+COMMAND=Get-FileHash -Algorithm SHA256 .\artifacts\CompleteCheatMenu.dll
+INPUT=Task 12 完成版程序集
+LITERAL_OUTPUT=SHA256 AE61F50BD3CF025F356D8395DB5E071B3155B28C8949CB6C077B73DE13D1C108
+EXIT_STATUS=0
+
+MODIFIED_LOCALIZED_UI_PRESET_TEST
+COMMAND=python .\tests\localized_ui_preset_test.py
+INPUT=互斥目标枚举、新功能中文控件、全部新增预设键、旧预设迁移、诊断入口、UTF-8 和汉化器输入保护
+LITERAL_OUTPUT=LOCALIZED_UI_PRESET_TESTS=PASS cases=8
+EXIT_STATUS=0
+OBSERVED_RESULT=新功能均有中文控件；Task 5-12 新设置均有保存与读取分支；旧目标布尔字段兼容迁移；19 个菜单标题为中文。
+
+REGRESSION_TESTS
+COMMAND=python .\tests\esp_projection_test.py
+LITERAL_OUTPUT=ESP_PROJECTION_TESTS=PASS cases=8
+EXIT_STATUS=0
+COMMAND=python .\tests\weapon_restore_test.py
+LITERAL_OUTPUT=WEAPON_RESTORE_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\visible_aim_test.py
+LITERAL_OUTPUT=VISIBLE_AIM_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\tracking_probability_test.py
+LITERAL_OUTPUT=TRACKING_PROBABILITY_TESTS=PASS cases=6
+EXIT_STATUS=0
+COMMAND=python .\tests\ballistic_prediction_test.py
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\target_lock_test.py
+LITERAL_OUTPUT=TARGET_LOCK_TESTS=PASS cases=8
+EXIT_STATUS=0
+COMMAND=python .\tests\bone_selection_test.py
+LITERAL_OUTPUT=BONE_SELECTION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\targeting_math_test.py
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=PASS cases=10
+EXIT_STATUS=0
+COMMAND=python .\tests\snapshot_isolation_test.py
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\entity_registry_test.py
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+EXIT_STATUS=0
+COMMAND=python .\tests\aim_scoring_test.py
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Task 3-12 的实体注册、快照、评分、骨骼、可见性、预测、追踪、拉枪、武器恢复与 ESP 行为全部继续通过。
+
+MODIFIED_BUILD
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File .\decompiled-src\build.ps1
+INPUT=互斥目标枚举、中文 UI、完整预设和诊断入口
+LITERAL_OUTPUT=0 compiler errors
+LITERAL_OUTPUT=BUILD_EXIT=0
+LITERAL_OUTPUT=MODIFIED_DLL_SHA256=AB57B01D8326EC3472CA8AC306EB1D434A4B046A819EFC07D456DC36A2498391
+EXIT_STATUS=0
+
+LOCALIZER_RUN
+COMMAND=python .\tools\localize_dll.py .\artifacts\CompleteCheatMenu.dll .\artifacts\cnkx-port\task13-localized-test.dll
+INPUT=Task 13 当前开发程序集
+LITERAL_OUTPUT={"changed": 268, "source_sha256": "ab57b01d8326ec3472ca8ac306eb1d434a4b046a819efc07d456dc36a2498391", "modified_sha256": "58faa72aea4d9816742af2dfe0be57814f6bcd58d43ada194da79265ff62bcba"}
+EXIT_STATUS=0
+
+ASSEMBLY_TYPE_CHECK
+COMMAND=dnfile TypeDef inspection on artifacts\CompleteCheatMenu.dll
+LITERAL_OUTPUT=TYPE_EspRendererV2=True
+LITERAL_OUTPUT=TYPE_WeaponStateStore=True
+LITERAL_OUTPUT=TYPE_VisibleAimController=True
+LITERAL_OUTPUT=TYPE_AimTargetMode=True
+EXIT_STATUS=0
+
+CODE_REVIEW
+COMMAND=requesting-code-review agent review of Task 13
+LITERAL_RESULT=预测参数 UI、汉化器旧 DLL 输入、菜单标题英文和骨骼诊断误报问题已修正；预设漏项与新旧字段优先级已复核。
+EXIT_STATUS=0
+
+ROLLBACK_POWERSHELL
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK13.ps1 -DestinationRoot .\artifacts\cnkx-port\rollback-task13-test-20260825a
+INPUT=包含全部 Task 13 修改文件的独立目录
+LITERAL_OUTPUT=VisualsTab.cs_SHA256=B90A3BCF72CF6E4D7F06C2BAC706510BC53E82B6277133664759301D232DC1B9
+LITERAL_OUTPUT=WeaponsTab.cs_SHA256=19D9977FC059932195AD42BF5EBC1A850312AC946B039B16C34E45EA9D9324D3
+LITERAL_OUTPUT=DiagnosticsTab.cs_SHA256=299F27FEFF318127AE522704E0CF9203401FB97D6290D996EC43151E55811228
+LITERAL_OUTPUT=MenuWindow.cs_SHA256=E748C37B3CC8FE8C69FF0D35FEA595D7FD3B0D9387565A7AE20D60315FEBDF90
+LITERAL_OUTPUT=Presets.cs_SHA256=46558DFB351DFC7B7D466706238A79B1A2D6BCD353FD0E2ED0BB57D34711688C
+LITERAL_OUTPUT=CheatState.cs_SHA256=1D1C0F4A86F8E5372958E5892C2B09864312A32705802E6D858E2261A6520F19
+LITERAL_OUTPUT=TargetingSystem.cs_SHA256=DA694AE460A3D6663D5AB1CE311D0F40C657D157518C46A92603EF058386566D
+LITERAL_OUTPUT=localize_dll.py_SHA256=C0AF213B0BDA2B4DB59FA2BE3974C99BA61A6B569E19BB8C5CAAB0539A32EA8A
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+
+ROLLBACK_BASH
+COMMAND=ROLLBACK_TASK13.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-task13-test-sh-20260825a
+INPUT=第二个独立修改副本
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=两个独立目录恢复到 Task 12 字节；工作目录继续保留 Task 13 修改版。
+
+MODIFIED_SOURCE_HASHES
+- VisualsTab.cs=B4F66579791C79EED4FADF0B4081573AC4CACDF882C4DE6A55B523E60EBD8C65
+- WeaponsTab.cs=EEAF2525C3757A85F99EBD1EB046BAF7760C3DF643C90B541B3B49CA7E1AEDE8
+- DiagnosticsTab.cs=DD3AB0333060D5B1059B4E4A9DC62CEEAF80CE6DC530C176CE0C5E5C4A065597
+- MenuWindow.cs=9AD8ECD66F238FE6DF2F0E3C5A21BC95F49F35EFBCE559900DF59CC53BB09472
+- Presets.cs=9D7130C6E13C1B0B01F74194B4156AF9CA5922C9DBBA4EDAFC69693930FED58C
+- CheatState.cs=D962540F4AFE39BC899BA49A4D13C5D96C60C8C0298201BBA6B9B9E22A153034
+- TargetingSystem.cs=ED2DEED55563B711FB67EB4AB18449483ACF8DE2FB6523E1653E812ABA76DE26
+- localize_dll.py=4F6A52F91D161F03AD26FEFB2E1363CD864F52F8F5457D4EB577FFF84D36C6FF
+- localized_ui_preset_test.py=2029F9F7D3ED14A267812E3C98A875B218070F5C67B2E9573AAA791F00484DE1
+
+DIFF
+LINES=1005
+SHA256=2FC9946BD4A79733BB9CBC9D35DEA178E4A8AFBA2CD853B376E92091F922FC22
+
+PLAN_MARK
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+RESULT=Task 13 marked complete with evidence path.
+
+DEPLOYMENT
+RESULT=NOT_DEPLOYED_GATE_A_IN_PROGRESS
+DEPLOYED_DLL_UNCHANGED_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+
+GIT
+RESULT=SKIPPED_NOT_A_GIT_REPOSITORY

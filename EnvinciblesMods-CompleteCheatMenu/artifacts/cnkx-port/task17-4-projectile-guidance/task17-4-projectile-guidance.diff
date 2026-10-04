@@ -1,0 +1,871 @@
+--- a/decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
++++ b/decompiled-src/CompleteCheatMenu/Runtime/CheatState.cs
+@@ -93,6 +93,8 @@
+ 
+ 	internal static bool AimPrediction;
+ 
++	internal static float AimMaxPredictionTime = 2f;
++
+ 	internal static float AimVelocityMinInterval = 0.02f;
+ 
+ 	internal static float AimTeleportDistance = 25f;
+@@ -104,6 +106,12 @@
+ 	internal static float AimGravityScale = 1f;
+ 
+ 	internal static float AimTrackingChance = 100f;
++
++	internal static float AimProjectileTrackingTime = 3f;
++
++	internal static float AimProjectileUpdateInterval = 0.02f;
++
++	internal static float AimProjectileTurnSpeed = 720f;
+ 
+ 	internal static bool AimTrackingDiagnostics;
+ 
+--- a/decompiled-src/CompleteCheatMenu/Runtime/Presets.cs
++++ b/decompiled-src/CompleteCheatMenu/Runtime/Presets.cs
+@@ -77,12 +77,16 @@
+ 				F("aimLockDuration", CheatState.AimLockDuration),
+ 				F("aimSwitchPenalty", CheatState.AimSwitchPenalty),
+ 				B("aimPrediction", CheatState.AimPrediction),
++				F("aimMaxPredictionTime", CheatState.AimMaxPredictionTime),
+ 				F("aimVelocityMinInterval", CheatState.AimVelocityMinInterval),
+ 				F("aimTeleportDistance", CheatState.AimTeleportDistance),
+ 				F("aimMaxTargetSpeed", CheatState.AimMaxTargetSpeed),
+ 				B("aimGravityCompensation", CheatState.AimGravityCompensation),
+ 				F("aimGravityScale", CheatState.AimGravityScale),
+ 				F("aimTrackingChance", CheatState.AimTrackingChance),
++				F("aimProjectileTrackingTime", CheatState.AimProjectileTrackingTime),
++				F("aimProjectileUpdateInterval", CheatState.AimProjectileUpdateInterval),
++				F("aimProjectileTurnSpeed", CheatState.AimProjectileTurnSpeed),
+ 				B("aimTrackingDiagnostics", CheatState.AimTrackingDiagnostics),
+ 				B("aimVisibleAssist", CheatState.AimVisibleAssist),
+ 				F("aimVisibleResponse", CheatState.AimVisibleResponse),
+@@ -212,12 +216,16 @@
+ 				case "aimLockDuration": if (TryFloat(text3, out var aimLockDuration)) CheatState.AimLockDuration = aimLockDuration; break;
+ 				case "aimSwitchPenalty": if (TryFloat(text3, out var aimSwitchPenalty)) CheatState.AimSwitchPenalty = aimSwitchPenalty; break;
+ 				case "aimPrediction": CheatState.AimPrediction = text3 == "1"; break;
++				case "aimMaxPredictionTime": if (TryFloat(text3, out var aimMaxPredictionTime)) CheatState.AimMaxPredictionTime = aimMaxPredictionTime; break;
+ 				case "aimVelocityMinInterval": if (TryFloat(text3, out var aimVelocityMinInterval)) CheatState.AimVelocityMinInterval = aimVelocityMinInterval; break;
+ 				case "aimTeleportDistance": if (TryFloat(text3, out var aimTeleportDistance)) CheatState.AimTeleportDistance = aimTeleportDistance; break;
+ 				case "aimMaxTargetSpeed": if (TryFloat(text3, out var aimMaxTargetSpeed)) CheatState.AimMaxTargetSpeed = aimMaxTargetSpeed; break;
+ 				case "aimGravityCompensation": CheatState.AimGravityCompensation = text3 == "1"; break;
+ 				case "aimGravityScale": if (TryFloat(text3, out var aimGravityScale)) CheatState.AimGravityScale = aimGravityScale; break;
+ 				case "aimTrackingChance": if (TryFloat(text3, out var aimTrackingChance)) CheatState.AimTrackingChance = aimTrackingChance; break;
++				case "aimProjectileTrackingTime": if (TryFloat(text3, out var aimProjectileTrackingTime)) CheatState.AimProjectileTrackingTime = aimProjectileTrackingTime; break;
++				case "aimProjectileUpdateInterval": if (TryFloat(text3, out var aimProjectileUpdateInterval)) CheatState.AimProjectileUpdateInterval = aimProjectileUpdateInterval; break;
++				case "aimProjectileTurnSpeed": if (TryFloat(text3, out var aimProjectileTurnSpeed)) CheatState.AimProjectileTurnSpeed = aimProjectileTurnSpeed; break;
+ 				case "aimTrackingDiagnostics": CheatState.AimTrackingDiagnostics = text3 == "1"; break;
+ 				case "aimVisibleAssist": CheatState.AimVisibleAssist = text3 == "1"; break;
+ 				case "aimVisibleResponse": if (TryFloat(text3, out var aimVisibleResponse)) CheatState.AimVisibleResponse = aimVisibleResponse; break;
+--- a/decompiled-src/CompleteCheatMenu/UI/Tabs/WeaponsTab.cs
++++ b/decompiled-src/CompleteCheatMenu/UI/Tabs/WeaponsTab.cs
+@@ -101,6 +101,7 @@
+ 		CheatState.AimPrediction = Widgets.ToggleRow("弹道预测", CheatState.AimPrediction, OnOff(CheatState.AimPrediction));
+ 		if (CheatState.AimPrediction)
+ 		{
++			CheatState.AimMaxPredictionTime = Widgets.SliderRow("最大预测时间", CheatState.AimMaxPredictionTime, 0.1f, 5f, "0.##", 2f);
+ 			CheatState.AimVelocityMinInterval = Widgets.SliderRow("速度采样最小间隔", CheatState.AimVelocityMinInterval, 0.005f, 0.2f, "0.###", 0.02f);
+ 			CheatState.AimTeleportDistance = Widgets.SliderRow("传送距离阈值", CheatState.AimTeleportDistance, 1f, 100f, "0.#", 25f);
+ 			CheatState.AimMaxTargetSpeed = Widgets.SliderRow("目标最大速度", CheatState.AimMaxTargetSpeed, 10f, 500f, "0", 250f);
+@@ -108,6 +109,10 @@
+ 			if (CheatState.AimGravityCompensation) CheatState.AimGravityScale = Widgets.SliderRow("重力补偿倍率", CheatState.AimGravityScale, 0f, 3f, "0.##", 1f);
+ 		}
+ 		CheatState.AimTrackingChance = Widgets.SliderRow("追踪概率（百分比）", CheatState.AimTrackingChance, 0f, 100f, "0", 100f);
++		CheatState.AimProjectileTrackingTime = Widgets.SliderRow("弹丸追踪时长", CheatState.AimProjectileTrackingTime, 0f, 10f, "0.##", 3f);
++		CheatState.AimProjectileUpdateInterval = Widgets.SliderRow("制导更新间隔", CheatState.AimProjectileUpdateInterval, 0f, 0.2f, "0.###", 0.02f);
++		CheatState.AimProjectileTurnSpeed = Widgets.SliderRow("最大转向速度", CheatState.AimProjectileTurnSpeed, 0f, 3600f, "0", 720f);
++		Widgets.Note("追踪时长为 0 时仅修正初始方向；最大转向速度为 0 时立即转向。制导不会在飞行中切换目标。");
+ 		CheatState.AimVisibleAssist = Widgets.ToggleRow("可见拉枪", CheatState.AimVisibleAssist, OnOff(CheatState.AimVisibleAssist));
+ 		if (CheatState.AimVisibleAssist)
+ 		{
+--- a/decompiled-src/CompleteCheatMenu/UI/Tabs/DiagnosticsTab.cs
++++ b/decompiled-src/CompleteCheatMenu/UI/Tabs/DiagnosticsTab.cs
+@@ -39,7 +39,8 @@
+ 			int containers = EntityRegistry.Containers.Count;
+ 			Line("目标注册", creatures + players + items + containers > 0, $"生物 {creatures} / 玩家 {players} / 物品 {items} / 容器 {containers}");
+ 			Line("弹速字段", GameBinder.Field("Weapon", "_projSpeed") != null, "Weapon._projSpeed");
+-			Line("弹丸生命周期绑定", ProjectileBindings.LifecycleAvailable, $"活动 {ProjectileTracker.ActiveCount} / 注册 {ProjectileTracker.RegisteredCount} / 清理 {ProjectileTracker.UnregisteredCount}");
++		Line("弹丸生命周期绑定", ProjectileBindings.LifecycleAvailable, $"活动 {ProjectileTracker.ActiveCount} / 注册 {ProjectileTracker.RegisteredCount} / 清理 {ProjectileTracker.UnregisteredCount}");
++		Line("飞行中制导绑定", ProjectileBindings.GuidanceAvailable, $"活动 {ProjectileGuidance.ActiveCount} / 更新 {ProjectileGuidance.GuidedUpdateCount} / 超时 {ProjectileGuidance.ExpiredCount} / 间隔跳过 {ProjectileGuidance.IntervalSkipCount}");
+ 			Line("人体骨骼接口", typeof(Animator).GetMethod("GetBoneTransform") != null, "Animator.GetBoneTransform");
+ 			Line("包围盒回退", typeof(Renderer).GetProperty("bounds") != null, "Renderer.bounds");
+ 			Line("开火追踪入口", GameBinder.Method("Weapon", "Shoot", 0) != null && GameBinder.Property("Attachments", "FirePoint") != null, "Weapon.Shoot → FirePoint");
+--- a/decompiled-src/CompleteCheatMenu/Plugin.cs
++++ b/decompiled-src/CompleteCheatMenu/Plugin.cs
+@@ -73,6 +73,7 @@
+ 	{
+ 		SafeRun(MagicShotContext.Clear, "clear shot context");
+ 		SafeRun(ProjectileTracker.Clear, "clear projectile tracker");
++		SafeRun(ProjectileGuidance.Clear, "clear projectile guidance");
+ 		SafeRun(WeaponCheats.RestoreAllWeapons, "restore weapons");
+ 		SafeRun(GuiPrimitives.Dispose, "dispose esp gui");
+ 		if (VisualCheats.FreeCamActive)
+--- a/decompiled-src/CompleteCheatMenu/Targeting/BallisticPredictor.cs
++++ b/decompiled-src/CompleteCheatMenu/Targeting/BallisticPredictor.cs
+@@ -35,6 +35,28 @@
+ 		return velocity;
+ 	}
+ 
++	internal static Vector3 PredictProjectile(Vector3 origin, Vector3 currentPoint, Vector3 velocity, float projectileSpeed, float projectileGravity, float maxPredictionTime, bool compensateGravity)
++	{
++		if (!IsFinite(projectileSpeed) || projectileSpeed <= 0.0001f || !IsFinite(maxPredictionTime) || maxPredictionTime <= 0f)
++		{
++			return currentPoint;
++		}
++		velocity = SanitizeVelocity(velocity, CheatState.AimMaxTargetSpeed);
++		float limit = Mathf.Max(0f, maxPredictionTime);
++		float flightTime = Mathf.Clamp(Vector3.Distance(origin, currentPoint) / projectileSpeed, 0f, limit);
++		for (int i = 0; i < 3; i++)
++		{
++			Vector3 estimate = currentPoint + velocity * flightTime;
++			flightTime = Mathf.Clamp(Vector3.Distance(origin, estimate) / projectileSpeed, 0f, limit);
++		}
++		Vector3 predicted = currentPoint + velocity * flightTime;
++		if (compensateGravity && projectileGravity > 0f)
++		{
++			predicted += Vector3.up * (0.5f * projectileGravity * flightTime * flightTime * Mathf.Max(0f, CheatState.AimGravityScale));
++		}
++		return IsFinite(predicted) ? predicted : currentPoint;
++	}
++
+ 	private static bool IsFinite(Vector3 value)
+ 	{
+ 		return IsFinite(value.x) && IsFinite(value.y) && IsFinite(value.z);
+--- a/decompiled-src/CompleteCheatMenu/Targeting/InitialVelocityRedirector.cs
++++ b/decompiled-src/CompleteCheatMenu/Targeting/InitialVelocityRedirector.cs
+@@ -1,3 +1,4 @@
++using CompleteCheatMenu.Runtime;
+ using UnityEngine;
+ 
+ namespace CompleteCheatMenu.Targeting;
+@@ -5,6 +6,11 @@
+ internal static class InitialVelocityRedirector
+ {
+ 	internal static bool TryRedirect(Vector3 origin, Vector3 originalVelocity, TargetSolution target, bool usePrediction, bool compensateGravity, out Vector3 redirectedVelocity)
++	{
++		return TryRedirect(origin, originalVelocity, target, 0f, usePrediction, compensateGravity, out redirectedVelocity);
++	}
++
++	internal static bool TryRedirect(Vector3 origin, Vector3 originalVelocity, TargetSolution target, float projectileGravity, bool usePrediction, bool compensateGravity, out Vector3 redirectedVelocity)
+ 	{
+ 		redirectedVelocity = originalVelocity;
+ 		if (target == null || !IsFinite(origin) || !IsFinite(originalVelocity))
+@@ -19,7 +25,7 @@
+ 		Vector3 point = target.AimPoint;
+ 		if (usePrediction)
+ 		{
+-			point = BallisticPredictor.Predict(origin, point, target.Velocity, speed, compensateGravity);
++			point = BallisticPredictor.PredictProjectile(origin, point, target.Velocity, speed, projectileGravity, CheatState.AimMaxPredictionTime, compensateGravity);
+ 		}
+ 		if (!IsFinite(point))
+ 		{
+@@ -41,6 +47,11 @@
+ 
+ 	internal static bool TryRedirectAll(Vector3 origin, Vector3[] velocities, TargetSolution target, bool usePrediction, bool compensateGravity, out Vector3[] redirectedVelocities)
+ 	{
++		return TryRedirectAll(origin, velocities, target, 0f, usePrediction, compensateGravity, out redirectedVelocities);
++	}
++
++	internal static bool TryRedirectAll(Vector3 origin, Vector3[] velocities, TargetSolution target, float projectileGravity, bool usePrediction, bool compensateGravity, out Vector3[] redirectedVelocities)
++	{
+ 		redirectedVelocities = velocities;
+ 		if (velocities == null || velocities.Length == 0 || target == null)
+ 		{
+@@ -50,7 +61,7 @@
+ 		bool changed = false;
+ 		for (int i = 0; i < copy.Length; i++)
+ 		{
+-			if (TryRedirect(origin, copy[i], target, usePrediction, compensateGravity, out Vector3 redirected))
++			if (TryRedirect(origin, copy[i], target, projectileGravity, usePrediction, compensateGravity, out Vector3 redirected))
+ 			{
+ 				copy[i] = redirected;
+ 				changed = true;
+--- a/decompiled-src/CompleteCheatMenu/Patches/WeaponAddProjectile_Patch.cs
++++ b/decompiled-src/CompleteCheatMenu/Patches/WeaponAddProjectile_Patch.cs
+@@ -32,7 +32,7 @@
+ 			}
+ 			TargetSolution target = MagicShotContext.ActiveTarget;
+ 			uint baseId = ProjectileSpawnRegistration.CaptureBaseId(__instance, isLocal, id);
+-			if (!InitialVelocityRedirector.TryRedirect(pos, velocity, target, CheatState.AimPrediction, CheatState.AimGravityCompensation, out Vector3 redirected))
++			if (!InitialVelocityRedirector.TryRedirect(pos, velocity, target, weaponInfo.ProjectileGravity, CheatState.AimPrediction, CheatState.AimGravityCompensation, out Vector3 redirected))
+ 			{
+ 				return;
+ 			}
+--- a/decompiled-src/CompleteCheatMenu/Patches/WeaponAddProjectiles_Patch.cs
++++ b/decompiled-src/CompleteCheatMenu/Patches/WeaponAddProjectiles_Patch.cs
+@@ -32,7 +32,7 @@
+ 			}
+ 			TargetSolution target = MagicShotContext.ActiveTarget;
+ 			uint baseId = ProjectileSpawnRegistration.CaptureBaseId(__instance, isLocal, id);
+-			if (!InitialVelocityRedirector.TryRedirectAll(pos, velocities, target, CheatState.AimPrediction, CheatState.AimGravityCompensation, out Vector3[] redirected))
++			if (!InitialVelocityRedirector.TryRedirectAll(pos, velocities, target, weaponInfo.ProjectileGravity, CheatState.AimPrediction, CheatState.AimGravityCompensation, out Vector3[] redirected))
+ 			{
+ 				return;
+ 			}
+--- a/tests/ballistic_prediction_test.py
++++ b/tests/ballistic_prediction_test.py
+@@ -65,6 +65,9 @@
+ assert "AimTeleportDistance" in tracker_source
+ assert "AimMaxTargetSpeed" in tracker_source
+ assert "for (int i = 0; i < 2; i++)" in predictor_source
++assert "for (int i = 0; i < 3; i++)" in predictor_source
++assert "PredictProjectile" in predictor_source
++assert "maxPredictionTime" in predictor_source
+ assert "projectileSpeed <= 0.0001f" in predictor_source
+ assert "Physics.gravity" in predictor_source
+ 
+--- a/tests/projectile_initial_velocity_harness.cs
++++ b/tests/projectile_initial_velocity_harness.cs
+@@ -65,6 +65,20 @@
+ 			Calls++;
+ 			return currentPoint + velocity;
+ 		}
++
++		internal static Vector3 PredictProjectile(Vector3 origin, Vector3 currentPoint, Vector3 velocity, float projectileSpeed, float projectileGravity, float maxPredictionTime, bool compensateGravity)
++		{
++			Calls++;
++			return currentPoint + velocity;
++		}
++	}
++}
++
++namespace CompleteCheatMenu.Runtime
++{
++	internal static class CheatState
++	{
++		internal static float AimMaxPredictionTime = 2f;
+ 	}
+ }
+ 
+--- a/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
++++ b/docs/plans/2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+@@ -859,3 +859,28 @@
+ Task 17.4：ProjectileGuidance + UpdateProjectileScan 飞行中持续制导 + AddToRemoveQueue 清理
+ ```
+ 
++#### Task 17.4：飞行中持续制导与移除清理 ✅ 已完成（2026-08-25）
++
++**完成记录：**
++
++- 新增 `ProjectileUpdateScan_Patch`，在游戏执行弹丸碰撞扫描前，仅对 `ProjectileTracker` 中登记的本地弹丸执行一次受限制导更新。
++- 新增 `ProjectileGuidance`，每颗弹丸固定使用发射时登记的目标，不在飞行过程中重新获取或切换目标。
++- 制导状态记录发射后首次更新时间、下一次更新时间和目标瞄点相对骨骼偏移；目标移动时以当前 Transform 位置恢复实时瞄点。
++- 目标速度优先使用目标父级 `Rigidbody.GetPointVelocity`，缺失刚体时回退到有限环形样本 `VelocityTracker`。
++- 新增 `ProjectileGuidanceMath`，使用度/秒转向上限和 `fixedDeltaTime` 平滑旋转弹丸方向，并在每次更新后恢复原始速度模长。
++- 新增真实弹丸重力预测：`BallisticPredictor.PredictProjectile` 使用 `Projectile.GravityForce`、三次迭代和最大预测时间；初始速度注入也改为使用 `WeaponInfo.ProjectileGravity`。
++- 新增最大预测时间、弹丸追踪时长、制导更新间隔和最大转向速度设置，并接入预设保存/加载和中文武器页面。
++- 弹丸追踪时长为 0 时只保留 Task 17.3 的初始方向修正；最大转向速度为 0 时立即转向；关闭自动瞄准后停止修改飞行速度并清理制导状态。
++- 到达最大追踪时长后，弹丸保持最后速度并从 Tracker/Guidance 中注销，不自动切换到其他目标。
++- 新增 `ProjectileRemove_Patch`，在 `AddToRemoveQueue` 完成后同步清理 Tracker 和 Guidance，避免命中、水面、超距和销毁弹丸残留。
++- 诊断页新增“飞行中制导绑定”，显示活动状态、累计更新、超时清理和间隔跳过计数；插件卸载时清空制导状态与速度采样。
++- 制导数学 Harness 15 项、制导生命周期 Harness 17 项、初始速度 Harness 19 项、弹丸生命周期 Harness 33 项和生成注册 Harness 10 项全部通过；Task 2–17.4 共 17 个 Python 回归测试全部通过。
++- 源码程序集与汉化程序集构建成功，版本均为 `0.7.0.0`；新增类型、方法、类型集、方法集和格式化占位符检查全部通过。
++- 本阶段尚未部署游戏目录，等待 Task 17.5 的角度 FOV 圆、当前追踪目标专用连线和最终实机整体验证完成后统一部署。
++
++**下一模块：**
++
++```text
++Task 17.5：角度 FOV 换算圆 + 当前追踪目标专用连线 + 最终部署验证
++```
++
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Targeting/ProjectileGuidance.cs
+@@ -0,0 +1,110 @@
++using System.Collections.Generic;
++using System.Runtime.CompilerServices;
++using CompleteCheatMenu.Runtime;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal static class ProjectileGuidance
++{
++	private sealed class GuidanceState
++	{
++		internal float StartTime;
++		internal float NextUpdate;
++		internal Vector3 AimOffset;
++		internal TargetSolution Target;
++	}
++
++	private static readonly Dictionary<Projectile, GuidanceState> States = new Dictionary<Projectile, GuidanceState>();
++
++	private static readonly VelocityTracker TargetVelocity = new VelocityTracker();
++
++	internal static int ActiveCount => States.Count;
++
++	internal static long GuidedUpdateCount { get; private set; }
++
++	internal static long ExpiredCount { get; private set; }
++
++	internal static long IntervalSkipCount { get; private set; }
++
++	internal static bool Step(Projectile projectile, float now, float deltaTime)
++	{
++		if (projectile == null)
++		{
++			return false;
++		}
++		if (!CheatState.Aimbot || CheatState.AimProjectileTrackingTime <= 0f)
++		{
++			Forget(projectile);
++			return false;
++		}
++		if (!ProjectileTracker.TryGetTarget(projectile, out TargetSolution target))
++		{
++			Forget(projectile);
++			return false;
++		}
++		if (!States.TryGetValue(projectile, out GuidanceState state) || !ReferenceEquals(state.Target, target))
++		{
++			state = new GuidanceState
++			{
++				StartTime = now,
++				NextUpdate = now,
++				AimOffset = target.AimPoint - target.Transform.position,
++				Target = target
++			};
++			States[projectile] = state;
++		}
++		if (now - state.StartTime > Mathf.Max(0f, CheatState.AimProjectileTrackingTime))
++		{
++			ExpiredCount++;
++			ProjectileTracker.Unregister(projectile);
++			Forget(projectile);
++			return false;
++		}
++		if (now + 0.0001f < state.NextUpdate)
++		{
++			IntervalSkipCount++;
++			return false;
++		}
++		state.NextUpdate = now + Mathf.Max(0f, CheatState.AimProjectileUpdateInterval);
++		Vector3 point = target.Transform.position + state.AimOffset;
++		Vector3 targetVelocity = ResolveTargetVelocity(target, point, now);
++		if (!ProjectileGuidanceMath.TrySteer(projectile.Position, projectile.Velocity, point, targetVelocity, projectile.GravityForce, CheatState.AimPrediction, CheatState.AimGravityCompensation, CheatState.AimMaxPredictionTime, CheatState.AimProjectileTurnSpeed, deltaTime, out Vector3 steered))
++		{
++			return false;
++		}
++		projectile.Velocity = steered;
++		GuidedUpdateCount++;
++		return true;
++	}
++
++	internal static void Forget(Projectile projectile)
++	{
++		if (projectile != null)
++		{
++			States.Remove(projectile);
++		}
++	}
++
++	internal static void Clear()
++	{
++		States.Clear();
++		TargetVelocity.Clear();
++	}
++
++	private static Vector3 ResolveTargetVelocity(TargetSolution target, Vector3 point, float now)
++	{
++		try
++		{
++			Rigidbody rigidbody = target.Transform.GetComponentInParent<Rigidbody>();
++			if (rigidbody != null)
++			{
++				return BallisticPredictor.SanitizeVelocity(rigidbody.GetPointVelocity(point), CheatState.AimMaxTargetSpeed);
++			}
++		}
++		catch
++		{
++		}
++		return TargetVelocity.Observe(RuntimeHelpers.GetHashCode(target.Entity), point, now);
++	}
++}
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Targeting/ProjectileGuidanceMath.cs
+@@ -0,0 +1,57 @@
++using UnityEngine;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal static class ProjectileGuidanceMath
++{
++	internal static bool TrySteer(Vector3 origin, Vector3 currentVelocity, Vector3 targetPoint, Vector3 targetVelocity, float projectileGravity, bool usePrediction, bool compensateGravity, float maxPredictionTime, float turnSpeedDegrees, float deltaTime, out Vector3 steeredVelocity)
++	{
++		steeredVelocity = currentVelocity;
++		if (!IsFinite(origin) || !IsFinite(currentVelocity) || !IsFinite(targetPoint) || !IsFinite(targetVelocity))
++		{
++			return false;
++		}
++		float speed = currentVelocity.magnitude;
++		if (!IsFinite(speed) || speed <= 0.0001f)
++		{
++			return false;
++		}
++		Vector3 point = targetPoint;
++		if (usePrediction)
++		{
++			point = BallisticPredictor.PredictProjectile(origin, point, targetVelocity, speed, projectileGravity, maxPredictionTime, compensateGravity);
++		}
++		Vector3 direction = point - origin;
++		if (!IsFinite(direction) || direction.sqrMagnitude <= 0.0001f)
++		{
++			return false;
++		}
++		Vector3 desired = direction.normalized * speed;
++		Vector3 steered = desired;
++		if (turnSpeedDegrees > 0f)
++		{
++			float maxRadiansDelta = Mathf.Max(0f, turnSpeedDegrees) * Mathf.Deg2Rad * Mathf.Max(0f, deltaTime);
++			steered = Vector3.RotateTowards(currentVelocity, desired, maxRadiansDelta, 0f);
++			if (steered.sqrMagnitude > 0.0001f)
++			{
++				steered = steered.normalized * speed;
++			}
++		}
++		if (!IsFinite(steered))
++		{
++			return false;
++		}
++		steeredVelocity = steered;
++		return true;
++	}
++
++	private static bool IsFinite(Vector3 value)
++	{
++		return IsFinite(value.x) && IsFinite(value.y) && IsFinite(value.z);
++	}
++
++	private static bool IsFinite(float value)
++	{
++		return !float.IsNaN(value) && !float.IsInfinity(value);
++	}
++}
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Patches/ProjectileUpdateScan_Patch.cs
+@@ -0,0 +1,34 @@
++using System;
++using System.Reflection;
++using CompleteCheatMenu.Game;
++using CompleteCheatMenu.Targeting;
++using HarmonyLib;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Patches;
++
++[HarmonyPatch]
++internal static class ProjectileUpdateScan_Patch
++{
++	private static MethodBase TargetMethod()
++	{
++		return GameBinder.Method("ProjectileManager", "UpdateProjectileScan", 2);
++	}
++
++	private static bool Prepare()
++	{
++		return TargetMethod() != null;
++	}
++
++	private static void Prefix(Projectile projectile)
++	{
++		try
++		{
++			ProjectileGuidance.Step(projectile, Time.unscaledTime, Time.fixedDeltaTime);
++		}
++		catch (Exception ex)
++		{
++			Plugin.Log.LogError((object)("飞行中弹丸制导失败：" + ex.Message));
++		}
++	}
++}
+--- /dev/null
++++ b/decompiled-src/CompleteCheatMenu/Patches/ProjectileRemove_Patch.cs
+@@ -0,0 +1,26 @@
++using System.Reflection;
++using CompleteCheatMenu.Game;
++using CompleteCheatMenu.Targeting;
++using HarmonyLib;
++
++namespace CompleteCheatMenu.Patches;
++
++[HarmonyPatch]
++internal static class ProjectileRemove_Patch
++{
++	private static MethodBase TargetMethod()
++	{
++		return GameBinder.Method("ProjectileManager", "AddToRemoveQueue", 1);
++	}
++
++	private static bool Prepare()
++	{
++		return TargetMethod() != null;
++	}
++
++	private static void Postfix(Projectile projectile)
++	{
++		ProjectileGuidance.Forget(projectile);
++		ProjectileTracker.Unregister(projectile);
++	}
++}
+--- /dev/null
++++ b/tests/projectile_guidance_test.py
+@@ -0,0 +1,84 @@
++from pathlib import Path
++
++
++ROOT = Path(__file__).resolve().parents[1]
++SRC = ROOT / "decompiled-src" / "CompleteCheatMenu"
++
++guidance_path = SRC / "Targeting" / "ProjectileGuidance.cs"
++math_path = SRC / "Targeting" / "ProjectileGuidanceMath.cs"
++update_patch_path = SRC / "Patches" / "ProjectileUpdateScan_Patch.cs"
++remove_patch_path = SRC / "Patches" / "ProjectileRemove_Patch.cs"
++
++for path in (guidance_path, math_path, update_patch_path, remove_patch_path):
++    assert path.exists(), path
++
++guidance = guidance_path.read_text(encoding="utf-8")
++math_source = math_path.read_text(encoding="utf-8")
++update_patch = update_patch_path.read_text(encoding="utf-8")
++remove_patch = remove_patch_path.read_text(encoding="utf-8")
++state = (SRC / "Runtime" / "CheatState.cs").read_text(encoding="utf-8")
++presets = (SRC / "Runtime" / "Presets.cs").read_text(encoding="utf-8")
++weapons = (SRC / "UI" / "Tabs" / "WeaponsTab.cs").read_text(encoding="utf-8")
++diagnostics = (SRC / "UI" / "Tabs" / "DiagnosticsTab.cs").read_text(encoding="utf-8")
++plugin = (SRC / "Plugin.cs").read_text(encoding="utf-8")
++predictor = (SRC / "Targeting" / "BallisticPredictor.cs").read_text(encoding="utf-8")
++single_patch = (SRC / "Patches" / "WeaponAddProjectile_Patch.cs").read_text(encoding="utf-8")
++multi_patch = (SRC / "Patches" / "WeaponAddProjectiles_Patch.cs").read_text(encoding="utf-8")
++
++# Seam 1: UpdateProjectileScan steers tracked local projectiles before collision scanning.
++assert 'GameBinder.Method("ProjectileManager", "UpdateProjectileScan", 2)' in update_patch
++assert "ProjectileGuidance.Step(projectile" in update_patch
++assert "Time.unscaledTime" in update_patch
++assert "Time.fixedDeltaTime" in update_patch
++
++# Seam 2: guidance is bounded by duration and update interval and never reacquires a target.
++for token in (
++    "AimProjectileTrackingTime",
++    "AimProjectileUpdateInterval",
++    "AimProjectileTurnSpeed",
++    "ProjectileTracker.TryGetTarget",
++    "ProjectileTracker.Unregister",
++    "NextUpdate",
++    "StartTime",
++):
++    assert token in guidance, token
++assert "Acquire(" not in guidance
++
++# Seam 3: target velocity prefers Rigidbody.GetPointVelocity and falls back to VelocityTracker.
++assert "GetComponentInParent<Rigidbody>" in guidance
++assert "GetPointVelocity" in guidance
++assert "VelocityTracker" in guidance
++assert "ProjectileGuidanceMath.TrySteer" in guidance
++assert "projectile.GravityForce" in guidance
++
++# Seam 4: steering preserves speed and applies a degrees-per-second turn cap.
++for token in (
++    "currentVelocity.magnitude",
++    "Vector3.RotateTowards",
++    "Mathf.Deg2Rad",
++    "direction.normalized * speed",
++    "BallisticPredictor.PredictProjectile",
++):
++    assert token in math_source, token
++assert "for (int i = 0; i < 3; i++)" in predictor
++assert "maxPredictionTime" in predictor
++
++# Seam 5: removal, unload, settings, presets, UI and diagnostics own the full lifecycle.
++assert 'GameBinder.Method("ProjectileManager", "AddToRemoveQueue", 1)' in remove_patch
++assert "ProjectileTracker.Unregister(projectile)" in remove_patch
++assert "ProjectileGuidance.Forget(projectile)" in remove_patch
++assert "ProjectileGuidance.Clear" in plugin
++assert "飞行中制导绑定" in diagnostics
++for field, key, label in (
++    ("AimMaxPredictionTime", "aimMaxPredictionTime", "最大预测时间"),
++    ("AimProjectileTrackingTime", "aimProjectileTrackingTime", "弹丸追踪时长"),
++    ("AimProjectileUpdateInterval", "aimProjectileUpdateInterval", "制导更新间隔"),
++    ("AimProjectileTurnSpeed", "aimProjectileTurnSpeed", "最大转向速度"),
++):
++    assert field in state
++    assert key in presets
++    assert label in weapons
++assert "weaponInfo.ProjectileGravity" in single_patch
++assert "weaponInfo.ProjectileGravity" in multi_patch
++
++print("PROJECTILE_GUIDANCE_TESTS=PASS cases=5")
+--- /dev/null
++++ b/tests/projectile_guidance_harness.cs
+@@ -0,0 +1,116 @@
++using System;
++using CompleteCheatMenu.Targeting;
++using UnityEngine;
++
++namespace UnityEngine
++{
++	internal static class Mathf
++	{
++		internal const float Deg2Rad = (float)(Math.PI / 180.0);
++		internal static float Max(float a, float b) => Math.Max(a, b);
++	}
++
++	internal struct Vector3
++	{
++		internal float x;
++		internal float y;
++		internal float z;
++
++		internal Vector3(float x, float y, float z)
++		{
++			this.x = x;
++			this.y = y;
++			this.z = z;
++		}
++
++		internal static Vector3 zero => new Vector3();
++		internal float sqrMagnitude => x * x + y * y + z * z;
++		internal float magnitude => (float)Math.Sqrt(sqrMagnitude);
++		internal Vector3 normalized => magnitude <= 0.000001f ? zero : this * (1f / magnitude);
++
++		internal static Vector3 RotateTowards(Vector3 current, Vector3 target, float maxRadiansDelta, float maxMagnitudeDelta)
++		{
++			float currentLength = current.magnitude;
++			float targetLength = target.magnitude;
++			if (currentLength <= 0.000001f || targetLength <= 0.000001f)
++			{
++				return target;
++			}
++			Vector3 a = current * (1f / currentLength);
++			Vector3 b = target * (1f / targetLength);
++			float dot = Math.Max(-1f, Math.Min(1f, a.x * b.x + a.y * b.y + a.z * b.z));
++			float angle = (float)Math.Acos(dot);
++			if (angle <= maxRadiansDelta || maxRadiansDelta == float.PositiveInfinity)
++			{
++				return b * currentLength;
++			}
++			float t = maxRadiansDelta / angle;
++			Vector3 blended = (a * (1f - t) + b * t).normalized;
++			return blended * currentLength;
++		}
++
++		public static Vector3 operator +(Vector3 a, Vector3 b) => new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
++		public static Vector3 operator -(Vector3 a, Vector3 b) => new Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
++		public static Vector3 operator *(Vector3 a, float b) => new Vector3(a.x * b, a.y * b, a.z * b);
++	}
++}
++
++namespace CompleteCheatMenu.Targeting
++{
++	internal static class BallisticPredictor
++	{
++		internal static int Calls;
++		internal static float LastGravity;
++		internal static float LastMaxTime;
++
++		internal static Vector3 PredictProjectile(Vector3 origin, Vector3 point, Vector3 velocity, float speed, float gravity, float maxPredictionTime, bool compensateGravity)
++		{
++			Calls++;
++			LastGravity = gravity;
++			LastMaxTime = maxPredictionTime;
++			return point + velocity;
++		}
++	}
++}
++
++internal static class ProjectileGuidanceHarness
++{
++	private static int _cases;
++
++	private static void Check(bool condition, string name)
++	{
++		_cases++;
++		if (!condition) throw new InvalidOperationException(name);
++	}
++
++	private static bool Close(float left, float right, float tolerance = 0.001f) => Math.Abs(left - right) <= tolerance;
++
++	public static int Main()
++	{
++		Vector3 current = new Vector3(10f, 0f, 0f);
++		Vector3 target = new Vector3(0f, 100f, 0f);
++		Check(ProjectileGuidanceMath.TrySteer(Vector3.zero, current, target, Vector3.zero, 0f, false, false, 2f, 0f, 0.02f, out Vector3 snap), "unlimited steering succeeds");
++		Check(Close(snap.magnitude, 10f), "unlimited speed preserved");
++		Check(Close(snap.x, 0f) && snap.y > 9.99f, "unlimited steering reaches target direction");
++
++		Check(ProjectileGuidanceMath.TrySteer(Vector3.zero, current, target, Vector3.zero, 0f, false, false, 2f, 90f, 0.5f, out Vector3 limited), "limited steering succeeds");
++		Check(Close(limited.magnitude, 10f), "limited speed preserved");
++		Check(limited.x > 0f && limited.y > 0f, "limited steering remains between directions");
++		float angle = (float)(Math.Atan2(limited.y, limited.x) * 180.0 / Math.PI);
++		Check(angle > 40f && angle < 50f, "limited steering near 45 degrees");
++
++		Vector3 targetVelocity = new Vector3(5f, 0f, 0f);
++		Check(ProjectileGuidanceMath.TrySteer(Vector3.zero, current, target, targetVelocity, 12.5f, true, true, 1.75f, 0f, 0.02f, out Vector3 predicted), "prediction steering succeeds");
++		Check(BallisticPredictor.Calls == 1, "prediction called once");
++		Check(Close(BallisticPredictor.LastGravity, 12.5f), "real projectile gravity forwarded");
++		Check(Close(BallisticPredictor.LastMaxTime, 1.75f), "prediction time forwarded");
++		Check(predicted.x > 0f && predicted.y > 0f && Close(predicted.magnitude, 10f), "predicted direction valid");
++
++		Check(!ProjectileGuidanceMath.TrySteer(Vector3.zero, Vector3.zero, target, Vector3.zero, 0f, false, false, 2f, 720f, 0.02f, out Vector3 zero), "zero velocity rejected");
++		Check(Close(zero.magnitude, 0f), "zero velocity unchanged");
++		Check(!ProjectileGuidanceMath.TrySteer(Vector3.zero, new Vector3(float.NaN, 0f, 0f), target, Vector3.zero, 0f, false, false, 2f, 720f, 0.02f, out _), "nan velocity rejected");
++
++		Console.WriteLine($"PROJECTILE_GUIDANCE_HARNESS=PASS cases={_cases}");
++		return 0;
++	}
++}
+--- /dev/null
++++ b/tests/projectile_guidance_lifecycle_harness.cs
+@@ -0,0 +1,152 @@
++using System;
++using System.Collections.Generic;
++using CompleteCheatMenu.Targeting;
++using UnityEngine;
++
++namespace UnityEngine
++{
++	internal static class Mathf
++	{
++		internal const float Deg2Rad = (float)(Math.PI / 180.0);
++		internal static float Max(float a, float b) => Math.Max(a, b);
++	}
++
++	internal struct Vector3
++	{
++		internal float x;
++		internal float y;
++		internal float z;
++		internal Vector3(float x, float y, float z) { this.x = x; this.y = y; this.z = z; }
++		internal static Vector3 zero => new Vector3();
++		internal float sqrMagnitude => x * x + y * y + z * z;
++		internal float magnitude => (float)Math.Sqrt(sqrMagnitude);
++		internal Vector3 normalized => magnitude <= 0.000001f ? zero : this * (1f / magnitude);
++		internal static Vector3 RotateTowards(Vector3 current, Vector3 target, float maxRadiansDelta, float maxMagnitudeDelta)
++		{
++			float cl = current.magnitude, tl = target.magnitude;
++			if (cl <= 0.000001f || tl <= 0.000001f) return target;
++			Vector3 a = current * (1f / cl), b = target * (1f / tl);
++			float dot = Math.Max(-1f, Math.Min(1f, a.x * b.x + a.y * b.y + a.z * b.z));
++			float angle = (float)Math.Acos(dot);
++			if (angle <= maxRadiansDelta) return b * cl;
++			float t = maxRadiansDelta / angle;
++			return (a * (1f - t) + b * t).normalized * cl;
++		}
++		public static Vector3 operator +(Vector3 a, Vector3 b) => new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
++		public static Vector3 operator -(Vector3 a, Vector3 b) => new Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
++		public static Vector3 operator *(Vector3 a, float b) => new Vector3(a.x * b, a.y * b, a.z * b);
++	}
++
++	internal sealed class Rigidbody
++	{
++		internal Vector3 Velocity;
++		internal int Calls;
++		internal Vector3 GetPointVelocity(Vector3 point) { Calls++; return Velocity; }
++	}
++
++	internal sealed class Transform
++	{
++		internal Vector3 position;
++		internal Rigidbody Rig;
++		internal T GetComponentInParent<T>() where T : class => Rig as T;
++	}
++}
++
++internal sealed class Projectile
++{
++	internal Vector3 Position;
++	internal Vector3 Velocity;
++	internal float GravityForce;
++}
++
++namespace CompleteCheatMenu.Runtime
++{
++	internal static class CheatState
++	{
++		internal static bool Aimbot = true;
++		internal static float AimProjectileTrackingTime = 0.05f;
++		internal static float AimProjectileUpdateInterval = 0.02f;
++		internal static float AimProjectileTurnSpeed;
++		internal static bool AimPrediction;
++		internal static bool AimGravityCompensation;
++		internal static float AimMaxPredictionTime = 2f;
++		internal static float AimMaxTargetSpeed = 250f;
++	}
++}
++
++namespace CompleteCheatMenu.Targeting
++{
++	internal sealed class TargetSolution
++	{
++		internal object Entity = new object();
++		internal Transform Transform;
++		internal Vector3 AimPoint;
++	}
++
++	internal static class ProjectileTracker
++	{
++		internal static readonly Dictionary<Projectile, TargetSolution> Targets = new Dictionary<Projectile, TargetSolution>();
++		internal static int UnregisterCalls;
++		internal static bool TryGetTarget(Projectile projectile, out TargetSolution target) => Targets.TryGetValue(projectile, out target);
++		internal static bool Unregister(Projectile projectile) { UnregisterCalls++; return Targets.Remove(projectile); }
++	}
++
++	internal sealed class VelocityTracker
++	{
++		internal static int ObserveCalls;
++		internal Vector3 Observe(int instanceId, Vector3 position, float now) { ObserveCalls++; return new Vector3(0f, 1f, 0f); }
++		internal void Clear() { }
++	}
++
++	internal static class BallisticPredictor
++	{
++		internal static Vector3 SanitizeVelocity(Vector3 velocity, float maxSpeed) => velocity;
++		internal static Vector3 PredictProjectile(Vector3 origin, Vector3 point, Vector3 velocity, float speed, float gravity, float maxTime, bool compensate) => point + velocity;
++	}
++}
++
++internal static class ProjectileGuidanceLifecycleHarness
++{
++	private static int _cases;
++	private static void Check(bool value, string name) { _cases++; if (!value) throw new InvalidOperationException(name); }
++	private static bool Close(float a, float b) => Math.Abs(a - b) <= 0.001f;
++
++	public static int Main()
++	{
++		Rigidbody rig = new Rigidbody { Velocity = new Vector3(2f, 0f, 0f) };
++		TargetSolution target = new TargetSolution { Transform = new Transform { position = new Vector3(0f, 10f, 0f), Rig = rig }, AimPoint = new Vector3(0f, 11f, 0f) };
++		Projectile projectile = new Projectile { Position = Vector3.zero, Velocity = new Vector3(10f, 0f, 0f), GravityForce = 9f };
++		ProjectileTracker.Targets[projectile] = target;
++
++		Check(ProjectileGuidance.Step(projectile, 1f, 0.02f), "first guidance update");
++		Check(ProjectileGuidance.ActiveCount == 1, "state created");
++		Check(rig.Calls == 1, "rigidbody velocity preferred");
++		Check(Close(projectile.Velocity.magnitude, 10f) && projectile.Velocity.y > 0f, "velocity redirected with speed preserved");
++		Vector3 afterFirst = projectile.Velocity;
++		Check(!ProjectileGuidance.Step(projectile, 1.01f, 0.02f), "interval skip");
++		Check(ProjectileGuidance.IntervalSkipCount == 1, "interval skip counted");
++		Check(Close(projectile.Velocity.x, afterFirst.x) && Close(projectile.Velocity.y, afterFirst.y), "interval skip keeps velocity");
++		Check(ProjectileGuidance.Step(projectile, 1.03f, 0.02f), "second scheduled update");
++
++		Check(!ProjectileGuidance.Step(projectile, 1.07f, 0.02f), "tracking expires");
++		Check(ProjectileTracker.UnregisterCalls == 1 && !ProjectileTracker.Targets.ContainsKey(projectile), "expiry unregisters tracker");
++		Check(ProjectileGuidance.ActiveCount == 0 && ProjectileGuidance.ExpiredCount == 1, "expiry forgets state");
++
++		Projectile fallbackProjectile = new Projectile { Position = Vector3.zero, Velocity = new Vector3(5f, 0f, 0f) };
++		TargetSolution fallbackTarget = new TargetSolution { Transform = new Transform { position = new Vector3(0f, 5f, 0f) }, AimPoint = new Vector3(0f, 5f, 0f) };
++		ProjectileTracker.Targets[fallbackProjectile] = fallbackTarget;
++		Check(ProjectileGuidance.Step(fallbackProjectile, 2f, 0.02f), "fallback velocity update");
++		Check(VelocityTracker.ObserveCalls == 1, "velocity tracker fallback used");
++
++		CompleteCheatMenu.Runtime.CheatState.Aimbot = false;
++		Vector3 disabledVelocity = fallbackProjectile.Velocity;
++		Check(!ProjectileGuidance.Step(fallbackProjectile, 2.03f, 0.02f), "disabled aimbot skips guidance");
++		Check(Close(disabledVelocity.x, fallbackProjectile.Velocity.x) && Close(disabledVelocity.y, fallbackProjectile.Velocity.y), "disabled aimbot keeps velocity");
++		Check(ProjectileGuidance.ActiveCount == 0, "disabled aimbot forgets guidance state");
++		ProjectileGuidance.Clear();
++		Check(ProjectileGuidance.ActiveCount == 0, "clear removes states");
++
++		Console.WriteLine($"PROJECTILE_GUIDANCE_LIFECYCLE_HARNESS=PASS cases={_cases}");
++		return 0;
++	}
++}

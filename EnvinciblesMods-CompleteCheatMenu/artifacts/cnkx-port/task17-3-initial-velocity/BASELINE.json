@@ -1,0 +1,47 @@
+[
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Patches\\WeaponShoot_Patch.cs",
+    "Length": 714,
+    "SHA256": "68A5BC6094C11A7413F93B04F359B13260AA0F232CC9357153C85968A1081131"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Cheats\\WeaponCheats.cs",
+    "Length": 7785,
+    "SHA256": "2B832E621BCDB03802768C0A0D8AE4D912676902DCFBDF67EFB292E2E831F544"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\ProjectileBindings.cs",
+    "Length": 2175,
+    "SHA256": "3757EDF019F52F21D46A4B58BF5841A9DBCA81AD9326DEC39083ADD87AEEEC0E"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\decompiled-src\\CompleteCheatMenu\\Targeting\\MagicShotContext.cs",
+    "Length": 700,
+    "SHA256": "88B7CD80F2D00C7A451A8A0BFD95DA146273594ECAED2E90DEB84E6835C60F3C"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\tests\\tracking_probability_test.py",
+    "Length": 1862,
+    "SHA256": "1BB57DCC48CB4AAF2D122EA00E257B31725824AC5C89E9E30141468D9E7ED48C"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\docs\\plans\\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md",
+    "Length": 52846,
+    "SHA256": "7B354085CAA9A160991CF06996EA0357FAD5627EE4DF922A1E4A6F7DF914213E"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\artifacts\\cnkx-port\\task17-2-projectile-lifecycle\\CompleteCheatMenu.task17-2.zh-CN.dll",
+    "Length": 195072,
+    "SHA256": "9361B9E43A3C77E9E32FD5421C23E51739BB569A099538DA024B5877E7558DB2"
+  },
+  {
+    "Path": "E:\\SteamLibrary\\steamapps\\common\\How to Fish\\How to Fish\\BepInEx\\plugins\\EnvinciblesMods-CompleteCheatMenu\\CompleteCheatMenu.dll",
+    "Length": 188928,
+    "SHA256": "224A13AE043E203D3EBCBFF840241BB32588A7549B8F8DC8326236513A4AAB0A"
+  },
+  {
+    "Path": "D:\\Code\\How2fish\\EnvinciblesMods-CompleteCheatMenu\\tests\\projectile_lifecycle_harness.cs",
+    "Length": 5458,
+    "SHA256": "7D41732A2C5770D824CF35A9DCE749B0465F9B78C6088A0F11E29DDBF54E55DB"
+  }
+]

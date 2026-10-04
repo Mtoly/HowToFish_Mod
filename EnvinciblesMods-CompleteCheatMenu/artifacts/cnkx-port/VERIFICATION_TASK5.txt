@@ -1,0 +1,130 @@
+CompleteCheatMenu cnKX port - Task 5 verification
+DATE=2026-08-25
+TASK=实现统一目标数据与评分器
+STATUS=COMPLETE
+
+CHANGED_BRANCH_OR_FIELD
+- TargetCandidate: 新增 Entity/Transform/AimPoint/Bone/Distance/Angle/ScreenPosition/ScreenDistance/Visible/Velocity/Priority。
+- TargetCandidate.BoneScore: 仅保存同一实体内部瞄准点分数。
+- TargetCandidate.EntityScore: 仅保存实体级综合分数。
+- TargetSolution: 保存最终目标解算字段、Score 与 Timestamp。
+- TargetingSettings.FromCheatState: 集中读取距离、角度、圆形屏幕半径、三项权重、切换惩罚、优先奖励上限与视线设置。
+- TargetScorer.InsideScreenRadius: 使用 delta.sqrMagnitude <= radius * radius。
+- TargetScorer.ScoreEntity: 距离权重 + 角度权重 + 屏幕距离权重 + 切换惩罚 - 有上限的优先奖励。
+- CheatState: 新增 AimScreenRadius/AimScreenDistanceWeight/AimPriorityBonus/AimPriorityBonusLimit。
+
+ARTIFACTS
+- MODIFIED_FILE_1: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\TargetCandidate.cs
+- MODIFIED_FILE_2: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\TargetSolution.cs
+- MODIFIED_FILE_3: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\TargetingSettings.cs
+- MODIFIED_FILE_4: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\TargetScorer.cs
+- MODIFIED_FILE_5: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Runtime\CheatState.cs
+- MODIFIED_FILE_6: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\cnkx_math_impl.py
+- TEST_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\targeting_math_test.py
+- MODIFIED_DLL: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\CompleteCheatMenu.dll
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task5-target-scorer.diff
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK5.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK5.sh
+- WINDOWS_ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK5.ps1
+- ORIGINAL_SOURCE_DIR: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task5-original-src
+
+BASELINE_BUILD
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File .\decompiled-src\build.ps1
+INPUT=Task 4 completed source; Task 5 source files absent; original CheatState.cs and targeting_math_test.py
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=FAIL missing implementation
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+LITERAL_OUTPUT=BASELINE_BUILD_EXIT=0
+LITERAL_OUTPUT=BASELINE_DLL_SHA256=A4192621AFFA2B67176C658F542AAA34EE9AF65C9885C5E1F2BCAA952D6F8A78
+EXIT_STATUS=0
+
+MODIFIED_TARGETING_TEST
+COMMAND=python .\tests\targeting_math_test.py
+INPUT=圆形半径边界、三项权重、切换惩罚、骨骼/实体评分隔离及 C# 源码结构
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=PASS cases=10
+EXIT_STATUS=0
+OBSERVED_RESULT=方形角落 (4,4) 在半径 5 的圆外；骨骼分数 1000 未污染近距离实体选择。
+
+EXPECTED_FUTURE_RED_TESTS
+COMMAND=python .\tests\ballistic_prediction_test.py
+INPUT=Task 8 尚未实现的 predict_point/sanitize_velocity
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+COMMAND=python .\tests\tracking_probability_test.py
+INPUT=Task 9 尚未实现的 should_track
+LITERAL_OUTPUT=TRACKING_PROBABILITY_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+RESULT=EXPECTED_RED; 不计为 Task 5 失败。
+
+REGRESSION_TESTS
+COMMAND=python .\tests\snapshot_isolation_test.py
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+EXIT_STATUS=0
+COMMAND=python .\tests\entity_registry_test.py
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+EXIT_STATUS=0
+COMMAND=python .\tests\aim_scoring_test.py
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=Task 3/4 的实体注册、ESP/自瞄快照隔离与旧自瞄评分行为保持通过。
+
+MODIFIED_BUILD
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File .\decompiled-src\build.ps1
+INPUT=Task 5 统一目标结构、设置与评分器
+LITERAL_OUTPUT=0 compiler errors
+LITERAL_OUTPUT=MODIFIED_BUILD_EXIT=0
+LITERAL_OUTPUT=MODIFIED_DLL_SHA256=4F21113CB09FDC6A6BB04E8DA8EFD9EC9DD903783A8B1FD49D0591BA53527E7E
+EXIT_STATUS=0
+
+ASSEMBLY_TYPE_CHECK
+COMMAND=dnfile TypeDef inspection on artifacts\CompleteCheatMenu.dll
+INPUT=修改版程序集
+LITERAL_OUTPUT=TYPE_TargetCandidate=True
+LITERAL_OUTPUT=TYPE_TargetSolution=True
+LITERAL_OUTPUT=TYPE_TargetingSettings=True
+LITERAL_OUTPUT=TYPE_TargetScorer=True
+EXIT_STATUS=0
+
+ROLLBACK_POWERSHELL
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK5.ps1 -DestinationRoot .\artifacts\cnkx-port\rollback-task5-test-20260825a
+INPUT=包含全部 Task 5 修改文件的独立目录
+LITERAL_OUTPUT=CHEATSTATE_SHA256=B3FCCAAF0C3B64CD036667F3E762C6831C14D710D652B8E883A410047AA6A553
+LITERAL_OUTPUT=TARGETING_TEST_SHA256=96B18C0F3D0810B44E809F633E0682F616C5FBD6615BFF40CCBDCB76AA7D9C0F
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=两个既有文件恢复 Task 4 字节，五个 Task 5 新文件被移除；工作目录继续保留修改版。
+
+ROLLBACK_BASH
+COMMAND=ROLLBACK_TASK5.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-task5-test-sh-20260825a
+INPUT=第二个独立修改副本
+LITERAL_OUTPUT=CHEATSTATE_SHA256=B3FCCAAF0C3B64CD036667F3E762C6831C14D710D652B8E883A410047AA6A553
+LITERAL_OUTPUT=TARGETING_TEST_SHA256=96B18C0F3D0810B44E809F633E0682F616C5FBD6615BFF40CCBDCB76AA7D9C0F
+LITERAL_OUTPUT=CREATED_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+
+MODIFIED_SOURCE_HASHES
+- TargetCandidate.cs=2781BFA1DAA452DF04E3EB663516345412E881F61903167B3B9AE986E3CE8380
+- TargetSolution.cs=3C985CC7C403469E77BF74A78B244C842B8B2209A0D301122BD012BC98D89A56
+- TargetingSettings.cs=D14DAD35B0893355EDB6B0CE6DB6CEB559706CADAF39E55EBE7FA22AFACA1B37
+- TargetScorer.cs=AF304F9270B43B18F8020C0A2C0845F4A024C6AD36A443A30B0D5CF6F7DE8BD7
+- CheatState.cs=9761A9E2E295B6D44BFCDF87C4D9ED6EBD1FDDF11D4C3AB142B9B1E2481840E6
+- cnkx_math_impl.py=5C2F5F73F5861A5C2AEA2BAD50C97C9EA101647BE8D3D0679E2CA53920D8E929
+- targeting_math_test.py=7DE3DC12856687A46EA8EC79549E6276E82B7A5933847A96E642179B3BE8B6C6
+
+DIFF
+LINES=350
+SHA256=652502B0904867D4793117D7D9EB91610C03336787A9BC323CD1B239CDC40B9D
+
+PLAN_MARK
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+RESULT=Task 5 marked complete with evidence path.
+
+DEPLOYMENT
+RESULT=NOT_DEPLOYED_GATE_A_IN_PROGRESS
+DEPLOYED_DLL_UNCHANGED_SHA256=F4B5209647A60C0BE7E5C49005867A4CE094FEB56C03AD804AEC67C35FE3BA79
+
+GIT
+RESULT=SKIPPED_NOT_A_GIT_REPOSITORY

@@ -1,0 +1,720 @@
+diff --git artifacts/cnkx-port/task7-original-src/WeaponCheats.cs decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs
+index 76500bd..a2f33ea 100644
+--- artifacts/cnkx-port/task7-original-src/WeaponCheats.cs
++++ decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs
+@@ -9,24 +9,11 @@ namespace CompleteCheatMenu.Cheats;
+ 
+ internal static class WeaponCheats
+ {
+-	internal struct Target
+-	{
+-		internal Transform Transform;
+-
+-		internal string Name;
+-
+-		internal float Angle;
+-
+-		internal float Distance;
+-	}
+-
+ 	private static readonly Dictionary<object, Dictionary<string, object>> _originals = new Dictionary<object, Dictionary<string, object>>();
+ 
+ 	private static float _nextTargetPreview;
+ 
+-	private static float _targetLockUntil;
+-
+-	private static readonly TargetingSnapshot _targetingSnapshot = new TargetingSnapshot();
++	private static readonly TargetingSystem _targetingSystem = new TargetingSystem();
+ 
+ 	internal static object HeldWeapon
+ 	{
+@@ -97,7 +84,7 @@ internal static class WeaponCheats
+ 		}
+ 	}
+ 
+-	internal static Target? CurrentTarget { get; private set; }
++	internal static TargetSolution CurrentTarget { get; private set; }
+ 
+ 	private static Transform FirePoint
+ 	{
+@@ -164,6 +151,7 @@ internal static class WeaponCheats
+ 			if (!CheatState.Aimbot)
+ 			{
+ 				CurrentTarget = null;
++				_targetingSystem.Clear();
+ 			}
+ 			else
+ 			{
+@@ -186,7 +174,7 @@ internal static class WeaponCheats
+ 		}
+ 		else
+ 		{
+-			CurrentTarget = FindTarget(currentCamera);
++			CurrentTarget = _targetingSystem.Acquire(currentCamera);
+ 		}
+ 	}
+ 
+@@ -205,10 +193,10 @@ internal static class WeaponCheats
+ 		Vector3 forward = currentCamera.transform.forward;
+ 		if (CheatState.Aimbot)
+ 		{
+-			Target? target = (CurrentTarget = FindTarget(currentCamera));
+-			if (target.HasValue && target.Value.Transform != null)
++			TargetSolution target = (CurrentTarget = _targetingSystem.Acquire(currentCamera));
++			if (target != null && target.Transform != null)
+ 			{
+-				forward = (target.Value.Transform.position + target.Value.Transform.up * CheatState.AimHeightOffset - firePoint.position).normalized;
++				forward = (target.AimPoint - firePoint.position).normalized;
+ 			}
+ 		}
+ 		if (forward.sqrMagnitude > 0.0001f)
+@@ -243,119 +231,6 @@ internal static class WeaponCheats
+ 		}
+ 	}
+ 
+-	private static Target? FindTarget(Camera cam)
+-	{
+-		Vector3 position = cam.transform.position;
+-		Vector3 forward = cam.transform.forward;
+-		Target? best = null;
+-		Target? current = null;
+-		float bestScore = float.MaxValue;
+-		Transform currentTransform = CurrentTarget.HasValue ? CurrentTarget.Value.Transform : null;
+-		_targetingSnapshot.Refresh(CheatState.AimAtCreatures, CheatState.AimAtPlayers);
+-
+-		if (CheatState.AimAtCreatures)
+-		{
+-			IReadOnlyList<EntityRecord> creatures = _targetingSnapshot.Creatures;
+-			for (int i = 0; i < creatures.Count; i++)
+-			{
+-				EntityRecord entityRecord = creatures[i];
+-				Creature creature = entityRecord.Entity as Creature;
+-				if (creature == null)
+-				{
+-					continue;
+-				}
+-				string name = creature.name;
+-				if (entityRecord.Name != name)
+-				{
+-					entityRecord.RefreshName(name);
+-				}
+-				bool flag = entityRecord.Name.IndexOf("seagull", System.StringComparison.OrdinalIgnoreCase) >= 0;
+-				bool flag2 = entityRecord.Name.IndexOf("albatross", System.StringComparison.OrdinalIgnoreCase) >= 0;
+-				if (!creature.gameObject.activeInHierarchy || (CheatState.AimExcludeDead && creature.IsDead) || (CheatState.AimExcludeSeagulls && flag))
+-				{
+-					continue;
+-				}
+-				Fish fish = creature as Fish;
+-				if (CheatState.AimExcludeHookedFish && fish != null && fish.AttachedRod != null)
+-				{
+-					continue;
+-				}
+-				EvaluateCandidate(position, forward, entityRecord.Transform, entityRecord.Name, flag2, currentTransform, ref best, ref current, ref bestScore);
+-			}
+-		}
+-
+-		if (CheatState.AimAtPlayers)
+-		{
+-			IReadOnlyList<EntityRecord> players = _targetingSnapshot.Players;
+-			object localPlayer = Refs.LocalPlayer;
+-			for (int j = 0; j < players.Count; j++)
+-			{
+-				EntityRecord entityRecord2 = players[j];
+-				if (!ReferenceEquals(entityRecord2.Entity, localPlayer) && entityRecord2.IsAlive)
+-				{
+-					EvaluateCandidate(position, forward, entityRecord2.Transform, entityRecord2.Name, albatross: false, currentTransform, ref best, ref current, ref bestScore);
+-				}
+-			}
+-		}
+-
+-		if (current.HasValue && Time.unscaledTime < _targetLockUntil)
+-		{
+-			return current;
+-		}
+-		if (best.HasValue && best.Value.Transform != currentTransform)
+-		{
+-			_targetLockUntil = Time.unscaledTime + CheatState.AimLockDuration;
+-		}
+-		return best;
+-	}
+-
+-	private static void EvaluateCandidate(Vector3 origin, Vector3 forward, Transform transform, string name, bool albatross, Transform currentTransform, ref Target? best, ref Target? current, ref float bestScore)
+-	{
+-		Vector3 to = transform.position + transform.up * CheatState.AimHeightOffset - origin;
+-		float distance = to.magnitude;
+-		if (distance > CheatState.AimRange || distance < 0.5f)
+-		{
+-			return;
+-		}
+-		float angle = Vector3.Angle(forward, to);
+-		if (angle > CheatState.AimFov || (CheatState.AimRequireLineOfSight && !HasLineOfSight(origin, transform)))
+-		{
+-			return;
+-		}
+-		Target candidate = new Target { Transform = transform, Name = name, Angle = angle, Distance = distance };
+-		if (transform == currentTransform)
+-		{
+-			current = candidate;
+-		}
+-		float score = CheatState.AimPrioritizeAlbatross && albatross
+-			? angle * 0.2f
+-			: distance * CheatState.AimDistanceWeight + angle * CheatState.AimAngleWeight;
+-		if (currentTransform != null && transform != currentTransform)
+-		{
+-			score += CheatState.AimSwitchPenalty;
+-		}
+-		if (score < bestScore)
+-		{
+-			bestScore = score;
+-			best = candidate;
+-		}
+-	}
+-
+-	private static bool HasLineOfSight(Vector3 from, Transform target)
+-	{
+-		Vector3 vector = target.position + target.up * CheatState.AimHeightOffset - from;
+-		float magnitude = vector.magnitude;
+-		if (!Physics.Raycast(from, vector.normalized, out var hitInfo, magnitude))
+-		{
+-			return true;
+-		}
+-		if (!(hitInfo.transform == target) && !hitInfo.transform.IsChildOf(target))
+-		{
+-			return target.IsChildOf(hitInfo.transform);
+-		}
+-		return true;
+-	}
+-
+ 	internal static bool RefillAmmo()
+ 	{
+ 		object heldWeapon = HeldWeapon;
+diff --git artifacts/cnkx-port/task7-original-src/WeaponsTab.cs decompiled-src/CompleteCheatMenu/UI/Tabs/WeaponsTab.cs
+index c9ace8d..f077c56 100644
+--- artifacts/cnkx-port/task7-original-src/WeaponsTab.cs
++++ decompiled-src/CompleteCheatMenu/UI/Tabs/WeaponsTab.cs
+@@ -91,11 +91,12 @@ internal static class WeaponsTab
+ 			CheatState.AimAngleWeight = Widgets.SliderRow("角度权重", CheatState.AimAngleWeight, 0f, 3f, "0.##", 0.5f);
+ 			CheatState.AimLockDuration = Widgets.SliderRow("目标保持时间", CheatState.AimLockDuration, 0f, 1f, "0.##", 0.2f);
+ 			CheatState.AimSwitchPenalty = Widgets.SliderRow("切换目标惩罚", CheatState.AimSwitchPenalty, 0f, 30f, "0.#", 8f);
+-			WeaponCheats.Target? currentTarget = WeaponCheats.CurrentTarget;
++			CompleteCheatMenu.Targeting.TargetSolution currentTarget = WeaponCheats.CurrentTarget;
+ 			GUILayout.Space(4f);
+-			if (currentTarget.HasValue)
++			if (currentTarget != null)
+ 			{
+-				GUILayout.Label($"Target: {currentTarget.Value.Name}   {currentTarget.Value.Distance:0}m   " + $"{currentTarget.Value.Angle:0}° off centre", Theme.Body);
++				string targetName = (currentTarget.Entity as Object)?.name ?? currentTarget.Transform?.name ?? "-";
++				GUILayout.Label($"目标：{targetName}   {currentTarget.Distance:0}米   偏离中心 {currentTarget.Angle:0}°   瞄准点：{currentTarget.Bone}", Theme.Body);
+ 			}
+ 			else
+ 			{
+diff --git artifacts/cnkx-port/task7-original-src/snapshot_isolation_test.py tests/snapshot_isolation_test.py
+index af243bc..deb34a4 100644
+--- artifacts/cnkx-port/task7-original-src/snapshot_isolation_test.py
++++ tests/snapshot_isolation_test.py
+@@ -68,12 +68,14 @@ visual = (ROOT / "decompiled-src/CompleteCheatMenu/Cheats/VisualCheats.cs").read
+ weapon = (ROOT / "decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs").read_text(encoding="utf-8")
+ esp_builder = (ROOT / "decompiled-src/CompleteCheatMenu/Runtime/EspSnapshotBuilder.cs").read_text(encoding="utf-8")
+ target_snapshot = (ROOT / "decompiled-src/CompleteCheatMenu/Targeting/TargetingSnapshot.cs").read_text(encoding="utf-8")
++target_system = (ROOT / "decompiled-src/CompleteCheatMenu/Targeting/TargetingSystem.cs").read_text(encoding="utf-8")
+ 
+ assert "EspSnapshotBuilder.Refresh" in visual
+ assert "internal static IReadOnlyList<EspTarget> Targets => _targets" in visual
+ assert "VisualCheats.Rescan(creatures: false" not in weapon
+ assert "VisualCheats.Targets" not in weapon
+-assert "_targetingSnapshot.Refresh" in weapon
++assert "_targetingSystem.Acquire" in weapon
++assert "_snapshot.Refresh" in target_system
+ assert "EntityRegistry.Creatures" in target_snapshot
+ assert "EntityRegistry.Players" in target_snapshot
+ assert "EntityRegistry.Items" in esp_builder
+diff --git decompiled-src/CompleteCheatMenu/Targeting/VisibilityCache.cs decompiled-src/CompleteCheatMenu/Targeting/VisibilityCache.cs
+new file mode 100644
+index 0000000..e5ecc49
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Targeting/VisibilityCache.cs
+@@ -0,0 +1,119 @@
++using System;
++using System.Collections.Generic;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal sealed class VisibilityCache
++{
++	private struct CacheKey : IEquatable<CacheKey>
++	{
++		internal int InstanceId;
++		internal string Point;
++
++		public bool Equals(CacheKey other)
++		{
++			return InstanceId == other.InstanceId && string.Equals(Point, other.Point, StringComparison.Ordinal);
++		}
++
++		public override bool Equals(object obj)
++		{
++			return obj is CacheKey && Equals((CacheKey)obj);
++		}
++
++		public override int GetHashCode()
++		{
++			return InstanceId * 397 ^ (Point?.GetHashCode() ?? 0);
++		}
++	}
++
++	private struct CacheEntry
++	{
++		internal bool Visible;
++		internal float ExpiresAt;
++	}
++
++	private readonly Dictionary<CacheKey, CacheEntry> _entries = new Dictionary<CacheKey, CacheEntry>();
++	private readonly float _ttl;
++	private float _nextPrune;
++
++	internal VisibilityCache(float ttl = 0.05f)
++	{
++		_ttl = Mathf.Max(0.01f, ttl);
++	}
++
++	internal bool IsVisible(int instanceId, Transform target, AimPoint point, Vector3 origin, float now)
++	{
++		if (target == null || point == null)
++		{
++			return false;
++		}
++		CacheKey key = new CacheKey
++		{
++			InstanceId = instanceId,
++			Point = point.Bone + ":" + point.Source
++		};
++		if (_entries.TryGetValue(key, out var cached) && now <= cached.ExpiresAt)
++		{
++			return cached.Visible;
++		}
++		bool visible = RaycastVisible(origin, point.Position, target);
++		_entries[key] = new CacheEntry
++		{
++			Visible = visible,
++			ExpiresAt = now + _ttl
++		};
++		if (now >= _nextPrune)
++		{
++			Prune(now);
++			_nextPrune = now + 1f;
++		}
++		return visible;
++	}
++
++	internal void Clear()
++	{
++		_entries.Clear();
++		_nextPrune = 0f;
++	}
++
++	private static bool RaycastVisible(Vector3 origin, Vector3 point, Transform target)
++	{
++		Vector3 direction = point - origin;
++		float distance = direction.magnitude;
++		if (distance <= 0.0001f || !Physics.Raycast(origin, direction / distance, out var hit, distance))
++		{
++			return true;
++		}
++		Transform hitTransform = hit.transform;
++		if (hitTransform == null)
++		{
++			return false;
++		}
++		return hitTransform == target || hitTransform.IsChildOf(target) || target.IsChildOf(hitTransform);
++	}
++
++	private void Prune(float now)
++	{
++		List<CacheKey> expired = null;
++		foreach (KeyValuePair<CacheKey, CacheEntry> pair in _entries)
++		{
++			if (pair.Value.ExpiresAt < now)
++			{
++				if (expired == null)
++				{
++					expired = new List<CacheKey>();
++				}
++				expired.Add(pair.Key);
++			}
++		}
++		if (expired == null)
++		{
++			return;
++		}
++		for (int i = 0; i < expired.Count; i++)
++		{
++			_entries.Remove(expired[i]);
++		}
++	}
++}
+diff --git decompiled-src/CompleteCheatMenu/Targeting/TargetingSystem.cs decompiled-src/CompleteCheatMenu/Targeting/TargetingSystem.cs
+new file mode 100644
+index 0000000..283bfd8
+--- /dev/null
++++ decompiled-src/CompleteCheatMenu/Targeting/TargetingSystem.cs
+@@ -0,0 +1,187 @@
++using System;
++using System.Collections.Generic;
++using CompleteCheatMenu.Game;
++using CompleteCheatMenu.Runtime;
++using UnityEngine;
++
++namespace CompleteCheatMenu.Targeting;
++
++internal sealed class TargetingSystem
++{
++	private readonly TargetingSnapshot _snapshot = new TargetingSnapshot();
++	private readonly VisibilityCache _visibility = new VisibilityCache();
++	private readonly List<TargetCandidate> _candidates = new List<TargetCandidate>(64);
++	private TargetSolution _current;
++	private float _lockUntil;
++
++	internal TargetSolution Current => IsSolutionAlive(_current) ? _current : null;
++
++	internal TargetSolution Acquire(Camera camera)
++	{
++		if (camera == null)
++		{
++			Clear();
++			return null;
++		}
++		TargetingSettings settings = TargetingSettings.FromCheatState();
++		_snapshot.Refresh(CheatState.AimAtCreatures, CheatState.AimAtPlayers);
++		_candidates.Clear();
++		Vector3 origin = camera.transform.position;
++		Vector3 forward = camera.transform.forward;
++		Vector2 screenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
++		float now = Time.unscaledTime;
++
++		if (CheatState.AimAtCreatures)
++		{
++			CollectCreatures(camera, origin, forward, screenCenter, settings, now);
++		}
++		if (CheatState.AimAtPlayers)
++		{
++			CollectPlayers(camera, origin, forward, screenCenter, settings, now);
++		}
++
++		TargetCandidate currentCandidate = FindCurrentCandidate();
++		if (currentCandidate == null)
++		{
++			_current = null;
++			_lockUntil = 0f;
++		}
++		else if (now < _lockUntil)
++		{
++			TargetScorer.ScoreEntity(currentCandidate, settings, currentCandidate.Entity);
++			_current = TargetSolution.FromCandidate(currentCandidate, now);
++			return _current;
++		}
++
++		object currentEntity = currentCandidate?.Entity;
++		TargetCandidate best = TargetScorer.SelectBest(_candidates, settings, currentEntity);
++		if (best == null)
++		{
++			_current = null;
++			_lockUntil = 0f;
++			return null;
++		}
++		if (currentEntity == null || !ReferenceEquals(best.Entity, currentEntity))
++		{
++			_lockUntil = now + Mathf.Max(0f, CheatState.AimLockDuration);
++		}
++		_current = TargetSolution.FromCandidate(best, now);
++		return _current;
++	}
++
++	internal void Clear()
++	{
++		_current = null;
++		_lockUntil = 0f;
++		_candidates.Clear();
++		_visibility.Clear();
++	}
++
++	private void CollectCreatures(Camera camera, Vector3 origin, Vector3 forward, Vector2 screenCenter, TargetingSettings settings, float now)
++	{
++		IReadOnlyList<EntityRecord> creatures = _snapshot.Creatures;
++		for (int i = 0; i < creatures.Count; i++)
++		{
++			EntityRecord record = creatures[i];
++			Creature creature = record.Entity as Creature;
++			if (creature == null || !record.IsAlive || !creature.gameObject.activeInHierarchy)
++			{
++				continue;
++			}
++			string name = creature.name;
++			if (record.Name != name)
++			{
++				record.RefreshName(name);
++			}
++			bool seagull = record.Name.IndexOf("seagull", StringComparison.OrdinalIgnoreCase) >= 0;
++			bool albatross = record.Name.IndexOf("albatross", StringComparison.OrdinalIgnoreCase) >= 0;
++			if ((CheatState.AimExcludeDead && creature.IsDead) || (CheatState.AimExcludeSeagulls && seagull))
++			{
++				continue;
++			}
++			Fish fish = creature as Fish;
++			if (CheatState.AimExcludeHookedFish && fish != null && fish.AttachedRod != null)
++			{
++				continue;
++			}
++			AddCandidate(record, player: false, priority: CheatState.AimPrioritizeAlbatross && albatross, camera, origin, forward, screenCenter, settings, now);
++		}
++	}
++
++	private void CollectPlayers(Camera camera, Vector3 origin, Vector3 forward, Vector2 screenCenter, TargetingSettings settings, float now)
++	{
++		IReadOnlyList<EntityRecord> players = _snapshot.Players;
++		object localPlayer = Refs.LocalPlayer;
++		for (int i = 0; i < players.Count; i++)
++		{
++			EntityRecord record = players[i];
++			if (ReferenceEquals(record.Entity, localPlayer) || !record.IsAlive || !record.Transform.gameObject.activeInHierarchy)
++			{
++				continue;
++			}
++			AddCandidate(record, player: true, priority: false, camera, origin, forward, screenCenter, settings, now);
++		}
++	}
++
++	private void AddCandidate(EntityRecord record, bool player, bool priority, Camera camera, Vector3 origin, Vector3 forward, Vector2 screenCenter, TargetingSettings settings, float now)
++	{
++		List<AimPoint> points = BoneResolver.Resolve(record.Transform, player, CheatState.AimHeightOffset);
++		AimPoint point = AimPoint.SelectClosestProjected(points, camera, screenCenter);
++		if (point == null)
++		{
++			return;
++		}
++		Vector3 direction = point.Position - origin;
++		float distance = direction.magnitude;
++		if (distance < 0.5f || distance > settings.MaxDistance)
++		{
++			return;
++		}
++		float angle = Vector3.Angle(forward, direction);
++		if (angle > settings.MaxAngle || !TargetScorer.InsideScreenRadius(point.ScreenPosition, screenCenter, settings.ScreenRadius))
++		{
++			return;
++		}
++		bool visible = !settings.RequireLineOfSight || _visibility.IsVisible(record.InstanceId, record.Transform, point, origin, now);
++		if (settings.RequireLineOfSight && !visible)
++		{
++			return;
++		}
++		_candidates.Add(new TargetCandidate
++		{
++			Record = record,
++			Entity = record.Entity,
++			Transform = record.Transform,
++			AimPoint = point.Position,
++			Bone = point.Bone,
++			Distance = distance,
++			Angle = angle,
++			ScreenPosition = point.ScreenPosition,
++			ScreenDistance = point.ScreenDistance,
++			Visible = visible,
++			Priority = priority,
++			BoneScore = point.ScreenDistance
++		});
++	}
++
++	private TargetCandidate FindCurrentCandidate()
++	{
++		if (!IsSolutionAlive(_current))
++		{
++			return null;
++		}
++		for (int i = 0; i < _candidates.Count; i++)
++		{
++			if (ReferenceEquals(_candidates[i].Entity, _current.Entity))
++			{
++				return _candidates[i];
++			}
++		}
++		return null;
++	}
++
++	private static bool IsSolutionAlive(TargetSolution solution)
++	{
++		return solution != null && Refs.IsAlive(solution.Entity) && solution.Transform != null;
++	}
++}
+diff --git tests/cnkx_target_lock_impl.py tests/cnkx_target_lock_impl.py
+new file mode 100644
+index 0000000..f2b8327
+--- /dev/null
++++ tests/cnkx_target_lock_impl.py
+@@ -0,0 +1,61 @@
++class VisibilityCacheModel:
++    def __init__(self, ttl):
++        self.ttl = ttl
++        self.entries = {}
++
++    def visible(self, entity, point, now, raycast):
++        key = (entity, point)
++        cached = self.entries.get(key)
++        if cached is not None and now <= cached[0]:
++            return cached[1]
++        result = bool(raycast(entity, point))
++        self.entries[key] = (now + self.ttl, result)
++        return result
++
++    def hit_matches(self, hit, target, parents):
++        if hit == target:
++            return True
++        current = hit
++        while current is not None:
++            current = parents.get(current)
++            if current == target:
++                return True
++        current = target
++        while current is not None:
++            current = parents.get(current)
++            if current == hit:
++                return True
++        return False
++
++
++class TargetingModel:
++    def __init__(self, lock_duration, switch_penalty):
++        self.lock_duration = lock_duration
++        self.switch_penalty = switch_penalty
++        self.current = None
++        self.lock_until = 0.0
++
++    def acquire(self, candidates, now):
++        valid = [candidate for candidate in candidates if candidate.get("valid", False)]
++        current_candidate = next(
++            (candidate for candidate in valid if candidate["name"] == self.current),
++            None,
++        )
++        if current_candidate is not None and now < self.lock_until:
++            return current_candidate["name"], current_candidate["point"]
++        if not valid:
++            self.current = None
++            self.lock_until = 0.0
++            return None
++
++        def weighted(candidate):
++            penalty = 0.0
++            if self.current is not None and candidate["name"] != self.current:
++                penalty = self.switch_penalty
++            return candidate["score"] + penalty
++
++        best = min(valid, key=weighted)
++        if best["name"] != self.current:
++            self.current = best["name"]
++            self.lock_until = now + self.lock_duration
++        return best["name"], best["point"]
+diff --git tests/target_lock_test.py tests/target_lock_test.py
+new file mode 100644
+index 0000000..a4b9aef
+--- /dev/null
++++ tests/target_lock_test.py
+@@ -0,0 +1,99 @@
++import sys
++from pathlib import Path
++
++TESTS = Path(__file__).resolve().parent
++PROJECT = TESTS.parent
++sys.path.insert(0, str(TESTS))
++
++try:
++    from cnkx_target_lock_impl import TargetingModel, VisibilityCacheModel
++except (ImportError, ModuleNotFoundError):
++    print("TARGET_LOCK_TESTS=FAIL missing implementation")
++    raise SystemExit(1)
++
++
++# 可见性按“对象 + 目标点”短周期缓存；同一点命中一次，不同点和过期后重新检测。
++ray_calls = []
++
++
++def raycast(entity, point):
++    ray_calls.append((entity, point))
++    return True
++
++
++cache = VisibilityCacheModel(ttl=0.05)
++assert cache.visible("fish", "head", 0.00, raycast)
++assert cache.visible("fish", "head", 0.02, raycast)
++assert len(ray_calls) == 1
++assert cache.visible("fish", "chest", 0.02, raycast)
++assert len(ray_calls) == 2
++assert cache.visible("fish", "head", 0.06, raycast)
++assert len(ray_calls) == 3
++
++# 射线命中目标本体、子对象或父对象均视为可见。
++assert cache.hit_matches("target", "target", {"target": None})
++assert cache.hit_matches("target-child", "target", {"target-child": "target", "target": None})
++assert cache.hit_matches("target", "target-child", {"target-child": "target", "target": None})
++assert not cache.hit_matches("wall", "target", {"wall": None, "target": None})
++
++# 同一次 acquire 同时确定实体与目标点，不读取上一帧瞄准点。
++model = TargetingModel(lock_duration=0.20, switch_penalty=8.0)
++first = model.acquire(
++    [
++        {"name": "near", "score": 10.0, "point": "head", "valid": True},
++        {"name": "far", "score": 20.0, "point": "chest", "valid": True},
++    ],
++    now=1.0,
++)
++assert first == ("near", "head")
++
++# 锁定期内当前目标仍有效时保持当前目标，即使另一目标基础分更低。
++locked = model.acquire(
++    [
++        {"name": "near", "score": 10.0, "point": "pelvis", "valid": True},
++        {"name": "far", "score": 1.0, "point": "head", "valid": True},
++    ],
++    now=1.10,
++)
++assert locked == ("near", "pelvis")
++
++# 当前目标失效时立即释放，不等待保持时间结束。
++released = model.acquire(
++    [
++        {"name": "near", "score": 0.0, "point": "head", "valid": False},
++        {"name": "far", "score": 1.0, "point": "chest", "valid": True},
++    ],
++    now=1.11,
++)
++assert released == ("far", "chest")
++
++# 保持期结束后按综合评分切换，并更新到本次 acquire 的目标点。
++switched = model.acquire(
++    [
++        {"name": "far", "score": 30.0, "point": "pelvis", "valid": True},
++        {"name": "third", "score": 2.0, "point": "head", "valid": True},
++    ],
++    now=1.40,
++)
++assert switched == ("third", "head")
++
++# 生产源码必须集中 Acquire、缓存可见性，并从 TargetSolution 提供兼容视图。
++system_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Targeting/TargetingSystem.cs"
++).read_text(encoding="utf-8")
++visibility_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Targeting/VisibilityCache.cs"
++).read_text(encoding="utf-8")
++weapon_source = (
++    PROJECT / "decompiled-src/CompleteCheatMenu/Cheats/WeaponCheats.cs"
++).read_text(encoding="utf-8")
++assert "internal TargetSolution Acquire(Camera camera)" in system_source
++assert "BoneResolver.Resolve" in system_source
++assert "_visibility.IsVisible" in system_source
++assert "hitTransform.IsChildOf(target)" in visibility_source
++assert "target.IsChildOf(hitTransform)" in visibility_source
++assert "internal static TargetSolution CurrentTarget" in weapon_source
++assert "FindTarget(" not in weapon_source
++assert "HasLineOfSight(" not in weapon_source
++
++print("TARGET_LOCK_TESTS=PASS cases=8")

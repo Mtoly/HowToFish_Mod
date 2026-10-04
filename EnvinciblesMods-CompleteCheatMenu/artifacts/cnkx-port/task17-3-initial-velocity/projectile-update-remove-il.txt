@@ -1,0 +1,116 @@
+=== ProjectileManager::UpdateProjectileScan RVA=0x26D60 ===
+IL_000C: ldc.r4       1.0
+IL_0011: ldarg.1      
+IL_0012: ldfld        CatchingUpToDo
+IL_0017: conv.r.un    
+IL_0018: conv.r4      
+IL_0019: ldsfld       Instance
+IL_001E: ldfld        _catchUpSpeed
+IL_0023: mul          
+IL_0024: add          
+IL_0025: stloc.0      
+IL_0026: ldarg.1      
+IL_0027: ldfld        Owner
+IL_002C: call         UnityEngine.Object::op_Implicit
+IL_0031: brfalse.s    94
+IL_0033: ldarg.1      
+IL_0034: ldfld        Position
+IL_0039: ldarg.1      
+IL_003A: ldfld        Owner
+IL_003F: callvirt     get_Transform
+IL_0044: callvirt     UnityEngine.Transform::get_position
+IL_0049: call         UnityEngine.Vector3::op_Subtraction
+IL_004E: stloc.3      
+IL_004F: ldloca.s     local(0x0003)
+IL_0051: call         UnityEngine.Vector3::get_sqrMagnitude
+IL_0056: ldarg.0      
+IL_0057: ldfld        _sqrMaxProjRange
+IL_005C: ble.un.s     103
+IL_005E: ldarg.0      
+IL_005F: ldarg.1      
+IL_0060: call         AddToRemoveQueue
+IL_0065: br.s         141
+IL_0067: ldarg.1      
+IL_0068: ldflda       Position
+IL_006D: ldfld        UnityEngine.Vector3::y
+IL_0072: call         get_WaterHeight
+IL_0077: ldc.r4       0.5
+IL_007C: sub          
+IL_007D: bge.un.s     141
+IL_007F: ldarg.0      
+IL_0080: ldarg.1      
+IL_0081: call         AddToRemoveQueue
+IL_0086: ldarg.0      
+IL_0087: ldarg.1      
+IL_0088: call         HitWater
+IL_008D: ldarg.1      
+IL_008E: ldfld        FromNpc
+IL_0093: brtrue.s     156
+IL_0095: call         get_ProjectileHitLayer
+IL_009A: br.s         161
+IL_009C: call         get_NpcProjectileHitLayer
+IL_00A1: stloc.1      
+IL_00A2: ldarg.1      
+IL_00A3: ldfld        Position
+IL_00A8: ldarg.2      
+IL_00A9: ldfld        WidthRadius
+IL_00AE: ldarg.1      
+IL_00AF: ldfld        Velocity
+IL_00B4: ldloca.s     local(0x0002)
+IL_00B6: ldarg.1      
+IL_00B7: ldflda       Velocity
+IL_00BC: call         UnityEngine.Vector3::get_magnitude
+IL_00C1: ldloc.0      
+IL_00C2: mul          
+IL_00C3: call         UnityEngine.Time::get_fixedDeltaTime
+IL_00C8: mul          
+IL_00C9: ldloc.1      
+IL_00CA: call         UnityEngine.LayerMask::op_Implicit
+IL_00CF: call         UnityEngine.Physics::SphereCast
+IL_00D4: brfalse.s    223
+IL_00D6: ldarg.0      
+IL_00D7: ldarg.1      
+IL_00D8: ldarg.2      
+IL_00D9: ldloc.2      
+IL_00DA: call         Hit
+IL_00DF: ret          
+=== ProjectileManager::AddToRemoveQueue RVA=0x27414 ===
+IL_000C: ldarg.1      
+IL_000D: ldfld        Owner
+IL_0012: call         UnityEngine.Object::op_Implicit
+IL_0017: brfalse.s    118
+IL_0019: ldarg.0      
+IL_001A: ldfld        _playerProjectiles
+IL_001F: ldarg.1      
+IL_0020: ldfld        Owner
+IL_0025: callvirt     FishNet.Object.NetworkBehaviour::get_Owner
+IL_002A: callvirt     ::ContainsKey
+IL_002F: brfalse.s    118
+IL_0031: ldarg.0      
+IL_0032: ldfld        _playerProjectiles
+IL_0037: ldarg.1      
+IL_0038: ldfld        Owner
+IL_003D: callvirt     FishNet.Object.NetworkBehaviour::get_Owner
+IL_0042: callvirt     ::get_Item
+IL_0047: ldarg.1      
+IL_0048: ldfld        Id
+IL_004D: callvirt     ::ContainsKey
+IL_0052: brfalse.s    118
+IL_0054: ldarg.0      
+IL_0055: ldfld        _playerProjectiles
+IL_005A: ldarg.1      
+IL_005B: ldfld        Owner
+IL_0060: callvirt     FishNet.Object.NetworkBehaviour::get_Owner
+IL_0065: callvirt     ::get_Item
+IL_006A: ldarg.1      
+IL_006B: ldfld        Id
+IL_0070: callvirt     ::Remove
+IL_0075: pop          
+IL_0076: ldarg.0      
+IL_0077: ldarg.1      
+IL_0078: ldfld        TypeId
+IL_007D: call         GetType
+IL_0082: ldfld        ProjectilesToRemove
+IL_0087: ldarg.1      
+IL_0088: callvirt     ::Add
+IL_008D: ret          

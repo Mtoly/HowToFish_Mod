@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\projectile_initial_velocity_test.py", line 13, in <module>
+    assert path.exists(), path
+           ~~~~~~~~~~~^^
+AssertionError: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\InitialVelocityRedirector.cs
+RED_EXIT=1

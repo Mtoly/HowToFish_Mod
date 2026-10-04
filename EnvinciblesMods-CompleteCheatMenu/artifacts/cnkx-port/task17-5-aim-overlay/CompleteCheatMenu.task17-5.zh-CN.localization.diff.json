@@ -1,0 +1,1572 @@
+{
+  "source_sha256": "d3b261f72afbf81f4245dcf87ac0896937bdc66e0824bf8074c0a7f02bc0e1ff",
+  "modified_sha256": "a105a0e1ab2a67a252387833000bafffde46e3b6fc3aa8a7a6a708cf7404d0e0",
+  "changed": [
+    {
+      "offset": 151988,
+      "original": "Copy the save folder once per session before the first destructive action. Silent, no prompt.",
+      "translated": "每局首次破坏性操作前静默备份存档。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 93
+    },
+    {
+      "offset": 152231,
+      "original": "Master switch for every cheat hotkey. The menu key is unaffected and always works.",
+      "translated": "所有作弊快捷键的总开关，菜单键不受影响。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 82
+    },
+    {
+      "offset": 152647,
+      "original": "{0} {1} loaded. Press {2} in game.",
+      "translated": "已加载 {0} {1}。进入游戏后按 {2}。​​​​​​​​​​​",
+      "slot_units": 34
+    },
+    {
+      "offset": 152717,
+      "original": "Complete Cheat Menu",
+      "translated": "完整作弊菜单​​​​​​​​​​​​​",
+      "slot_units": 19
+    },
+    {
+      "offset": 153231,
+      "original": "This tab hit an error.",
+      "translated": "此页面发生错误。​​​​​​​​​​​​​​",
+      "slot_units": 22
+    },
+    {
+      "offset": 153503,
+      "original": "Unavailable",
+      "translated": "不可用​​​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 153527,
+      "original": "No boat in the scene yet. Load into a save with a boat spawned.",
+      "translated": "场景中还没有船，请加载已有船的存档。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 63
+    },
+    {
+      "offset": 153683,
+      "original": "Flight",
+      "translated": "飞行​​​​",
+      "slot_units": 6
+    },
+    {
+      "offset": 153697,
+      "original": "Speed",
+      "translated": "速度​​​",
+      "slot_units": 5
+    },
+    {
+      "offset": 153709,
+      "original": "Handling",
+      "translated": "操控​​​​​​",
+      "slot_units": 8
+    },
+    {
+      "offset": 153765,
+      "original": "Anti-rollover",
+      "translated": "防翻滚​​​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 153825,
+      "original": "Steer smoothing",
+      "translated": "转向平滑​​​​​​​​​​​",
+      "slot_units": 15
+    },
+    {
+      "offset": 153901,
+      "original": "Air drag",
+      "translated": "空中阻力​​​​",
+      "slot_units": 8
+    },
+    {
+      "offset": 153965,
+      "original": "Air spin drag",
+      "translated": "空中旋转阻力​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 154037,
+      "original": "Water drag",
+      "translated": "水面阻力​​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 154105,
+      "original": "Water spin drag",
+      "translated": "水面旋转阻力​​​​​​​​​",
+      "slot_units": 15
+    },
+    {
+      "offset": 157537,
+      "original": "Diagnostics: {0}/{1} bindings failed.",
+      "translated": "诊断：{0}/{1} 个绑定失败。​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 37
+    },
+    {
+      "offset": 157751,
+      "original": "Clear near me",
+      "translated": "清除附近​​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 157779,
+      "original": "Clear everything",
+      "translated": "清除全部​​​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 157813,
+      "original": "No player inventory yet. Load into a save first.",
+      "translated": "尚未找到玩家背包，请先加载存档。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 48
+    },
+    {
+      "offset": 158025,
+      "original": "All baits ({0})",
+      "translated": "全部鱼饵（{0}）​​​​​​",
+      "slot_units": 15
+    },
+    {
+      "offset": 158057,
+      "original": "No casino in this scene. Travel to the island with the casino.",
+      "translated": "当前场景没有赌场，请前往赌场所在岛屿。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 62
+    },
+    {
+      "offset": 158183,
+      "original": "Roulette odds",
+      "translated": "轮盘赔率​​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 158211,
+      "original": "How this works",
+      "translated": "工作原理​​​​​​​​​​",
+      "slot_units": 14
+    },
+    {
+      "offset": 158251,
+      "original": "Bet table",
+      "translated": "下注表​​​​​​",
+      "slot_units": 9
+    },
+    {
+      "offset": 158271,
+      "original": "Skin machine",
+      "translated": "外观机器​​​​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 158547,
+      "original": "Current values",
+      "translated": "当前数值​​​​​​​​​​",
+      "slot_units": 14
+    },
+    {
+      "offset": 158601,
+      "original": "Stacking and inventory",
+      "translated": "堆叠与背包​​​​​​​​​​​​​​​​​",
+      "slot_units": 22
+    },
+    {
+      "offset": 158657,
+      "original": "Master switch",
+      "translated": "总开关​​​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 158685,
+      "original": "Hotkeys",
+      "translated": "快捷键​​​​",
+      "slot_units": 7
+    },
+    {
+      "offset": 159036,
+      "original": "Balance",
+      "translated": "余额​​​​​",
+      "slot_units": 7
+    },
+    {
+      "offset": 159052,
+      "original": "Quick add",
+      "translated": "快速增加​​​​​",
+      "slot_units": 9
+    },
+    {
+      "offset": 159080,
+      "original": "Load into a save first.",
+      "translated": "请先加载存档。​​​​​​​​​​​​​​​​",
+      "slot_units": 23
+    },
+    {
+      "offset": 159128,
+      "original": "Ground movement",
+      "translated": "地面移动​​​​​​​​​​​",
+      "slot_units": 15
+    },
+    {
+      "offset": 159182,
+      "original": "Walk speed",
+      "translated": "行走速度​​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 159230,
+      "original": "Sprint speed",
+      "translated": "冲刺速度​​​​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 159348,
+      "original": "Jump force",
+      "translated": "跳跃力度​​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 159408,
+      "original": "Extra gravity",
+      "translated": "额外重力​​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 159464,
+      "original": "Acceleration",
+      "translated": "加速度​​​​​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 159520,
+      "original": "Deceleration",
+      "translated": "减速度​​​​​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 159568,
+      "original": "Sink speed",
+      "translated": "下沉速度​​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 159636,
+      "original": "Developer cheats",
+      "translated": "开发者作弊​​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 159728,
+      "original": "Game completion",
+      "translated": "游戏完成度​​​​​​​​​​",
+      "slot_units": 15
+    },
+    {
+      "offset": 159760,
+      "original": "Steam achievements",
+      "translated": "Steam 成就​​​​​​​​​​",
+      "slot_units": 18
+    },
+    {
+      "offset": 159798,
+      "original": "Save",
+      "translated": "保存​​",
+      "slot_units": 4
+    },
+    {
+      "offset": 159808,
+      "original": "Presets",
+      "translated": "预设​​​​​",
+      "slot_units": 7
+    },
+    {
+      "offset": 159860,
+      "original": "Held item skin",
+      "translated": "手持物品外观​​​​​​​​",
+      "slot_units": 14
+    },
+    {
+      "offset": 160052,
+      "original": "Options",
+      "translated": "选项​​​​​",
+      "slot_units": 7
+    },
+    {
+      "offset": 160068,
+      "original": "Sort",
+      "translated": "排序​​",
+      "slot_units": 4
+    },
+    {
+      "offset": 160078,
+      "original": "Filter spawnables…",
+      "translated": "筛选可生成物…​​​​​​​​​​​",
+      "slot_units": 18
+    },
+    {
+      "offset": 160116,
+      "original": "{0} of {1} spawnables",
+      "translated": "{0}/{1} 个可生成物​​​​​​​​",
+      "slot_units": 21
+    },
+    {
+      "offset": 160352,
+      "original": "Waypoints",
+      "translated": "航点​​​​​​​",
+      "slot_units": 9
+    },
+    {
+      "offset": 160372,
+      "original": "Players",
+      "translated": "玩家​​​​​",
+      "slot_units": 7
+    },
+    {
+      "offset": 162708,
+      "original": "World unlocks",
+      "translated": "世界解锁​​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 164304,
+      "original": "God mode",
+      "translated": "无敌模式​​​​",
+      "slot_units": 8
+    },
+    {
+      "offset": 164330,
+      "original": "ESP",
+      "translated": "透视​",
+      "slot_units": 3
+    },
+    {
+      "offset": 164338,
+      "original": "Free camera",
+      "translated": "自由镜头​​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 164362,
+      "original": "One-shot kills",
+      "translated": "一击必杀​​​​​​​​​​",
+      "slot_units": 14
+    },
+    {
+      "offset": 164426,
+      "original": "off",
+      "translated": "关​​",
+      "slot_units": 3
+    },
+    {
+      "offset": 164434,
+      "original": "on",
+      "translated": "开​",
+      "slot_units": 2
+    },
+    {
+      "offset": 166664,
+      "original": "Preset save failed: ",
+      "translated": "预设保存失败：​​​​​​​​​​​​​",
+      "slot_units": 20
+    },
+    {
+      "offset": 166766,
+      "original": "Preset load failed: ",
+      "translated": "预设加载失败：​​​​​​​​​​​​​",
+      "slot_units": 20
+    },
+    {
+      "offset": 167172,
+      "original": "Keep inventory: skipped the death drop.",
+      "translated": "背包保留：已跳过死亡掉落。​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 39
+    },
+    {
+      "offset": 167252,
+      "original": "Keep inventory: items retained",
+      "translated": "背包保留：物品已保留​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 30
+    },
+    {
+      "offset": 167476,
+      "original": "Binding failed: ",
+      "translated": "绑定失败：​​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 168224,
+      "original": "disabled",
+      "translated": "已禁用​​​​​",
+      "slot_units": 8
+    },
+    {
+      "offset": 168242,
+      "original": "enabled",
+      "translated": "已启用​​​​",
+      "slot_units": 7
+    },
+    {
+      "offset": 168690,
+      "original": "Green",
+      "translated": "绿色​​​",
+      "slot_units": 5
+    },
+    {
+      "offset": 168702,
+      "original": "Red",
+      "translated": "红色​",
+      "slot_units": 3
+    },
+    {
+      "offset": 168710,
+      "original": "Black",
+      "translated": "黑色​​​",
+      "slot_units": 5
+    },
+    {
+      "offset": 168950,
+      "original": "Cookness",
+      "translated": "熟度​​​​​​",
+      "slot_units": 8
+    },
+    {
+      "offset": 169198,
+      "original": "Kill score catalogue: {0} bonuses.",
+      "translated": "击杀分数目录：{0} 个奖励。​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 34
+    },
+    {
+      "offset": 169468,
+      "original": "Rarity",
+      "translated": "稀有度​​​",
+      "slot_units": 6
+    },
+    {
+      "offset": 170256,
+      "original": "None",
+      "translated": "无​​​",
+      "slot_units": 4
+    },
+    {
+      "offset": 170718,
+      "original": "Target player has no usable position.",
+      "translated": "目标玩家没有可用位置。​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 37
+    },
+    {
+      "offset": 171627,
+      "original": "Boat locked",
+      "translated": "船只未解锁​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 171651,
+      "original": "Boat unlocked",
+      "translated": "船只已解锁​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 171679,
+      "original": "Radar locked",
+      "translated": "雷达未解锁​​​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 171705,
+      "original": "Radar unlocked",
+      "translated": "雷达已解锁​​​​​​​​​",
+      "slot_units": 14
+    },
+    {
+      "offset": 171735,
+      "original": "Unlock boat",
+      "translated": "解锁船只​​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 171759,
+      "original": "Unlock radar",
+      "translated": "解锁雷达​​​​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 171785,
+      "original": "Bring boat to me",
+      "translated": "召回船只​​​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 171819,
+      "original": "Boat moved",
+      "translated": "船只已移动​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 171841,
+      "original": "Current tier: {0}",
+      "translated": "当前等级：{0}​​​​​​​​​",
+      "slot_units": 17
+    },
+    {
+      "offset": 171885,
+      "original": "Motor set to {0}",
+      "translated": "引擎等级已设为 {0}​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 172232,
+      "original": "Boat flight",
+      "translated": "船只飞行​​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 172270,
+      "original": "Climb speed",
+      "translated": "攀爬速度​​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 172667,
+      "original": "Engine power",
+      "translated": "引擎功率​​​​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 172693,
+      "original": "Speed limit",
+      "translated": "速度上限​​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 172718,
+      "original": "Engine power is the thrust the motor applies and is the real speed control. The limit is the rigidbody's velocity cap — the game only reads its own value at startup, so this writes the cap directly.",
+      "translated": "引擎功率决定推力，速度上限直接写入刚体。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 198
+    },
+    {
+      "offset": 173116,
+      "original": "Reset handling",
+      "translated": "重置操控​​​​​​​​​​",
+      "slot_units": 14
+    },
+    {
+      "offset": 173146,
+      "original": "Boat handling reset",
+      "translated": "船只操控已重置​​​​​​​​​​​​",
+      "slot_units": 19
+    },
+    {
+      "offset": 174233,
+      "original": "{0} loose object(s) in the world",
+      "translated": "世界中有 {0} 个散落物​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 32
+    },
+    {
+      "offset": 174300,
+      "original": "Anything a player is holding or has stored is excluded and never removed.",
+      "translated": "玩家手持或存放的物品不会被处理。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 73
+    },
+    {
+      "offset": 174448,
+      "original": "Nothing loose right now.",
+      "translated": "当前没有散落物。​​​​​​​​​​​​​​​​",
+      "slot_units": 24
+    },
+    {
+      "offset": 174504,
+      "original": "Despawn",
+      "translated": "消失​​​​​",
+      "slot_units": 7
+    },
+    {
+      "offset": 174544,
+      "original": "Radius",
+      "translated": "半径​​​​",
+      "slot_units": 6
+    },
+    {
+      "offset": 174768,
+      "original": "All creatures",
+      "translated": "所有生物​​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 174796,
+      "original": "Creatures cleared",
+      "translated": "生物已清除​​​​​​​​​​​​",
+      "slot_units": 17
+    },
+    {
+      "offset": 174832,
+      "original": "Everything loose",
+      "translated": "全部散落物​​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 174866,
+      "original": "World cleared",
+      "translated": "世界已清理​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 174895,
+      "original": "Uses the game's own Item.DestroyItem, so objects despawn across the network properly rather than vanishing only on your screen. This will also remove loot and quest items lying on the ground.",
+      "translated": "使用游戏自身的销毁接口，物体会在网络中正确消失，也会移除地面战利品和任务物品。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 191
+    },
+    {
+      "offset": 175279,
+      "original": "Currently equipped: bait {0}",
+      "translated": "当前装备鱼饵：{0}​​​​​​​​​​​​​​​​​​",
+      "slot_units": 28
+    },
+    {
+      "offset": 175337,
+      "original": "Grant every bait",
+      "translated": "获得所有鱼饵​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 175371,
+      "original": "All baits granted",
+      "translated": "已获得所有鱼饵​​​​​​​​​​",
+      "slot_units": 17
+    },
+    {
+      "offset": 175408,
+      "original": "Grants ownership without charging — the same call the game makes once a purchase is approved.",
+      "translated": "直接授予所有权，不收取费用。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 93
+    },
+    {
+      "offset": 175640,
+      "original": "Equip",
+      "translated": "装备​​​",
+      "slot_units": 5
+    },
+    {
+      "offset": 175680,
+      "original": "Win chance",
+      "translated": "获胜概率​​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 175702,
+      "original": "Force colour",
+      "translated": "强制颜色​​​​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 175867,
+      "original": "Rolled once per spin. On a win the ball is steered to the colour you bet; on a loss it goes to the other of red or black, never green, so a loss can't accidentally pay 35x.",
+      "translated": "每次旋转判定一次，赢时落在下注颜色，输时落在另一种红黑色，不会落到绿色。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 172
+    },
+    {
+      "offset": 176213,
+      "original": "BetColor enum did not resolve. See Diagnostics.",
+      "translated": "下注颜色枚举解析失败，请查看诊断。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 47
+    },
+    {
+      "offset": 176310,
+      "original": "Every spin lands on this colour regardless of what you bet. Green pays 35x.",
+      "translated": "每次旋转都落在此颜色，绿色赔率为 35 倍。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 75
+    },
+    {
+      "offset": 177287,
+      "original": "Spin in progress",
+      "translated": "旋转进行中​​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 177335,
+      "original": "You bet",
+      "translated": "你的下注​​​",
+      "slot_units": 7
+    },
+    {
+      "offset": 177425,
+      "original": "Last result",
+      "translated": "上次结果​​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 177513,
+      "original": "Settle now",
+      "translated": "立即结算​​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 177535,
+      "original": "Wheel settled",
+      "translated": "转盘已停稳​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 177587,
+      "original": "Stats cleared",
+      "translated": "统计已清除​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 177912,
+      "original": "Item value multiplier",
+      "translated": "物品价值倍率​​​​​​​​​​​​​​​",
+      "slot_units": 21
+    },
+    {
+      "offset": 178255,
+      "original": "Start a spin manually",
+      "translated": "手动开始旋转​​​​​​​​​​​​​​​",
+      "slot_units": 21
+    },
+    {
+      "offset": 178299,
+      "original": "Spinning on ",
+      "translated": "当前落点：​​​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 178431,
+      "original": "Nothing armed",
+      "translated": "未装填任何内容​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 178473,
+      "original": "the roll is random",
+      "translated": "本次结果为随机​​​​​​​​​​​",
+      "slot_units": 18
+    },
+    {
+      "offset": 178511,
+      "original": "Roll the machine",
+      "translated": "旋转机器​​​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 178559,
+      "original": "Clear",
+      "translated": "清除​​​",
+      "slot_units": 5
+    },
+    {
+      "offset": 178571,
+      "original": "Rig cleared",
+      "translated": "装填已清除​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 178596,
+      "original": "Arm a skin, then roll — the reel is built around your pick, so the machine visibly stops on the skin it hands you.",
+      "translated": "装填外观后旋转，机器会停在你选择的外观上。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 114
+    },
+    {
+      "offset": 178826,
+      "original": "Held item",
+      "translated": "手持物品​​​​​",
+      "slot_units": 9
+    },
+    {
+      "offset": 178874,
+      "original": "Find a weapon…",
+      "translated": "查找武器…​​​​​​​​​",
+      "slot_units": 14
+    },
+    {
+      "offset": 179035,
+      "original": "Rarity also decides where on the reel it lands — the game seats commons, rares and legendaries in different positions.",
+      "translated": "稀有度决定转盘落点，普通、稀有和传奇位于不同位置。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 118
+    },
+    {
+      "offset": 179273,
+      "original": "Filter skins…",
+      "translated": "筛选外观…​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 179301,
+      "original": "{0} of {1} skins",
+      "translated": "{0}/{1} 个外观​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 179335,
+      "original": "Arm",
+      "translated": "装填​",
+      "slot_units": 3
+    },
+    {
+      "offset": 179399,
+      "original": "Base worth",
+      "translated": "基础价值​​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 179421,
+      "original": "Apply worth",
+      "translated": "应用价值​​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 179485,
+      "original": "Total worth is derived from base worth, weight and cookness.",
+      "translated": "总价值由基础价值、重量和熟度计算。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 60
+    },
+    {
+      "offset": 179607,
+      "original": "Weight",
+      "translated": "重量​​​​",
+      "slot_units": 6
+    },
+    {
+      "offset": 179621,
+      "original": "Apply weight",
+      "translated": "应用重量​​​​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 179647,
+      "original": "Weight set to {0:0.##}",
+      "translated": "重量已设为 {0:0.##}​​​​​​​​",
+      "slot_units": 22
+    },
+    {
+      "offset": 179693,
+      "original": "Apply cookness",
+      "translated": "应用熟度​​​​​​​​​​",
+      "slot_units": 14
+    },
+    {
+      "offset": 179795,
+      "original": "Apply kill score",
+      "translated": "应用击杀分数​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 179897,
+      "original": "Apply betting",
+      "translated": "应用下注倍率​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 179971,
+      "original": "Keep inventory on death",
+      "translated": "死亡保留背包​​​​​​​​​​​​​​​​​",
+      "slot_units": 23
+    },
+    {
+      "offset": 180034,
+      "original": "Skips the drop that normally scatters your items when you die, on both the inventory and the server side so nothing desyncs.",
+      "translated": "跳过死亡掉落，客户端与服务器保持同步。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 124
+    },
+    {
+      "offset": 180381,
+      "original": "The game has no stack count — every slot holds one real item with its own worth and skin — so this spawns that many genuine copies at your feet instead of faking a stack number.",
+      "translated": "游戏没有堆叠数量，每个栏位都是独立物品；此操作会生成对应数量的真实副本。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 177
+    },
+    {
+      "offset": 180737,
+      "original": "Save inventory",
+      "translated": "保存背包​​​​​​​​​​",
+      "slot_units": 14
+    },
+    {
+      "offset": 180767,
+      "original": "Inventory saved",
+      "translated": "背包已保存​​​​​​​​​​",
+      "slot_units": 15
+    },
+    {
+      "offset": 180799,
+      "original": "Drop everything",
+      "translated": "丢弃全部​​​​​​​​​​​",
+      "slot_units": 15
+    },
+    {
+      "offset": 180847,
+      "original": "Make everything valuable",
+      "translated": "让全部物品更有价值​​​​​​​​​​​​​​​",
+      "slot_units": 24
+    },
+    {
+      "offset": 180958,
+      "original": "Applies base worth 100,000 and weight 10 to whichever target is selected above.",
+      "translated": "将选中目标的基础价值设为 100000、重量设为 10。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 79
+    },
+    {
+      "offset": 181118,
+      "original": "Every item in world",
+      "translated": "世界中的每件物品​​​​​​​​​​​",
+      "slot_units": 19
+    },
+    {
+      "offset": 181178,
+      "original": "Nothing in hand.",
+      "translated": "手中没有物品。​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 181212,
+      "original": "{0} items in the world.",
+      "translated": "世界中有 {0} 件物品。​​​​​​​​​​",
+      "slot_units": 23
+    },
+    {
+      "offset": 181260,
+      "original": "Total worth",
+      "translated": "总价值​​​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 181284,
+      "original": "Kill score multi",
+      "translated": "击杀分数倍率​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 181346,
+      "original": "Enable all keybinds",
+      "translated": "启用全部快捷键​​​​​​​​​​​​",
+      "slot_units": 19
+    },
+    {
+      "offset": 181386,
+      "original": "Cheat hotkeys disabled",
+      "translated": "作弊快捷键已禁用​​​​​​​​​​​​​​",
+      "slot_units": 22
+    },
+    {
+      "offset": 181432,
+      "original": "Cheat hotkeys enabled",
+      "translated": "作弊快捷键已启用​​​​​​​​​​​​​",
+      "slot_units": 21
+    },
+    {
+      "offset": 181714,
+      "original": "and always works.",
+      "translated": "并且始终有效。​​​​​​​​​​",
+      "slot_units": 17
+    },
+    {
+      "offset": 181750,
+      "original": "Currently inactive — you can still rebind them.",
+      "translated": "当前未启用，仍可重新绑定。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 47
+    },
+    {
+      "offset": 181847,
+      "original": "Click a key to rebind it, then press the new key. Escape cancels.",
+      "translated": "点击按键进行重绑，然后按下新按键。按 Esc 取消。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 65
+    },
+    {
+      "offset": 181979,
+      "original": "press a key…",
+      "translated": "请按下按键…​​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 182164,
+      "original": "Open / close menu",
+      "translated": "打开/关闭菜单​​​​​​​​​​",
+      "slot_units": 17
+    },
+    {
+      "offset": 182557,
+      "original": "Extra multiplier",
+      "translated": "额外倍率​​​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 182888,
+      "original": "Select all",
+      "translated": "全选​​​​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 182910,
+      "original": "All bonuses selected",
+      "translated": "已选择全部奖励​​​​​​​​​​​​​",
+      "slot_units": 20
+    },
+    {
+      "offset": 182952,
+      "original": "Selection cleared",
+      "translated": "选择已清除​​​​​​​​​​​​",
+      "slot_units": 17
+    },
+    {
+      "offset": 183009,
+      "original": "Bonuses multiply together — the game computes the payout as the product of every row, which is why picking several stacks up fast.",
+      "translated": "奖励倍率相乘，选择多个奖励会快速叠加。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 130
+    },
+    {
+      "offset": 183271,
+      "original": "Amount",
+      "translated": "数量​​​​",
+      "slot_units": 6
+    },
+    {
+      "offset": 183285,
+      "original": "Accepts shorthand: 50k, 2.5m, 1b.",
+      "translated": "支持简写：50k、2.5m、1b。​​​​​​​​​​​​​​​​",
+      "slot_units": 33
+    },
+    {
+      "offset": 183377,
+      "original": "Remove",
+      "translated": "移除​​​​",
+      "slot_units": 6
+    },
+    {
+      "offset": 183407,
+      "original": "Set to",
+      "translated": "设置为​​​",
+      "slot_units": 6
+    },
+    {
+      "offset": 183708,
+      "original": "Fly mode",
+      "translated": "飞行模式​​​​",
+      "slot_units": 8
+    },
+    {
+      "offset": 183726,
+      "original": "Horizontal speed",
+      "translated": "水平速度​​​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 183760,
+      "original": "Vertical speed",
+      "translated": "垂直速度​​​​​​​​​​",
+      "slot_units": 14
+    },
+    {
+      "offset": 183791,
+      "original": "WASD moves, Space up, Left Ctrl down. Releasing both hovers instead of falling. Gravity is restored when you switch fly off.",
+      "translated": "WASD 移动，空格上升，左 Ctrl 下降；松开后悬停，关闭飞行时恢复重力。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 124
+    },
+    {
+      "offset": 184041,
+      "original": "Reset all to defaults",
+      "translated": "全部恢复默认​​​​​​​​​​​​​​​",
+      "slot_units": 21
+    },
+    {
+      "offset": 184085,
+      "original": "Movement reset",
+      "translated": "移动设置已重置​​​​​​​",
+      "slot_units": 14
+    },
+    {
+      "offset": 184116,
+      "original": "Defaults are captured the first time each slider is read this session.",
+      "translated": "每个滑块首次读取时保存本局初始值。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 70
+    },
+    {
+      "offset": 184258,
+      "original": "God mode off",
+      "translated": "无敌模式已关闭​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 184284,
+      "original": "God mode on",
+      "translated": "无敌模式已开启​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 184354,
+      "original": "One-shot off",
+      "translated": "一击必杀已关闭​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 184380,
+      "original": "One-shot on",
+      "translated": "一击必杀已开启​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 184404,
+      "original": "One-shot toggle failed",
+      "translated": "一击必杀切换失败​​​​​​​​​​​​​​",
+      "slot_units": 22
+    },
+    {
+      "offset": 184450,
+      "original": "Friendly fire",
+      "translated": "友军伤害​​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 184478,
+      "original": "Friendly fire off",
+      "translated": "友军伤害已关闭​​​​​​​​​​",
+      "slot_units": 17
+    },
+    {
+      "offset": 184514,
+      "original": "Friendly fire on",
+      "translated": "友军伤害已开启​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 184604,
+      "original": "Health {0}",
+      "translated": "生命值 {0}​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 184674,
+      "original": "Feed",
+      "translated": "进食​​",
+      "slot_units": 4
+    },
+    {
+      "offset": 184684,
+      "original": "Fullness +{0}",
+      "translated": "饱食度 +{0}​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 184712,
+      "original": "Full reset",
+      "translated": "完全重置​​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 184734,
+      "original": "Vitals reset",
+      "translated": "生命状态已重置​​​​​",
+      "slot_units": 12
+    },
+    {
+      "offset": 184760,
+      "original": "Full reset also clears poison and fire.",
+      "translated": "完全重置还会清除中毒和着火。​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 39
+    },
+    {
+      "offset": 185030,
+      "original": "Enable dev cheats",
+      "translated": "启用开发者作弊​​​​​​​​​​",
+      "slot_units": 17
+    },
+    {
+      "offset": 185066,
+      "original": "Disable dev cheats",
+      "translated": "禁用开发者作弊​​​​​​​​​​​",
+      "slot_units": 18
+    },
+    {
+      "offset": 185104,
+      "original": "Dev cheats enabled",
+      "translated": "开发者作弊已启用​​​​​​​​​​",
+      "slot_units": 18
+    },
+    {
+      "offset": 185142,
+      "original": "Dev cheats disabled",
+      "translated": "开发者作弊已禁用​​​​​​​​​​​",
+      "slot_units": 19
+    },
+    {
+      "offset": 185182,
+      "original": "Unlock everything",
+      "translated": "全部解锁​​​​​​​​​​​​​",
+      "slot_units": 17
+    },
+    {
+      "offset": 185514,
+      "original": "Extra pockets unlocked: {0}",
+      "translated": "额外背包格已解锁：{0}​​​​​​​​​​​​​​​",
+      "slot_units": 27
+    },
+    {
+      "offset": 185592,
+      "original": "Pocket {0} unlocked",
+      "translated": "背包格 {0} 已解锁​​​​​​​​",
+      "slot_units": 19
+    },
+    {
+      "offset": 185632,
+      "original": "Unlock all pockets",
+      "translated": "解锁所有背包格​​​​​​​​​​​",
+      "slot_units": 18
+    },
+    {
+      "offset": 185670,
+      "original": "All pockets unlocked",
+      "translated": "全部背包格已解锁​​​​​​​​​​​​",
+      "slot_units": 20
+    },
+    {
+      "offset": 185712,
+      "original": "Finish game",
+      "translated": "完成游戏​​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 185736,
+      "original": "Game marked finished",
+      "translated": "游戏已标记为完成​​​​​​​​​​​​",
+      "slot_units": 20
+    },
+    {
+      "offset": 185778,
+      "original": "Show kill scores",
+      "translated": "显示击杀分数​​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 185812,
+      "original": "Kill scores shown",
+      "translated": "击杀分数已显示​​​​​​​​​​",
+      "slot_units": 17
+    },
+    {
+      "offset": 185848,
+      "original": "Unlock all",
+      "translated": "全部解锁​​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 185870,
+      "original": "All achievements unlocked",
+      "translated": "全部成就已解锁​​​​​​​​​​​​​​​​​​",
+      "slot_units": 25
+    },
+    {
+      "offset": 185922,
+      "original": "Lock all",
+      "translated": "全部锁定​​​​",
+      "slot_units": 8
+    },
+    {
+      "offset": 185981,
+      "original": "Achievements are written to Steam. Locking clears the local flags, but anything already pushed to your Steam profile stays there.",
+      "translated": "成就会写入 Steam。锁定只清除本地标记，已同步到 Steam 的记录不会改变。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 129
+    },
+    {
+      "offset": 186241,
+      "original": "Save now",
+      "translated": "立即保存​​​​",
+      "slot_units": 8
+    },
+    {
+      "offset": 186286,
+      "original": "A backup copy of your save folder is taken automatically before the first permanent change each session.",
+      "translated": "每局首次永久修改前会自动备份存档文件夹。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 104
+    },
+    {
+      "offset": 186496,
+      "original": "Save current settings",
+      "translated": "保存当前设置​​​​​​​​​​​​​​​",
+      "slot_units": 21
+    },
+    {
+      "offset": 186561,
+      "original": "No presets yet. Presets store movement, ESP, camera and item values.",
+      "translated": "暂无预设。预设保存移动、透视、镜头和物品数值。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 68
+    },
+    {
+      "offset": 186699,
+      "original": "Load",
+      "translated": "加载​​",
+      "slot_units": 4
+    },
+    {
+      "offset": 186727,
+      "original": "Menu key",
+      "translated": "菜单键​​​​​",
+      "slot_units": 8
+    },
+    {
+      "offset": 186745,
+      "original": "Cheat hotkeys",
+      "translated": "作弊快捷键​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 186773,
+      "original": "disabled — see Keybinds tab",
+      "translated": "已禁用，请查看按键页面​​​​​​​​​​​​​​​​",
+      "slot_units": 27
+    },
+    {
+      "offset": 186829,
+      "original": "Auto-unlock dev cheats",
+      "translated": "自动解锁开发者作弊​​​​​​​​​​​​​",
+      "slot_units": 22
+    },
+    {
+      "offset": 186875,
+      "original": "Back up saves before permanent changes",
+      "translated": "永久修改前备份存档​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 38
+    },
+    {
+      "offset": 187086,
+      "original": "Unlock all weapon skins",
+      "translated": "解锁所有武器外观​​​​​​​​​​​​​​​",
+      "slot_units": 23
+    },
+    {
+      "offset": 187134,
+      "original": "All weapon skins unlocked",
+      "translated": "所有武器外观已解锁​​​​​​​​​​​​​​​​",
+      "slot_units": 25
+    },
+    {
+      "offset": 187186,
+      "original": "All skins locked",
+      "translated": "所有外观已锁定​​​​​​​​​",
+      "slot_units": 16
+    },
+    {
+      "offset": 187220,
+      "original": "Unlock all characters",
+      "translated": "解锁所有角色​​​​​​​​​​​​​​​",
+      "slot_units": 21
+    },
+    {
+      "offset": 187264,
+      "original": "All characters unlocked",
+      "translated": "全部角色已解锁​​​​​​​​​​​​​​​​",
+      "slot_units": 23
+    },
+    {
+      "offset": 187312,
+      "original": "Hold an item to see and apply its skins.",
+      "translated": "手持物品即可查看并应用外观。​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 40
+    },
+    {
+      "offset": 187394,
+      "original": "{0} — {1} skins",
+      "translated": "{0} — {1} 个外观​​",
+      "slot_units": 15
+    },
+    {
+      "offset": 187426,
+      "original": "This item has no skin preset.",
+      "translated": "此物品没有外观预设。​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 29
+    },
+    {
+      "offset": 187486,
+      "original": "Wear",
+      "translated": "穿戴​​",
+      "slot_units": 4
+    },
+    {
+      "offset": 187654,
+      "original": "Filter characters…",
+      "translated": "筛选角色…​​​​​​​​​​​​​",
+      "slot_units": 18
+    },
+    {
+      "offset": 187692,
+      "original": "Quantity",
+      "translated": "数量​​​​​​",
+      "slot_units": 8
+    },
+    {
+      "offset": 187739,
+      "original": "Spawns 2m in front of the camera. Dead and Drip only apply to creatures.",
+      "translated": "在镜头前方 2 米生成；死亡和滴水变体仅适用于生物。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 72
+    },
+    {
+      "offset": 187885,
+      "original": "A–Z",
+      "translated": "按字母",
+      "slot_units": 3
+    },
+    {
+      "offset": 187968,
+      "original": "Categories come from the components each prefab carries, not from its name.",
+      "translated": "类别根据预制体组件判定，而不是名称。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 75
+    },
+    {
+      "offset": 188164,
+      "original": "unlocked up to {0}",
+      "translated": "已解锁至 {0}​​​​​​​​​​",
+      "slot_units": 18
+    },
+    {
+      "offset": 188250,
+      "original": "◀ Previous",
+      "translated": "◀ 上一步​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 188272,
+      "original": "Previous island",
+      "translated": "上一座岛​​​​​​​​​​​",
+      "slot_units": 15
+    },
+    {
+      "offset": 188304,
+      "original": "Next ▶",
+      "translated": "下一步 ▶​",
+      "slot_units": 6
+    },
+    {
+      "offset": 188318,
+      "original": "Next island",
+      "translated": "下一座岛​​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 188342,
+      "original": "All islands unlocked",
+      "translated": "所有岛屿已解锁​​​​​​​​​​​​​",
+      "slot_units": 20
+    },
+    {
+      "offset": 188385,
+      "original": "Island travel moves everyone on the server, same as the game's own command.",
+      "translated": "岛屿旅行会移动服务器上的所有玩家。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 75
+    },
+    {
+      "offset": 188537,
+      "original": "Go to boat",
+      "translated": "前往船只​​​​​​",
+      "slot_units": 10
+    },
+    {
+      "offset": 188559,
+      "original": "Teleported to boat",
+      "translated": "已传送到船只​​​​​​​​​​​​",
+      "slot_units": 18
+    },
+    {
+      "offset": 188597,
+      "original": "Save here",
+      "translated": "保存到此处​​​​",
+      "slot_units": 9
+    },
+    {
+      "offset": 188617,
+      "original": "No waypoints yet. They last until you quit the game.",
+      "translated": "暂无航点，航点会保留到退出游戏。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 52
+    },
+    {
+      "offset": 188761,
+      "original": "No other players found.",
+      "translated": "未找到其他玩家。​​​​​​​​​​​​​​​",
+      "slot_units": 23
+    },
+    {
+      "offset": 188809,
+      "original": "Go to",
+      "translated": "前往​​​",
+      "slot_units": 5
+    },
+    {
+      "offset": 188843,
+      "original": "Bring",
+      "translated": "召回​​​",
+      "slot_units": 5
+    },
+    {
+      "offset": 188855,
+      "original": "Player brought",
+      "translated": "玩家已召回​​​​​​​​​",
+      "slot_units": 14
+    },
+    {
+      "offset": 188957,
+      "original": "Complete normal",
+      "translated": "完成普通日志​​​​​​​​​",
+      "slot_units": 15
+    },
+    {
+      "offset": 188989,
+      "original": "Normal journal completed",
+      "translated": "普通日志已完成​​​​​​​​​​​​​​​​​",
+      "slot_units": 24
+    },
+    {
+      "offset": 189039,
+      "original": "Complete drip",
+      "translated": "完成滴水日志​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 189067,
+      "original": "Drip journal completed",
+      "translated": "滴水日志已完成​​​​​​​​​​​​​​​",
+      "slot_units": 22
+    },
+    {
+      "offset": 189139,
+      "original": "Normal journal reset",
+      "translated": "普通日志已重置​​​​​​​​​​​​​",
+      "slot_units": 20
+    },
+    {
+      "offset": 189203,
+      "original": "Drip journal reset",
+      "translated": "滴水日志已重置​​​​​​​​​​​",
+      "slot_units": 18
+    },
+    {
+      "offset": 189241,
+      "original": "No boss active. Spawn one from the Spawn tab.",
+      "translated": "当前没有首领，请在生成页生成。​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+      "slot_units": 45
+    },
+    {
+      "offset": 189371,
+      "original": "Boss immortal",
+      "translated": "首领无敌​​​​​​​​​",
+      "slot_units": 13
+    },
+    {
+      "offset": 189515,
+      "original": "Heal amount",
+      "translated": "治疗量​​​​​​​​",
+      "slot_units": 11
+    },
+    {
+      "offset": 189539,
+      "original": "Heal boss",
+      "translated": "治疗首领​​​​​",
+      "slot_units": 9
+    },
+    {
+      "offset": 189597,
+      "original": "Kill boss",
+      "translated": "击杀首领​​​​​",
+      "slot_units": 9
+    },
+    {
+      "offset": 189641,
+      "original": "Unlock grill",
+      "translated": "解锁烤架​​​​​​​​",
+      "slot_units": 12
+    }
+  ]
+}

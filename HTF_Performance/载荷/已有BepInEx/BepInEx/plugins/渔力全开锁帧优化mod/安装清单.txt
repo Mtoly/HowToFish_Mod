@@ -1,0 +1,3 @@
+format	1
+product	渔力全开锁帧优化mod
+file	BepInEx\plugins\渔力全开锁帧优化mod\渔力全开锁帧优化mod.dll	c4cf3e449684313d83a36d65f460dc6ff133cdebe3b6723b579e47c20281ee27

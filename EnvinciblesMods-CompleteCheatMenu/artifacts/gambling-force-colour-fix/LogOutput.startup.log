@@ -1,0 +1,65 @@
+[Message:   BepInEx] BepInEx 5.4.23.5 - How to Fish (2026/8/25 19:48:44)
+[Info   :   BepInEx] Running under Unity v6000.4.4.3542935
+[Info   :   BepInEx] CLR runtime version: 4.0.30319.42000
+[Info   :   BepInEx] Supports SRE: True
+[Info   :   BepInEx] System platform: Bits64, Windows
+[Message:   BepInEx] Preloader started
+[Info   :   BepInEx] Loaded 1 patcher method from [BepInEx.Preloader 5.4.23.5]
+[Info   :   BepInEx] 1 patcher plugin loaded
+[Info   :   BepInEx] Patching [UnityEngine.CoreModule] with [BepInEx.Chainloader]
+[Message:   BepInEx] Preloader finished
+[Message:   BepInEx] Chainloader ready
+[Message:   BepInEx] Chainloader started
+[Info   :   BepInEx] 7 plugins to load
+[Warning:   BepInEx] Skipping [MorePlayers 0.1.0] because a newer version exists (MorePlayers 0.1.0)
+[Warning:   BepInEx] Skipping [MorePlayers 0.1.0] because a newer version exists (MorePlayers 0.1.0)
+[Info   :   BepInEx] Loading [How To Fish - Magic Bullet 1.2.2]
+[Info   :How To Fish - Magic Bullet] [Compatibility] ProjectileManager methods verified successfully. Wall Penetration is supported.
+[Info   :How To Fish - Magic Bullet] How To Fish - Magic Bullet v1.2.2 loaded.
+[Info   :How To Fish - Magic Bullet] Target mode: Crosshair | FOV: 20° | Sticky: True | WallPen: False
+[Info   :   BepInEx] Loading [NoSharedMoney 1.1.0]
+[Info   :NoSharedMoney] SaveBackups is not installed, so wallets will not be included in save backups. Installing it is recommended, since a lost wallet file cannot be recovered any other way.
+[Info   :NoSharedMoney] Hooked 8/8 purchase paths: BuyItem, BuyBait, BuyAttachment, BuyBulletUpgrade, BuySharpnessUpgrade, BuyBoatMotor, BuyBoatRadar, UnlockPocket
+[Info   :NoSharedMoney] NoSharedMoney 1.1.0 loaded. Money is now per-player; every player needs this mod installed.
+[Info   :   BepInEx] Loading [Complete Cheat Menu 0.7.0]
+[Info   :Complete Cheat Menu] 13 method(s) patched.
+[Info   :Complete Cheat Menu] 已加载 完整作弊菜单​​​​​​​​​​​​​ 0.7.0。进入游戏后按 Insert。​​​​​​​​​​​
+[Info   :   BepInEx] Loading [MorePlayers 0.1.0]
+[Error  : Unity Log] ArgumentException: Label #2 is not marked in method `DMD<SteamManager::CreateLobby>'
+Stack trace:
+System.Reflection.Emit.ILGenerator.label_fixup (System.Reflection.MethodBase mb) (at <f713e1c3c5f545ce9b1df47230f4f853>:0)
+System.Reflection.Emit.DynamicMethod.CreateDynMethod () (at <f713e1c3c5f545ce9b1df47230f4f853>:0)
+System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) (at <f713e1c3c5f545ce9b1df47230f4f853>:0)
+Rethrow as TargetInvocationException: Exception has been thrown by the target of an invocation.
+System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) (at <f713e1c3c5f545ce9b1df47230f4f853>:0)
+System.Reflection.MethodBase.Invoke (System.Object obj, System.Object[] parameters) (at <f713e1c3c5f545ce9b1df47230f4f853>:0)
+MonoMod.RuntimeDetour.Platforms.DetourRuntimeMonoPlatform.GetMethodHandle (System.Reflection.MethodBase method) (at <4e2760c7517c4ea79c633d67e84b319f>:0)
+MonoMod.RuntimeDetour.Platforms.DetourRuntimeILPlatform.GetIdentifiable (System.Reflection.MethodBase method) (at <4e2760c7517c4ea79c633d67e84b319f>:0)
+MonoMod.RuntimeDetour.Platforms.DetourRuntimeILPlatform.Pin (System.Reflection.MethodBase method) (at <4e2760c7517c4ea79c633d67e84b319f>:0)
+MonoMod.RuntimeDetour.DetourHelper.Pin[T] (T method) (at <4e2760c7517c4ea79c633d67e84b319f>:0)
+MonoMod.RuntimeDetour.Detour..ctor (System.Reflection.MethodBase from, System.Reflection.MethodBase to, MonoMod.RuntimeDetour.DetourConfig& config) (at <4e2760c7517c4ea79c633d67e84b319f>:0)
+(wrapper dynamic-method) MonoMod.RuntimeDetour.ILHook+Context.DMD<MonoMod.RuntimeDetour.ILHook+Context::Refresh>(MonoMod.RuntimeDetour.ILHook/Context)
+(wrapper dynamic-method) MonoMod.Utils.DynamicMethodDefinition.Trampoline<MonoMod.RuntimeDetour.ILHook+Context::Refresh>?1849500752(object)
+HarmonyLib.Internal.RuntimeFixes.StackTraceFixes.OnILChainRefresh (System.Object self) (at <474744d65d8e460fa08cd5fd82b5d65f>:0)
+MonoMod.RuntimeDetour.ILHook.Apply () (at <4e2760c7517c4ea79c633d67e84b319f>:0)
+HarmonyLib.Public.Patching.ManagedMethodPatcher.DetourTo (System.Reflection.MethodBase replacement) (at <474744d65d8e460fa08cd5fd82b5d65f>:0)
+Rethrow as HarmonyException: IL Compile Error (unknown location)
+HarmonyLib.Public.Patching.ManagedMethodPatcher.DetourTo (System.Reflection.MethodBase replacement) (at <474744d65d8e460fa08cd5fd82b5d65f>:0)
+HarmonyLib.PatchFunctions.UpdateWrapper (System.Reflection.MethodBase original, HarmonyLib.PatchInfo patchInfo) (at <474744d65d8e460fa08cd5fd82b5d65f>:0)
+Rethrow as HarmonyException: IL Compile Error (unknown location)
+HarmonyLib.PatchClassProcessor.ReportException (System.Exception exception, System.Reflection.MethodBase original) (at <474744d65d8e460fa08cd5fd82b5d65f>:0)
+HarmonyLib.PatchClassProcessor.Patch () (at <474744d65d8e460fa08cd5fd82b5d65f>:0)
+HarmonyLib.Harmony.<PatchAll>b__11_0 (System.Type type) (at <474744d65d8e460fa08cd5fd82b5d65f>:0)
+HarmonyLib.CollectionExtensions.Do[T] (System.Collections.Generic.IEnumerable`1[T] sequence, System.Action`1[T] action) (at <474744d65d8e460fa08cd5fd82b5d65f>:0)
+HarmonyLib.Harmony.PatchAll (System.Reflection.Assembly assembly) (at <474744d65d8e460fa08cd5fd82b5d65f>:0)
+HarmonyLib.Harmony.PatchAll () (at <474744d65d8e460fa08cd5fd82b5d65f>:0)
+MorePlayers.Plugin.Awake () (at <22ba16b0bba742b0a0fe624b38e75469>:0)
+UnityEngine.GameObject:AddComponent(Type)
+BepInEx.Bootstrap.Chainloader:Start()
+UnityEngine.InputSystem.InputSystem:.cctor()
+
+[Info   :   BepInEx] Loading [Keep Inventory 1.0.0]
+[Info   :Keep Inventory] KeepInventory loaded!
+[Message:   BepInEx] Chainloader startup complete
+[Error  : Unity Log] Steam Initialization failed, check the log for more information.
+[Error  : Unity Log] [Steamworks.NET] Steam Initialization failed, check the log for more information

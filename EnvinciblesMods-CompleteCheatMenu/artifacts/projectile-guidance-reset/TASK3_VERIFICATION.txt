@@ -1,0 +1,63 @@
+TASK=Task 3 Caijue-style projectile target lifecycle checks
+DATE=2026-09-04
+STATUS=PASS
+
+CHANGED_BRANCH_OR_FIELD
+- ProjectileTracker.IsValidTarget now rejects Creature.IsDead.
+- ProjectileTracker.IsValidTarget now rejects Item.IsDestroying.
+- ProjectileTracker.IsValidTarget now rejects disabled Behaviour components.
+- ProjectileTracker.IsValidTarget now rejects inactive Transform GameObjects.
+- Invalid ID fallback cleanup removes launch metadata together with target metadata.
+
+FOUR_PRIMARY_ARTIFACTS
+MODIFIED_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\decompiled-src\CompleteCheatMenu\Targeting\ProjectileTracker.cs
+MODIFIED_SHA256=AF6282A49534D267CF29FC9F346FE9F3BF3008E6A3F085E67D275041FACC0EE6
+DIFF_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\task3-lifecycle.patch
+DIFF_SHA256=28EA9A9EBB715270A08CC99654F328EADF0A7A4E2CDCC5DBB5D8703CDA23685C
+VERIFICATION=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\TASK3_VERIFICATION.txt
+ROLLBACK=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\ROLLBACK_TASK3.sh
+ROLLBACK_SHA256=EE61EFC757C4F66E9BFDB7D04B36C513BD92299A92C23DBAB29E67E2045FE12D
+
+TESTS
+COMMAND=python tests/projectile_target_lifecycle_test.py
+INPUT=source lifecycle contract assertions
+LITERAL_OUTPUT=PROJECTILE_TARGET_LIFECYCLE_TESTS=PASS cases=5
+EXIT_STATUS=0
+COMMAND=powershell -NoProfile -ExecutionPolicy Bypass -File decompiled-src/build.ps1 -GameRoot "E:\SteamLibrary\steamapps\common\How to Fish\How to Fish" -OutputPath artifacts/projectile-guidance-reset/CompleteCheatMenu.task3.dll
+INPUT=97 sorted C# source files and game references
+LITERAL_OUTPUT=BUILD_OUTPUT=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\CompleteCheatMenu.task3.dll
+LITERAL_OUTPUT=BUILD_SOURCE_COUNT=97
+LITERAL_OUTPUT=BUILD_SHA256=0A266C364396680621144D512C9B54E5BF40110900A8BB775734972ECFC29312
+LITERAL_OUTPUT=BUILD_EXIT=0
+EXIT_STATUS=0
+
+REGRESSION
+COMMAND=python tests/projectile_spawn_metadata_test.py; python tests/projectile_initial_velocity_test.py; python tests/projectile_lifecycle_test.py; python tests/projectile_guidance_test.py
+INPUT=Task 2 and prior projectile seams
+LITERAL_OUTPUT=PROJECTILE_SPAWN_METADATA_TESTS=PASS cases=4
+LITERAL_OUTPUT=PROJECTILE_INITIAL_VELOCITY_TESTS=PASS cases=5
+LITERAL_OUTPUT=PROJECTILE_LIFECYCLE_TESTS=PASS cases=5
+LITERAL_OUTPUT=PROJECTILE_GUIDANCE_TESTS=PASS cases=5
+EXIT_STATUS=0
+
+ROLLBACK
+COMMAND=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\ROLLBACK_TASK3.sh executed against independent copy D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\task3-rollback-test\ProjectileTracker.cs
+INPUT=modified tracker copy; baseline D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\projectile-guidance-reset\task2-baseline-source\ProjectileTracker.cs
+LITERAL_OUTPUT=RESTORED_SHA256=26EB67652B168498F51E547B9706931CAF083419D36BBEF804AB4C0FF8346BDA
+LITERAL_OUTPUT=EXPECTED_SHA256=26EB67652B168498F51E547B9706931CAF083419D36BBEF804AB4C0FF8346BDA
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+LITERAL_OUTPUT=ROLLBACK_EXIT=0
+EXIT_STATUS=0
+
+TASK_RESULT
+TASK3=COMPLETE
+DEAD_TARGET_REJECTION=PASS
+DESTROYING_TARGET_REJECTION=PASS
+DISABLED_COMPONENT_REJECTION=PASS
+INACTIVE_TRANSFORM_REJECTION=PASS
+BUILD=PASS
+PRODUCTION_DEPLOYMENT=NOT_PERFORMED
+NEXT=Task 4 implement Tracking/Returning/NaturalFlight guidance state machine
+
+RESTORED_STATUS
+Independent tracker-copy rollback restored the exact Task 2 baseline. Modified tracker source and Task 3 DLL remain in the workspace artifacts.

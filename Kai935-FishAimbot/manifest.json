@@ -1,0 +1,9 @@
+{
+  "name": "FishAimbot",
+  "version_number": "1.1.0",
+  "website_url": "",
+  "description": "Lightweight aimbot mod for trickshotting fish, crabs, lobsters, and bosses. Built for the sniper. (now updated to function on the albatross)",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100"
+  ]
+}

@@ -1,0 +1,450 @@
+Assembly: Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+Path: D:\Code\How2fish\Kalamies-MorePlayers\analysis\current-game\Assembly-CSharp.dll
+Filter: SteamManager
+Matched types: 1
+
+TYPE SteamManager
+  FIELD Private, Static SteamManager _instance
+  FIELD Private FishNet.Managing.NetworkManager _netMan
+  FIELD Private FishySteamworks.FishySteamworks _fishy
+  FIELD Private, Static Steamworks.CSteamID <CurrentLobbyID>k__BackingField
+  FIELD Private, Static, Literal, HasDefault System.Int32 MaxPlayers
+  FIELD Private, Static DisconnectReason _disconnectReason
+  FIELD Private, Static System.Boolean <IsDev>k__BackingField
+
+  METHOD Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+    ATTRIBUTES Public, Static, HideBySig, SpecialName
+    ATTRIBUTE System.Runtime.CompilerServices.CompilerGeneratedAttribute()
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: ldsfld       Steamworks.CSteamID SteamManager::<CurrentLobbyID>k__BackingField
+      IL_0005: ret
+
+  METHOD System.Void SteamManager::set_CurrentLobbyID(Steamworks.CSteamID)
+    ATTRIBUTES Private, Static, HideBySig, SpecialName
+    ATTRIBUTE System.Runtime.CompilerServices.CompilerGeneratedAttribute()
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: ldarg.0
+      IL_0001: stsfld       Steamworks.CSteamID SteamManager::<CurrentLobbyID>k__BackingField
+      IL_0006: ret
+
+  METHOD System.Boolean SteamManager::get_IsDev()
+    ATTRIBUTES Public, Static, HideBySig, SpecialName
+    ATTRIBUTE System.Runtime.CompilerServices.CompilerGeneratedAttribute()
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: ldsfld       System.Boolean SteamManager::<IsDev>k__BackingField
+      IL_0005: ret
+
+  METHOD System.Void SteamManager::set_IsDev(System.Boolean)
+    ATTRIBUTES Private, Static, HideBySig, SpecialName
+    ATTRIBUTE System.Runtime.CompilerServices.CompilerGeneratedAttribute()
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: ldarg.0
+      IL_0001: stsfld       System.Boolean SteamManager::<IsDev>k__BackingField
+      IL_0006: ret
+
+  METHOD System.Void SteamManager::Awake()
+    ATTRIBUTES Private, HideBySig
+    LOCALS init=True maxstack=2
+      V_0: System.UInt64
+    IL
+      IL_0000: ldsflda      SteamManager SteamManager::_instance
+      IL_0005: ldarg.0
+      IL_0006: call         System.Void Setter::SetSingleInstance<SteamManager>(T&,T)
+      IL_000B: ldarg.0
+      IL_000C: ldftn        System.Void SteamManager::OnLobbyCreated(Steamworks.LobbyCreated_t)
+      IL_0012: newobj       System.Void Steamworks.Callback`1/DispatchDelegate<Steamworks.LobbyCreated_t>::.ctor(System.Object,System.IntPtr)
+      IL_0017: call         Steamworks.Callback`1<!0> Steamworks.Callback`1<Steamworks.LobbyCreated_t>::Create(Steamworks.Callback`1/DispatchDelegate<!0>)
+      IL_001C: pop
+      IL_001D: ldarg.0
+      IL_001E: ldftn        System.Void SteamManager::OnJoinRequested(Steamworks.GameLobbyJoinRequested_t)
+      IL_0024: newobj       System.Void Steamworks.Callback`1/DispatchDelegate<Steamworks.GameLobbyJoinRequested_t>::.ctor(System.Object,System.IntPtr)
+      IL_0029: call         Steamworks.Callback`1<!0> Steamworks.Callback`1<Steamworks.GameLobbyJoinRequested_t>::Create(Steamworks.Callback`1/DispatchDelegate<!0>)
+      IL_002E: pop
+      IL_002F: ldarg.0
+      IL_0030: ldftn        System.Void SteamManager::OnLobbyEntered(Steamworks.LobbyEnter_t)
+      IL_0036: newobj       System.Void Steamworks.Callback`1/DispatchDelegate<Steamworks.LobbyEnter_t>::.ctor(System.Object,System.IntPtr)
+      IL_003B: call         Steamworks.Callback`1<!0> Steamworks.Callback`1<Steamworks.LobbyEnter_t>::Create(Steamworks.Callback`1/DispatchDelegate<!0>)
+      IL_0040: pop
+      IL_0041: ldarg.0
+      IL_0042: ldftn        System.Void SteamManager::OnLobbyChatUpdate(Steamworks.LobbyChatUpdate_t)
+      IL_0048: newobj       System.Void Steamworks.Callback`1/DispatchDelegate<Steamworks.LobbyChatUpdate_t>::.ctor(System.Object,System.IntPtr)
+      IL_004D: call         Steamworks.Callback`1<!0> Steamworks.Callback`1<Steamworks.LobbyChatUpdate_t>::Create(Steamworks.Callback`1/DispatchDelegate<!0>)
+      IL_0052: pop
+      IL_0053: call         Steamworks.CSteamID Steamworks.SteamUser::GetSteamID()
+      IL_0058: ldfld        System.UInt64 Steamworks.CSteamID::m_SteamID
+      IL_005D: stloc.0
+      IL_005E: ldloc.0
+      IL_005F: ldc.i8       76561198105374043
+      IL_0068: beq.s        IL_00AB
+      IL_006A: ldloc.0
+      IL_006B: ldc.i8       76561198058500353
+      IL_0074: beq.s        IL_00AB
+      IL_0076: ldloc.0
+      IL_0077: ldc.i8       76561197992778568
+      IL_0080: beq.s        IL_00AB
+      IL_0082: ldloc.0
+      IL_0083: ldc.i8       76561198080340560
+      IL_008C: beq.s        IL_00AB
+      IL_008E: ldloc.0
+      IL_008F: ldc.i8       76561199534821387
+      IL_0098: beq.s        IL_00AB
+      IL_009A: ldloc.0
+      IL_009B: ldc.i8       76561198028651102
+      IL_00A4: ceq
+      IL_00A6: ldc.i4.0
+      IL_00A7: ceq
+      IL_00A9: br.s         IL_00AC
+      IL_00AB: ldc.i4.0
+      IL_00AC: ldc.i4.0
+      IL_00AD: ceq
+      IL_00AF: call         System.Void SteamManager::set_IsDev(System.Boolean)
+      IL_00B4: ret
+
+  METHOD System.Void SteamManager::OnDestroy()
+    ATTRIBUTES Private, HideBySig
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: call         System.Void Steamworks.SteamAPI::Shutdown()
+      IL_0005: ret
+
+  METHOD System.Void SteamManager::CreateLobby()
+    ATTRIBUTES Public, Static, HideBySig
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: call         SaveManager/ServerSaveObject SaveManager::get_CurServerSave()
+      IL_0005: brfalse.s    IL_0016
+      IL_0007: call         SaveManager/ServerSaveObject SaveManager::get_CurServerSave()
+      IL_000C: ldfld        System.Boolean SaveManager/ServerSaveObject::IsPublic
+      IL_0011: brtrue.s     IL_0016
+      IL_0013: ldc.i4.0
+      IL_0014: br.s         IL_0017
+      IL_0016: ldc.i4.1
+      IL_0017: ldc.i4.8
+      IL_0018: call         Steamworks.SteamAPICall_t Steamworks.SteamMatchmaking::CreateLobby(Steamworks.ELobbyType,System.Int32)
+      IL_001D: pop
+      IL_001E: ret
+
+  METHOD System.Void SteamManager::JoinLobby(System.UInt64)
+    ATTRIBUTES Public, Static, HideBySig
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: ldarg.0
+      IL_0001: newobj       System.Void Steamworks.CSteamID::.ctor(System.UInt64)
+      IL_0006: call         Steamworks.SteamAPICall_t Steamworks.SteamMatchmaking::JoinLobby(Steamworks.CSteamID)
+      IL_000B: pop
+      IL_000C: ret
+
+  METHOD System.Void SteamManager::JoinFriend(Steamworks.CSteamID)
+    ATTRIBUTES Public, Static, HideBySig
+    LOCALS init=True maxstack=2
+      V_0: Steamworks.FriendGameInfo_t
+    IL
+      IL_0000: ldarg.0
+      IL_0001: ldloca.s     V_0
+      IL_0003: call         System.Boolean Steamworks.SteamFriends::GetFriendGamePlayed(Steamworks.CSteamID,Steamworks.FriendGameInfo_t&)
+      IL_0008: brfalse.s    IL_0040
+      IL_000A: ldloca.s     V_0
+      IL_000C: ldflda       Steamworks.CGameID Steamworks.FriendGameInfo_t::m_gameID
+      IL_0011: call         Steamworks.AppId_t Steamworks.CGameID::AppID()
+      IL_0016: call         Steamworks.AppId_t Steamworks.SteamUtils::GetAppID()
+      IL_001B: call         System.Boolean Steamworks.AppId_t::op_Equality(Steamworks.AppId_t,Steamworks.AppId_t)
+      IL_0020: brfalse.s    IL_0040
+      IL_0022: ldloc.0
+      IL_0023: ldfld        Steamworks.CSteamID Steamworks.FriendGameInfo_t::m_steamIDLobby
+      IL_0028: ldsfld       Steamworks.CSteamID Steamworks.CSteamID::Nil
+      IL_002D: call         System.Boolean Steamworks.CSteamID::op_Inequality(Steamworks.CSteamID,Steamworks.CSteamID)
+      IL_0032: brfalse.s    IL_0040
+      IL_0034: ldloc.0
+      IL_0035: ldfld        Steamworks.CSteamID Steamworks.FriendGameInfo_t::m_steamIDLobby
+      IL_003A: call         Steamworks.SteamAPICall_t Steamworks.SteamMatchmaking::JoinLobby(Steamworks.CSteamID)
+      IL_003F: pop
+      IL_0040: ret
+
+  METHOD System.Void SteamManager::LeaveLobby(DisconnectReason)
+    ATTRIBUTES Public, Static, HideBySig
+    LOCALS init=True maxstack=2
+    IL
+      IL_0000: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0005: ldsfld       Steamworks.CSteamID Steamworks.CSteamID::Nil
+      IL_000A: call         System.Boolean Steamworks.CSteamID::op_Equality(Steamworks.CSteamID,Steamworks.CSteamID)
+      IL_000F: brfalse.s    IL_001E
+      IL_0011: call         Server Server::get_Instance()
+      IL_0016: call         System.Boolean UnityEngine.Object::op_Implicit(UnityEngine.Object)
+      IL_001B: brtrue.s     IL_001E
+      IL_001D: ret
+      IL_001E: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0023: ldsfld       Steamworks.CSteamID Steamworks.CSteamID::Nil
+      IL_0028: call         System.Boolean Steamworks.CSteamID::op_Inequality(Steamworks.CSteamID,Steamworks.CSteamID)
+      IL_002D: brfalse.s    IL_0043
+      IL_002F: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0034: call         System.Void Steamworks.SteamMatchmaking::LeaveLobby(Steamworks.CSteamID)
+      IL_0039: ldsfld       Steamworks.CSteamID Steamworks.CSteamID::Nil
+      IL_003E: call         System.Void SteamManager::set_CurrentLobbyID(Steamworks.CSteamID)
+      IL_0043: ldarg.0
+      IL_0044: stsfld       DisconnectReason SteamManager::_disconnectReason
+      IL_0049: ldsfld       ConnectionManager ConnectionManager::Instance
+      IL_004E: callvirt     System.Void ConnectionManager::LeaveTransport()
+      IL_0053: ret
+
+  METHOD System.Boolean SteamManager::IsCurrentLobbyMember(Steamworks.CSteamID)
+    ATTRIBUTES Public, Static, HideBySig
+    LOCALS init=True maxstack=2
+      V_0: System.Int32
+      V_1: System.Int32
+    IL
+      IL_0000: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0005: ldsfld       Steamworks.CSteamID Steamworks.CSteamID::Nil
+      IL_000A: call         System.Boolean Steamworks.CSteamID::op_Equality(Steamworks.CSteamID,Steamworks.CSteamID)
+      IL_000F: brtrue.s     IL_001E
+      IL_0011: ldarg.0
+      IL_0012: ldsfld       Steamworks.CSteamID Steamworks.CSteamID::Nil
+      IL_0017: call         System.Boolean Steamworks.CSteamID::op_Equality(Steamworks.CSteamID,Steamworks.CSteamID)
+      IL_001C: brfalse.s    IL_0020
+      IL_001E: ldc.i4.0
+      IL_001F: ret
+      IL_0020: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0025: call         System.Int32 Steamworks.SteamMatchmaking::GetNumLobbyMembers(Steamworks.CSteamID)
+      IL_002A: stloc.0
+      IL_002B: ldc.i4.0
+      IL_002C: stloc.1
+      IL_002D: br.s         IL_0048
+      IL_002F: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0034: ldloc.1
+      IL_0035: call         Steamworks.CSteamID Steamworks.SteamMatchmaking::GetLobbyMemberByIndex(Steamworks.CSteamID,System.Int32)
+      IL_003A: ldarg.0
+      IL_003B: call         System.Boolean Steamworks.CSteamID::op_Equality(Steamworks.CSteamID,Steamworks.CSteamID)
+      IL_0040: brfalse.s    IL_0044
+      IL_0042: ldc.i4.1
+      IL_0043: ret
+      IL_0044: ldloc.1
+      IL_0045: ldc.i4.1
+      IL_0046: add
+      IL_0047: stloc.1
+      IL_0048: ldloc.1
+      IL_0049: ldloc.0
+      IL_004A: blt.s        IL_002F
+      IL_004C: ldc.i4.0
+      IL_004D: ret
+
+  METHOD System.Void SteamManager::OnLobbyChatUpdate(Steamworks.LobbyChatUpdate_t)
+    ATTRIBUTES Private, HideBySig
+    LOCALS init=True maxstack=2
+      V_0: Steamworks.CSteamID
+      V_1: System.UInt32
+    IL
+      IL_0000: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0005: ldsfld       Steamworks.CSteamID Steamworks.CSteamID::Nil
+      IL_000A: call         System.Boolean Steamworks.CSteamID::op_Equality(Steamworks.CSteamID,Steamworks.CSteamID)
+      IL_000F: brtrue.s     IL_0023
+      IL_0011: ldarg.1
+      IL_0012: ldfld        System.UInt64 Steamworks.LobbyChatUpdate_t::m_ulSteamIDLobby
+      IL_0017: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_001C: ldfld        System.UInt64 Steamworks.CSteamID::m_SteamID
+      IL_0021: beq.s        IL_0024
+      IL_0023: ret
+      IL_0024: ldloca.s     V_0
+      IL_0026: ldarg.1
+      IL_0027: ldfld        System.UInt64 Steamworks.LobbyChatUpdate_t::m_ulSteamIDUserChanged
+      IL_002C: call         System.Void Steamworks.CSteamID::.ctor(System.UInt64)
+      IL_0031: ldloc.0
+      IL_0032: call         Steamworks.CSteamID Steamworks.SteamUser::GetSteamID()
+      IL_0037: call         System.Boolean Steamworks.CSteamID::op_Equality(Steamworks.CSteamID,Steamworks.CSteamID)
+      IL_003C: brfalse.s    IL_0050
+      IL_003E: ldarg.1
+      IL_003F: ldfld        System.UInt32 Steamworks.LobbyChatUpdate_t::m_rgfChatMemberStateChange
+      IL_0044: ldc.i4.s     30
+      IL_0046: and
+      IL_0047: brfalse.s    IL_0050
+      IL_0049: ldc.i4.0
+      IL_004A: call         System.Void SteamManager::LeaveLobby(DisconnectReason)
+      IL_004F: ret
+      IL_0050: call         FishNet.Managing.NetworkManager FishNet.InstanceFinder::get_NetworkManager()
+      IL_0055: callvirt     System.Boolean FishNet.Managing.NetworkManager::get_IsServerStarted()
+      IL_005A: brtrue.s     IL_005D
+      IL_005C: ret
+      IL_005D: ldarg.1
+      IL_005E: ldfld        System.UInt32 Steamworks.LobbyChatUpdate_t::m_rgfChatMemberStateChange
+      IL_0063: ldc.i4.s     30
+      IL_0065: and
+      IL_0066: brfalse.s    IL_0073
+      IL_0068: ldsfld       ConnectionManager ConnectionManager::Instance
+      IL_006D: ldloc.0
+      IL_006E: callvirt     System.Void ConnectionManager::KickSteamUserIfConnected(Steamworks.CSteamID)
+      IL_0073: ldarg.1
+      IL_0074: ldfld        System.UInt32 Steamworks.LobbyChatUpdate_t::m_rgfChatMemberStateChange
+      IL_0079: stloc.1
+      IL_007A: ldloc.1
+      IL_007B: ldc.i4.1
+      IL_007C: sub
+      IL_007D: switch       IL_0092, IL_0092, IL_0092, IL_0092
+      IL_0092: ret
+
+  METHOD System.Void SteamManager::OnLobbyEntered(Steamworks.LobbyEnter_t)
+    ATTRIBUTES Private, HideBySig
+    LOCALS init=True maxstack=2
+      V_0: Steamworks.CSteamID
+      V_1: System.UInt32
+    IL
+      IL_0000: ldarg.1
+      IL_0001: ldfld        System.UInt32 Steamworks.LobbyEnter_t::m_EChatRoomEnterResponse
+      IL_0006: ldc.i4.1
+      IL_0007: beq.s        IL_0019
+      IL_0009: ldarg.1
+      IL_000A: ldfld        System.UInt32 Steamworks.LobbyEnter_t::m_EChatRoomEnterResponse
+      IL_000F: stloc.1
+      IL_0010: ldloc.1
+      IL_0011: ldc.i4.2
+      IL_0012: beq.s        IL_0018
+      IL_0014: ldloc.1
+      IL_0015: ldc.i4.3
+      IL_0016: pop
+      IL_0017: pop
+      IL_0018: ret
+      IL_0019: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_001E: ldsfld       Steamworks.CSteamID Steamworks.CSteamID::Nil
+      IL_0023: call         System.Boolean Steamworks.CSteamID::op_Inequality(Steamworks.CSteamID,Steamworks.CSteamID)
+      IL_0028: brfalse.s    IL_0040
+      IL_002A: call         FishNet.Managing.NetworkManager FishNet.InstanceFinder::get_NetworkManager()
+      IL_002F: callvirt     System.Boolean FishNet.Managing.NetworkManager::get_IsServerStarted()
+      IL_0034: brtrue.s     IL_0040
+      IL_0036: ldstr        "trying to enter lobby"
+      IL_003B: call         System.Void UnityEngine.MonoBehaviour::print(System.Object)
+      IL_0040: ldloca.s     V_0
+      IL_0042: ldarg.1
+      IL_0043: ldfld        System.UInt64 Steamworks.LobbyEnter_t::m_ulSteamIDLobby
+      IL_0048: call         System.Void Steamworks.CSteamID::.ctor(System.UInt64)
+      IL_004D: ldloc.0
+      IL_004E: ldstr        "version"
+      IL_0053: call         System.String Steamworks.SteamMatchmaking::GetLobbyData(Steamworks.CSteamID,System.String)
+      IL_0058: call         System.String UnityEngine.Application::get_version()
+      IL_005D: call         System.Boolean System.String::op_Inequality(System.String,System.String)
+      IL_0062: brfalse.s    IL_0070
+      IL_0064: ldloc.0
+      IL_0065: call         System.Void Steamworks.SteamMatchmaking::LeaveLobby(Steamworks.CSteamID)
+      IL_006A: call         System.Void NetworkPrompts::ShowVersionMismatch()
+      IL_006F: ret
+      IL_0070: ldloc.0
+      IL_0071: call         System.Void SteamManager::set_CurrentLobbyID(Steamworks.CSteamID)
+      IL_0076: ldsfld       ConnectionManager ConnectionManager::Instance
+      IL_007B: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0080: callvirt     System.Boolean ConnectionManager::JoinOnlineLobby(Steamworks.CSteamID)
+      IL_0085: pop
+      IL_0086: ret
+
+  METHOD System.Void SteamManager::CloseFailedHostLobby(System.String)
+    ATTRIBUTES Private, HideBySig
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: ldarg.1
+      IL_0001: call         System.Void UnityEngine.Debug::LogError(System.Object)
+      IL_0006: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_000B: ldsfld       Steamworks.CSteamID Steamworks.CSteamID::Nil
+      IL_0010: call         System.Boolean Steamworks.CSteamID::op_Inequality(Steamworks.CSteamID,Steamworks.CSteamID)
+      IL_0015: brfalse.s    IL_0023
+      IL_0017: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_001C: ldc.i4.0
+      IL_001D: call         System.Boolean Steamworks.SteamMatchmaking::SetLobbyJoinable(Steamworks.CSteamID,System.Boolean)
+      IL_0022: pop
+      IL_0023: ldc.i4.1
+      IL_0024: call         System.Void SteamManager::LeaveLobby(DisconnectReason)
+      IL_0029: ldc.i4.1
+      IL_002A: call         System.Void MainMenuManager::ToggleMenu(System.Boolean)
+      IL_002F: ret
+
+  METHOD System.Void SteamManager::OnLobbyCreated(Steamworks.LobbyCreated_t)
+    ATTRIBUTES Private, HideBySig
+    LOCALS init=True maxstack=4
+    IL
+      IL_0000: ldarg.1
+      IL_0001: ldfld        Steamworks.EResult Steamworks.LobbyCreated_t::m_eResult
+      IL_0006: ldc.i4.1
+      IL_0007: beq.s        IL_000A
+      IL_0009: ret
+      IL_000A: ldarg.1
+      IL_000B: ldfld        System.UInt64 Steamworks.LobbyCreated_t::m_ulSteamIDLobby
+      IL_0010: newobj       System.Void Steamworks.CSteamID::.ctor(System.UInt64)
+      IL_0015: call         System.Void SteamManager::set_CurrentLobbyID(Steamworks.CSteamID)
+      IL_001A: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_001F: ldc.i4.0
+      IL_0020: call         System.Boolean Steamworks.SteamMatchmaking::SetLobbyJoinable(Steamworks.CSteamID,System.Boolean)
+      IL_0025: pop
+      IL_0026: ldsfld       ConnectionManager ConnectionManager::Instance
+      IL_002B: ldc.i4.8
+      IL_002C: callvirt     System.Boolean ConnectionManager::CreateOnlineLobby(System.Int32)
+      IL_0031: brtrue.s     IL_0053
+      IL_0033: ldarg.0
+      IL_0034: ldstr        "Steam lobby {0} was created, but the FishySteamworks server failed to start. Closing the lobby."
+      IL_0039: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_003E: ldfld        System.UInt64 Steamworks.CSteamID::m_SteamID
+      IL_0043: box          System.UInt64
+      IL_0048: call         System.String System.String::Format(System.String,System.Object)
+      IL_004D: call         System.Void SteamManager::CloseFailedHostLobby(System.String)
+      IL_0052: ret
+      IL_0053: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0058: ldstr        "name"
+      IL_005D: call         System.String Steamworks.SteamFriends::GetPersonaName()
+      IL_0062: ldstr        "'s lobby"
+      IL_0067: call         System.String System.String::Concat(System.String,System.String)
+      IL_006C: call         System.Boolean Steamworks.SteamMatchmaking::SetLobbyData(Steamworks.CSteamID,System.String,System.String)
+      IL_0071: pop
+      IL_0072: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0077: ldstr        "version"
+      IL_007C: call         System.String UnityEngine.Application::get_version()
+      IL_0081: call         System.Boolean Steamworks.SteamMatchmaking::SetLobbyData(Steamworks.CSteamID,System.String,System.String)
+      IL_0086: brfalse.s    IL_0095
+      IL_0088: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_008D: ldc.i4.1
+      IL_008E: call         System.Boolean Steamworks.SteamMatchmaking::SetLobbyJoinable(Steamworks.CSteamID,System.Boolean)
+      IL_0093: brtrue.s     IL_00B5
+      IL_0095: ldarg.0
+      IL_0096: ldstr        "Steam lobby {0} could not publish its metadata or become joinable. Closing the lobby."
+      IL_009B: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_00A0: ldfld        System.UInt64 Steamworks.CSteamID::m_SteamID
+      IL_00A5: box          System.UInt64
+      IL_00AA: call         System.String System.String::Format(System.String,System.Object)
+      IL_00AF: call         System.Void SteamManager::CloseFailedHostLobby(System.String)
+      IL_00B4: ret
+      IL_00B5: ret
+
+  METHOD System.Void SteamManager::OnJoinRequested(Steamworks.GameLobbyJoinRequested_t)
+    ATTRIBUTES Private, HideBySig
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0005: ldsfld       Steamworks.CSteamID Steamworks.CSteamID::Nil
+      IL_000A: call         System.Boolean Steamworks.CSteamID::op_Inequality(Steamworks.CSteamID,Steamworks.CSteamID)
+      IL_000F: brfalse.s    IL_002F
+      IL_0011: call         Steamworks.CSteamID SteamManager::get_CurrentLobbyID()
+      IL_0016: ldfld        System.UInt64 Steamworks.CSteamID::m_SteamID
+      IL_001B: ldarg.1
+      IL_001C: ldfld        Steamworks.CSteamID Steamworks.GameLobbyJoinRequested_t::m_steamIDLobby
+      IL_0021: ldfld        System.UInt64 Steamworks.CSteamID::m_SteamID
+      IL_0026: bne.un.s     IL_0029
+      IL_0028: ret
+      IL_0029: ldc.i4.0
+      IL_002A: call         System.Void SteamManager::LeaveLobby(DisconnectReason)
+      IL_002F: ldarg.1
+      IL_0030: ldfld        Steamworks.CSteamID Steamworks.GameLobbyJoinRequested_t::m_steamIDLobby
+      IL_0035: call         Steamworks.SteamAPICall_t Steamworks.SteamMatchmaking::JoinLobby(Steamworks.CSteamID)
+      IL_003A: pop
+      IL_003B: ret
+
+  METHOD System.Void SteamManager::.ctor()
+    ATTRIBUTES Public, HideBySig, SpecialName, RTSpecialName
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: ldarg.0
+      IL_0001: call         System.Void UnityEngine.MonoBehaviour::.ctor()
+      IL_0006: ret
+
+  METHOD System.Void SteamManager::.cctor()
+    ATTRIBUTES Private, Static, HideBySig, SpecialName, RTSpecialName
+    LOCALS init=False maxstack=8
+    IL
+      IL_0000: ldsfld       Steamworks.CSteamID Steamworks.CSteamID::Nil
+      IL_0005: stsfld       Steamworks.CSteamID SteamManager::<CurrentLobbyID>k__BackingField
+      IL_000A: ret

@@ -1,0 +1,124 @@
+TASK=17.1 REAL VISIBILITY AND AIM UI LABELS
+DATE=2026-08-25
+STATUS=PASS
+DEPLOYMENT=NOT_PERFORMED_GAME_DLL_UNCHANGED
+
+CHANGED_BRANCH_OR_FIELD
+- TargetingSystem always computes actual target visibility.
+- RequireLineOfSight now controls eligibility only; it no longer overwrites Visible=true.
+- VisibilityCache and EspRendererV2 use Physics.DefaultRaycastLayers with QueryTriggerInteraction.Ignore.
+- EspRendererV2 no longer reuses aim-point TargetSolution.Visible for its independent bounds-center visibility result.
+- AimRange UI label changed from 最大范围 to 最大距离.
+- AimScreenRadius UI label changed from 屏幕锁定半径 to 自瞄范围.
+- EspDistance remains the only ESP distance field and preset key.
+
+FOUR_PRIMARY_ARTIFACTS
+MODIFIED_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-1-visibility-ui\CompleteCheatMenu.task17-1.zh-CN.dll
+MODIFIED_SHA256=ED9F679FD8AE6DCF12A0171A01252DBB2CF0A3CF5C63DD2E02A4FAD6E9192B6B
+DIFF_FILE=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-1-visibility-ui\task17-1-visibility-ui.diff
+DIFF_SHA256=FADE60DE33451E7F1225D6798904298664B450E1AE682E0960ED554CE78DCD04
+VERIFICATION=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK17_1.txt
+ROLLBACK=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-1-visibility-ui\ROLLBACK_TASK17_1.ps1
+ROLLBACK_SHA256=5E6D1A5F17C2D5EDDEDEFFB9A826F2E2578F072D5A40E310CC14EAB4D91C1E38
+ROLLBACK_SH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task17-1-visibility-ui\ROLLBACK_TASK17_1.sh
+ROLLBACK_SH_SHA256=5135F34C0AB1C6FB83C8A5DC1D436E310999592709CB7DBCCDF17771783C608B
+
+BASELINE RED TEST
+COMMAND=python .\tests\visibility_ui_semantics_test.py
+INPUT=pre-change source copy with 最大范围, 屏幕锁定半径, conditional visibility measurement, and ESP current-target visibility reuse
+LITERAL_OUTPUT=AssertionError at assert 'SliderRow("最大距离", CheatState.AimRange' in weapons
+LITERAL_OUTPUT=RED_EXIT=1
+EXIT_STATUS=1
+OBSERVED_RESULT=the requested labels and visibility semantics were absent before the change.
+
+MODIFIED GREEN TEST
+COMMAND=python .\tests\visibility_ui_semantics_test.py
+INPUT=modified source
+LITERAL_OUTPUT=VISIBILITY_UI_SEMANTICS_TESTS=PASS cases=4
+LITERAL_OUTPUT=EXIT_CODE=0
+EXIT_STATUS=0
+OBSERVED_RESULT=labels, actual visibility, common raycast policy, and unified EspDistance behavior all match the reviewed plan.
+
+FULL REGRESSION
+COMMAND=for each tests\*_test.py: python TEST
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=PASS cases=7
+LITERAL_OUTPUT=BONE_SELECTION_TESTS=PASS cases=7
+LITERAL_OUTPUT=CLIENT_MODE_CAPABILITY_TESTS=PASS cases=5
+LITERAL_OUTPUT=ENTITY_REGISTRY_TESTS=PASS cases=9
+LITERAL_OUTPUT=ESP_PROJECTION_TESTS=PASS cases=8
+LITERAL_OUTPUT=LOCALIZED_UI_PRESET_TESTS=PASS cases=9
+LITERAL_OUTPUT=SNAPSHOT_ISOLATION_TESTS=PASS cases=7
+LITERAL_OUTPUT=TARGET_LOCK_TESTS=PASS cases=8
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=PASS cases=10
+LITERAL_OUTPUT=TRACKING_PROBABILITY_TESTS=PASS cases=6
+LITERAL_OUTPUT=VISIBILITY_UI_SEMANTICS_TESTS=PASS cases=4
+LITERAL_OUTPUT=VISIBLE_AIM_TESTS=PASS cases=7
+LITERAL_OUTPUT=WEAPON_RESTORE_TESTS=PASS cases=7
+EXIT_STATUS=0
+
+BUILD
+COMMAND=powershell -File .\decompiled-src\build.ps1 -GameRoot GAME_ROOT -OutputPath .\artifacts\cnkx-port\task17-1-visibility-ui\CompleteCheatMenu.task17-1.dll
+INPUT=83 C# source files
+LITERAL_OUTPUT=BUILD_SOURCE_COUNT=83
+LITERAL_OUTPUT=BUILD_SHA256=CB40C8A9523A1487B916718EC7B4CEE75887B71E058B28AC8226BA03082F8A00
+LITERAL_OUTPUT=EXIT_CODE=0
+EXIT_STATUS=0
+
+LOCALIZATION
+COMMAND=python .\tools\localize_dll.py CompleteCheatMenu.task17-1.dll CompleteCheatMenu.task17-1.zh-CN.dll
+INPUT=Task 17.1 raw assembly
+LITERAL_OUTPUT={"changed": 261, "source_sha256": "cb40c8a9523a1487b916718ec7b4cee75887b71e058b28ac8226ba03082f8a00", "modified_sha256": "ed9f679fd8ae6dcf12a0171a01252dbb2cf0a3cf5c63dd2e02a4fad6e9192b6b"}
+LITERAL_OUTPUT=EXIT_CODE=0
+EXIT_STATUS=0
+
+METADATA AND UI STRING VERIFICATION
+COMMAND=dnfile type/method comparison plus #US user-string and placeholder inspection
+LITERAL_OUTPUT=RAW_VERSION=0.7.0.0
+LITERAL_OUTPUT=LOCALIZED_VERSION=0.7.0.0
+LITERAL_OUTPUT=TYPESET_EQUAL=True
+LITERAL_OUTPUT=METHODSET_EQUAL=True
+LITERAL_OUTPUT=UI_MAX_DISTANCE_PRESENT=True
+LITERAL_OUTPUT=UI_AIM_RANGE_PRESENT=True
+LITERAL_OUTPUT=UI_OLD_MAX_RANGE_ABSENT=True
+LITERAL_OUTPUT=UI_OLD_SCREEN_RADIUS_ABSENT=True
+LITERAL_OUTPUT=UI_PIXEL_NOTE_PRESENT=True
+LITERAL_OUTPUT=LOCALIZATION_CHANGED=261
+LITERAL_OUTPUT=PLACEHOLDER_MISMATCHES=0
+LITERAL_OUTPUT=TASK17_1_METADATA=PASS
+EXIT_STATUS=0
+
+DEPLOYMENT INVARIANT
+COMMAND=Get-FileHash game CompleteCheatMenu.dll -Algorithm SHA256
+INPUT=game plugin directory
+LITERAL_OUTPUT=224A13AE043E203D3EBCBFF840241BB32588A7549B8F8DC8326236513A4AAB0A
+EXIT_STATUS=0
+OBSERVED_RESULT=game directory remains on the Task 16 deployment; Task 17.1 is a validated build artifact only.
+
+ROLLBACK POWERSHELL
+COMMAND=ROLLBACK_TASK17_1.ps1 -DestinationRoot rollback-test-20260825a -DestinationDll rollback-test-20260825a\deployed.dll
+INPUT=independent modified source and Task 17.1 localized DLL copy
+LITERAL_OUTPUT=RESTORED_DLL_SHA256=224A13AE043E203D3EBCBFF840241BB32588A7549B8F8DC8326236513A4AAB0A
+LITERAL_OUTPUT=RESTORED_SOURCE_FILES=6
+LITERAL_OUTPUT=CREATED_TEST_PRESENT=False
+LITERAL_OUTPUT=ROLLBACK_TASK17_1=PASS
+LITERAL_OUTPUT=all six source/plan files MATCH=True
+LITERAL_OUTPUT=DLL_MATCH=True
+LITERAL_OUTPUT=NEW_TEST_PRESENT=False
+EXIT_STATUS=0
+RESTORED_BEHAVIOR=pre-Task17.1 labels and visibility implementation restored in the rollback copy; baseline Task 16 DLL restored.
+
+ROLLBACK BASH
+COMMAND=ROLLBACK_TASK17_1.sh rollback-test-sh-20260825a deployed.dll baseline.dll
+INPUT=independent modified source and Task 17.1 localized DLL copy
+LITERAL_OUTPUT=RESTORED_SOURCE_FILES=6
+LITERAL_OUTPUT=CREATED_TEST_PRESENT=false
+LITERAL_OUTPUT=ROLLBACK_TASK17_1=PASS
+LITERAL_OUTPUT=ROLLBACK_SH_DLL_MATCH=True
+LITERAL_OUTPUT=ROLLBACK_SH_NEW_TEST_PRESENT=False
+EXIT_STATUS=0
+
+PLAN
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+SHA256=506C526B77F95CC29B18374E71DFC6CAD8B8523B7A45FD31D9F2EEF6DB1B0D55
+STATUS=Task 17 in progress; Task 17.1 marked complete; next module is Projectile binding/lifecycle infrastructure.

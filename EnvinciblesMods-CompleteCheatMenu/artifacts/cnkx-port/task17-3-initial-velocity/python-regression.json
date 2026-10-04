@@ -1,0 +1,82 @@
+[
+  {
+    "Test": "aim_scoring_test.py",
+    "Exit": 0,
+    "Output": "AIM_SCORING_TESTS=PASS cases=9"
+  },
+  {
+    "Test": "ballistic_prediction_test.py",
+    "Exit": 0,
+    "Output": "BALLISTIC_PREDICTION_TESTS=PASS cases=7"
+  },
+  {
+    "Test": "bone_selection_test.py",
+    "Exit": 0,
+    "Output": "BONE_SELECTION_TESTS=PASS cases=7"
+  },
+  {
+    "Test": "client_mode_capability_test.py",
+    "Exit": 0,
+    "Output": "CLIENT_MODE_CAPABILITY_TESTS=PASS cases=5"
+  },
+  {
+    "Test": "entity_registry_test.py",
+    "Exit": 0,
+    "Output": "ENTITY_REGISTRY_TESTS=PASS cases=9"
+  },
+  {
+    "Test": "esp_projection_test.py",
+    "Exit": 0,
+    "Output": "ESP_PROJECTION_TESTS=PASS cases=8"
+  },
+  {
+    "Test": "localized_ui_preset_test.py",
+    "Exit": 0,
+    "Output": "LOCALIZED_UI_PRESET_TESTS=PASS cases=9"
+  },
+  {
+    "Test": "projectile_initial_velocity_test.py",
+    "Exit": 0,
+    "Output": "PROJECTILE_INITIAL_VELOCITY_TESTS=PASS cases=5"
+  },
+  {
+    "Test": "projectile_lifecycle_test.py",
+    "Exit": 0,
+    "Output": "PROJECTILE_LIFECYCLE_TESTS=PASS cases=5"
+  },
+  {
+    "Test": "snapshot_isolation_test.py",
+    "Exit": 0,
+    "Output": "SNAPSHOT_ISOLATION_TESTS=PASS cases=7"
+  },
+  {
+    "Test": "target_lock_test.py",
+    "Exit": 0,
+    "Output": "TARGET_LOCK_TESTS=PASS cases=8"
+  },
+  {
+    "Test": "targeting_math_test.py",
+    "Exit": 0,
+    "Output": "TARGETING_MATH_TESTS=PASS cases=10"
+  },
+  {
+    "Test": "tracking_probability_test.py",
+    "Exit": 0,
+    "Output": "TRACKING_PROBABILITY_TESTS=PASS cases=6"
+  },
+  {
+    "Test": "visibility_ui_semantics_test.py",
+    "Exit": 0,
+    "Output": "VISIBILITY_UI_SEMANTICS_TESTS=PASS cases=4"
+  },
+  {
+    "Test": "visible_aim_test.py",
+    "Exit": 0,
+    "Output": "VISIBLE_AIM_TESTS=PASS cases=7"
+  },
+  {
+    "Test": "weapon_restore_test.py",
+    "Exit": 0,
+    "Output": "WEAPON_RESTORE_TESTS=PASS cases=7"
+  }
+]

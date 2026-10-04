@@ -1,0 +1,84 @@
+CompleteCheatMenu cnKX port - Task 2 verification
+DATE=2026-08-25
+TASK=先建立纯数学测试基线
+STATUS=COMPLETE
+
+CHANGED_BRANCH_OR_FIELD
+- targeting_math_test: 圆形屏幕半径、实体评分、切换惩罚、骨骼与实体评分隔离。
+- ballistic_prediction_test: 静止、横移、接近、远离、零弹速和异常速度。
+- tracking_probability_test: 0%、100%、50% 边界和越界钳制。
+- TEST_IMPORT: tests/cnkx_math_impl.py，预计由后续目标数学实现任务提供。
+
+ARTIFACTS
+- MODIFIED_FILE_1: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\targeting_math_test.py
+- MODIFIED_FILE_2: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\ballistic_prediction_test.py
+- MODIFIED_FILE_3: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\tests\tracking_probability_test.py
+- DIFF_FILE: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\task2-math-tests.diff
+- VERIFICATION: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\VERIFICATION_TASK2.txt
+- ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK2.sh
+- WINDOWS_ROLLBACK: D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\artifacts\cnkx-port\ROLLBACK_TASK2.ps1
+
+BASELINE
+COMMAND=python .\tests\aim_scoring_test.py
+INPUT=现有距离/角度、死亡、海鸥、上钩、范围、锥角、信天翁和锁定用例
+LITERAL_OUTPUT=AIM_SCORING_TESTS=PASS cases=9
+EXIT_STATUS=0
+PRESERVED_SHA256=CB84D5A26B79D4D4B8B14C611F37A5C1ED25AD93FFB1F668C7BF0041F23A16F0
+
+MODIFIED_SYNTAX
+COMMAND=python -m py_compile .\tests\targeting_math_test.py .\tests\ballistic_prediction_test.py .\tests\tracking_probability_test.py
+INPUT=三个新增测试文件
+LITERAL_RESULT=No output; all files compiled to Python bytecode successfully.
+EXIT_STATUS=0
+
+MODIFIED_TARGETING_CONTRACT
+COMMAND=python .\tests\targeting_math_test.py
+INPUT=圆内、圆边界、方形角落圆外、距离/角度/屏幕权重、切换惩罚、骨骼评分隔离
+LITERAL_OUTPUT=TARGETING_MATH_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+EXPECTED_STATUS=RED; tests/cnkx_math_impl.py is intentionally absent until the implementation task.
+FILE_SHA256=96B18C0F3D0810B44E809F633E0682F616C5FBD6615BFF40CCBDCB76AA7D9C0F
+
+MODIFIED_BALLISTIC_CONTRACT
+COMMAND=python .\tests\ballistic_prediction_test.py
+INPUT=静止、横移、接近、远离、零弹速、异常速度
+LITERAL_OUTPUT=BALLISTIC_PREDICTION_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+EXPECTED_STATUS=RED; tests/cnkx_math_impl.py is intentionally absent until the implementation task.
+FILE_SHA256=1C1819893C1F93891F66CA94A878367B97048D3ADF0E6345E2167C8AD928F258
+
+MODIFIED_PROBABILITY_CONTRACT
+COMMAND=python .\tests\tracking_probability_test.py
+INPUT=0%、100%、50% 阈值、负值和超过 100% 的概率
+LITERAL_OUTPUT=TRACKING_PROBABILITY_TESTS=FAIL missing implementation
+EXIT_STATUS=1
+EXPECTED_STATUS=RED; tests/cnkx_math_impl.py is intentionally absent until the implementation task.
+FILE_SHA256=5CA9A34E3248527DDB739D6E2B4A0EAF6847FA9153667A795B058D6940352608
+
+ROLLBACK_POWERSHELL
+COMMAND=.\artifacts\cnkx-port\ROLLBACK_TASK2.ps1 -DestinationRoot .\artifacts\cnkx-port\rollback-task2-test
+INPUT=包含三个新增测试副本的独立目录
+LITERAL_OUTPUT=ROLLBACK_REMOVED=3
+LITERAL_OUTPUT=ROLLBACK_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+RESTORED_STATUS=测试目录恢复为新增测试文件不存在的基线状态；工作目录测试文件保持不变。
+
+ROLLBACK_BASH
+COMMAND=ROLLBACK_TASK2.sh /mnt/d/Code/How2fish/EnvinciblesMods-CompleteCheatMenu/artifacts/cnkx-port/rollback-task2-test-sh
+INPUT=包含三个新增测试副本的第二个独立目录
+LITERAL_OUTPUT=ROLLBACK_REMOVED=3
+LITERAL_OUTPUT=ROLLBACK_REMAINING=0
+LITERAL_OUTPUT=ROLLBACK_MATCH=True
+EXIT_STATUS=0
+
+DIFF
+LINES=167
+SHA256=446878B28B4994D0ADC653178FC55D93B6F09C0CE81F38566B100DBA76ECEB35
+
+PLAN_MARK
+PATH=D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu\docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md
+RESULT=Task 2 marked complete with evidence path.
+
+GIT
+RESULT=SKIPPED_NOT_A_GIT_REPOSITORY

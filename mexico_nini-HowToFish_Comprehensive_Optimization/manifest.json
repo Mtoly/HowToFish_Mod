@@ -1,0 +1,10 @@
+{
+    "name": "HowToFish_Comprehensive_Optimization",
+    "version_number": "1.5.4",
+    "website_url": "https://github.com/mexico-nini/HowToFish-ComprehensivePerfOpt",
+    "description": "Pure-performance BepInEx 5 plugin for How to Fish. JIT warmup, log trim, gentle GC, and island early-load reduce stutter without affecting mods, loot, saves, or visuals.",
+    "dependencies": [
+        "BepInEx-BepInExPack-5.4.2305"
+    ],
+    "folder_name": "HowToFish.ComprehensivePerformanceOptimization-1.5.4"
+}

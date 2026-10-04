@@ -1,0 +1,366 @@
+=== ProjectileManager::AddProjectile RVA=0x26618 ===
+IL_000C: ldarg.3      
+IL_000D: brfalse.s    23
+IL_000F: ldarg.0      
+IL_0010: ldfld        _nextId
+IL_0015: starg.s      argument(0x0007)
+IL_0017: ldarg.0      
+IL_0018: ldarg.2      
+IL_0019: callvirt     get_ProjectileType
+IL_001E: call         GetType
+IL_0023: stloc.0      
+IL_0024: ldarg.3      
+IL_0025: brfalse.s    83
+IL_0027: call         get_Instance
+IL_002C: ldarg.1      
+IL_002D: ldarg.2      
+IL_002E: call         FishNet.InstanceFinder::get_TimeManager
+IL_0033: callvirt     FishNet.Managing.Timing.TimeManager::get_Tick
+IL_0038: ldarg.s      argument(0x0007)
+IL_003A: ldarg.s      argument(0x0004)
+IL_003C: ldarg.s      argument(0x0005)
+IL_003E: callvirt     AddProjectile
+IL_0043: ldarg.0      
+IL_0044: ldarg.0      
+IL_0045: ldfld        _nextId
+IL_004A: ldc.i4.1     
+IL_004B: add          
+IL_004C: stfld        _nextId
+IL_0051: br.s         108
+IL_0053: ldarg.2      
+IL_0054: callvirt     get_Weapon
+IL_0059: call         UnityEngine.Object::op_Implicit
+IL_005E: brfalse.s    108
+IL_0060: ldarg.2      
+IL_0061: callvirt     get_Weapon
+IL_0066: ldc.i4.0     
+IL_0067: callvirt     ShootEffects
+IL_006C: newobj       .ctor
+IL_0071: dup          
+IL_0072: ldarg.2      
+IL_0073: callvirt     get_ProjectileType
+IL_0078: stfld        TypeId
+IL_007D: dup          
+IL_007E: ldarg.1      
+IL_007F: stfld        Owner
+IL_0084: dup          
+IL_0085: ldarg.3      
+IL_0086: stfld        IsLocal
+IL_008B: dup          
+IL_008C: ldarg.s      argument(0x0006)
+IL_008E: stfld        CatchingUpToDo
+IL_0093: dup          
+IL_0094: ldarg.s      argument(0x0007)
+IL_0096: stfld        Id
+IL_009B: dup          
+IL_009C: ldarg.s      argument(0x0004)
+IL_009E: stfld        PreviousPosition
+IL_00A3: dup          
+IL_00A4: ldarg.s      argument(0x0004)
+IL_00A6: stfld        Position
+IL_00AB: dup          
+IL_00AC: ldarg.s      argument(0x0004)
+IL_00AE: stfld        SpawnPos
+IL_00B3: dup          
+IL_00B4: ldarg.s      argument(0x0005)
+IL_00B6: stfld        PreviousVelocity
+IL_00BB: dup          
+IL_00BC: ldarg.s      argument(0x0005)
+IL_00BE: stfld        Velocity
+IL_00C3: dup          
+IL_00C4: ldarg.2      
+IL_00C5: callvirt     get_ProjectileForce
+IL_00CA: stfld        Force
+IL_00CF: dup          
+IL_00D0: ldarg.2      
+IL_00D1: callvirt     get_BoatForceOverride
+IL_00D6: stfld        BoatForceOverride
+IL_00DB: dup          
+IL_00DC: call         get_OneShotEnabled
+IL_00E1: brtrue.s     288
+IL_00E3: ldarg.2      
+IL_00E4: callvirt     get_Weapon
+IL_00E9: call         UnityEngine.Object::op_Implicit
+IL_00EE: brtrue.s     275
+IL_00F0: ldarg.s      argument(0x0008)
+IL_00F2: brfalse.s    267
+IL_00F4: ldarg.2      
+IL_00F5: callvirt     get_ProjectileDamage
+IL_00FA: ldsfld       Players
+IL_00FF: callvirt     ::get_Count
+IL_0104: ldc.i4.1     
+IL_0105: sub          
+IL_0106: ldc.i4.2     
+IL_0107: mul          
+IL_0108: add          
+IL_0109: br.s         293
+IL_010B: ldarg.2      
+IL_010C: callvirt     get_ProjectileDamage
+IL_0111: br.s         293
+IL_0113: ldarg.2      
+IL_0114: callvirt     get_Weapon
+IL_0119: callvirt     get_Damage
+IL_011E: br.s         293
+IL_0120: ldc.i4       99999
+IL_0125: stfld        Damage
+IL_012A: dup          
+IL_012B: ldarg.2      
+IL_012C: callvirt     get_ProjectileGravity
+IL_0131: stfld        GravityForce
+IL_0136: dup          
+IL_0137: ldarg.s      argument(0x0008)
+IL_0139: stfld        FromNpc
+IL_013E: stloc.1      
+IL_013F: ldarg.2      
+IL_0140: callvirt     get_ShootVFX
+IL_0145: ldarg.s      argument(0x0004)
+IL_0147: ldarga.s     argument(0x0005)
+IL_0149: call         UnityEngine.Vector3::get_normalized
+IL_014E: call         UnityEngine.Quaternion::LookRotation
+IL_0153: stloc.2      
+IL_0154: ldloca.s     local(0x0002)
+IL_0156: call         UnityEngine.Quaternion::get_eulerAngles
+IL_015B: call         Play
+IL_0160: ldloc.0      
+IL_0161: ldfld        IsHitScan
+IL_0166: brfalse.s    410
+IL_0168: ldloc.0      
+IL_0169: ldfld        MeshScale
+IL_016E: stloc.3      
+IL_016F: ldloca.s     local(0x0003)
+IL_0171: ldarg.0      
+IL_0172: ldloc.1      
+IL_0173: ldloc.0      
+IL_0174: call         HitScan
+IL_0179: stfld        UnityEngine.Vector3::z
+IL_017E: ldloc.0      
+IL_017F: ldfld        InstanceMatrices
+IL_0184: ldarg.s      argument(0x0004)
+IL_0186: ldarg.s      argument(0x0005)
+IL_0188: call         UnityEngine.Quaternion::LookRotation
+IL_018D: ldloc.3      
+IL_018E: call         UnityEngine.Matrix4x4::TRS
+IL_0193: callvirt     ::Add
+IL_0198: br.s         422
+IL_019A: ldloc.0      
+IL_019B: ldfld        Projectiles
+IL_01A0: ldloc.1      
+IL_01A1: callvirt     ::Add
+IL_01A6: ldarg.1      
+IL_01A7: call         UnityEngine.Object::op_Implicit
+IL_01AC: brfalse.s    500
+IL_01AE: ldarg.1      
+IL_01AF: callvirt     FishNet.Object.NetworkBehaviour::get_IsDeinitializing
+IL_01B4: brtrue.s     500
+IL_01B6: ldarg.1      
+IL_01B7: callvirt     FishNet.Object.NetworkBehaviour::get_Owner
+IL_01BC: stloc.s      local(0x0004)
+IL_01BE: ldarg.0      
+IL_01BF: ldfld        _playerProjectiles
+IL_01C4: ldloc.s      local(0x0004)
+IL_01C6: callvirt     ::ContainsKey
+IL_01CB: brtrue.s     479
+IL_01CD: ldarg.0      
+IL_01CE: ldfld        _playerProjectiles
+IL_01D3: ldloc.s      local(0x0004)
+IL_01D5: newobj       ::.ctor
+IL_01DA: callvirt     ::Add
+IL_01DF: ldarg.0      
+IL_01E0: ldfld        _playerProjectiles
+IL_01E5: ldloc.s      local(0x0004)
+IL_01E7: callvirt     ::get_Item
+IL_01EC: ldarg.s      argument(0x0007)
+IL_01EE: ldloc.1      
+IL_01EF: callvirt     ::Add
+IL_01F4: ret          
+=== ProjectileManager::AddProjectiles RVA=0x26810 ===
+IL_000C: ldarg.s      argument(0x0005)
+IL_000E: brfalse.s    21
+IL_0010: ldarg.s      argument(0x0005)
+IL_0012: ldlen        
+IL_0013: brtrue.s     22
+IL_0015: ret          
+IL_0016: ldarg.3      
+IL_0017: brfalse.s    33
+IL_0019: ldarg.0      
+IL_001A: ldfld        _nextId
+IL_001F: starg.s      argument(0x0007)
+IL_0021: ldarg.0      
+IL_0022: ldarg.2      
+IL_0023: callvirt     get_ProjectileType
+IL_0028: call         GetType
+IL_002D: stloc.0      
+IL_002E: ldarg.3      
+IL_002F: brfalse.s    96
+IL_0031: call         get_Instance
+IL_0036: ldarg.1      
+IL_0037: ldarg.2      
+IL_0038: call         FishNet.InstanceFinder::get_TimeManager
+IL_003D: callvirt     FishNet.Managing.Timing.TimeManager::get_Tick
+IL_0042: ldarg.s      argument(0x0007)
+IL_0044: ldarg.s      argument(0x0004)
+IL_0046: ldarg.s      argument(0x0005)
+IL_0048: callvirt     AddProjectiles
+IL_004D: ldarg.0      
+IL_004E: ldarg.0      
+IL_004F: ldfld        _nextId
+IL_0054: ldarg.s      argument(0x0005)
+IL_0056: ldlen        
+IL_0057: conv.i4      
+IL_0058: add          
+IL_0059: stfld        _nextId
+IL_005E: br.s         121
+IL_0060: ldarg.2      
+IL_0061: callvirt     get_Weapon
+IL_0066: call         UnityEngine.Object::op_Implicit
+IL_006B: brfalse.s    121
+IL_006D: ldarg.2      
+IL_006E: callvirt     get_Weapon
+IL_0073: ldc.i4.0     
+IL_0074: callvirt     ShootEffects
+IL_0079: ldc.i4.0     
+IL_007A: stloc.1      
+IL_007B: br           513
+IL_0080: ldarg.s      argument(0x0005)
+IL_0082: ldloc.1      
+IL_0083: ldelem       <dnfile.mdtable.TypeRefRow object at 0x000001730BF3BC50>
+IL_0088: stloc.2      
+IL_0089: ldarg.s      argument(0x0007)
+IL_008B: ldloc.1      
+IL_008C: add          
+IL_008D: stloc.3      
+IL_008E: newobj       .ctor
+IL_0093: dup          
+IL_0094: ldarg.2      
+IL_0095: callvirt     get_ProjectileType
+IL_009A: stfld        TypeId
+IL_009F: dup          
+IL_00A0: ldarg.1      
+IL_00A1: stfld        Owner
+IL_00A6: dup          
+IL_00A7: ldarg.3      
+IL_00A8: stfld        IsLocal
+IL_00AD: dup          
+IL_00AE: ldarg.s      argument(0x0006)
+IL_00B0: stfld        CatchingUpToDo
+IL_00B5: dup          
+IL_00B6: ldloc.3      
+IL_00B7: stfld        Id
+IL_00BC: dup          
+IL_00BD: ldarg.s      argument(0x0004)
+IL_00BF: stfld        PreviousPosition
+IL_00C4: dup          
+IL_00C5: ldarg.s      argument(0x0004)
+IL_00C7: stfld        Position
+IL_00CC: dup          
+IL_00CD: ldarg.s      argument(0x0004)
+IL_00CF: stfld        SpawnPos
+IL_00D4: dup          
+IL_00D5: ldloc.2      
+IL_00D6: stfld        PreviousVelocity
+IL_00DB: dup          
+IL_00DC: ldloc.2      
+IL_00DD: stfld        Velocity
+IL_00E2: dup          
+IL_00E3: ldarg.2      
+IL_00E4: callvirt     get_ProjectileForce
+IL_00E9: stfld        Force
+IL_00EE: dup          
+IL_00EF: ldarg.2      
+IL_00F0: callvirt     get_BoatForceOverride
+IL_00F5: stfld        BoatForceOverride
+IL_00FA: dup          
+IL_00FB: call         get_OneShotEnabled
+IL_0100: brtrue.s     292
+IL_0102: ldarg.2      
+IL_0103: callvirt     get_Weapon
+IL_0108: call         UnityEngine.Object::op_Implicit
+IL_010D: brtrue.s     279
+IL_010F: ldarg.2      
+IL_0110: callvirt     get_ProjectileDamage
+IL_0115: br.s         297
+IL_0117: ldarg.2      
+IL_0118: callvirt     get_Weapon
+IL_011D: callvirt     get_Damage
+IL_0122: br.s         297
+IL_0124: ldc.i4       99999
+IL_0129: stfld        Damage
+IL_012E: dup          
+IL_012F: ldarg.2      
+IL_0130: callvirt     get_ProjectileGravity
+IL_0135: stfld        GravityForce
+IL_013A: dup          
+IL_013B: ldarg.s      argument(0x0008)
+IL_013D: stfld        FromNpc
+IL_0142: stloc.s      local(0x0004)
+IL_0144: ldarg.2      
+IL_0145: callvirt     get_ShootVFX
+IL_014A: ldarg.s      argument(0x0004)
+IL_014C: ldloca.s     local(0x0002)
+IL_014E: call         UnityEngine.Vector3::get_normalized
+IL_0153: call         UnityEngine.Quaternion::LookRotation
+IL_0158: stloc.s      local(0x0005)
+IL_015A: ldloca.s     local(0x0005)
+IL_015C: call         UnityEngine.Quaternion::get_eulerAngles
+IL_0161: call         Play
+IL_0166: ldloc.0      
+IL_0167: ldfld        IsHitScan
+IL_016C: brfalse.s    418
+IL_016E: ldloc.0      
+IL_016F: ldfld        MeshScale
+IL_0174: stloc.s      local(0x0006)
+IL_0176: ldloca.s     local(0x0006)
+IL_0178: ldarg.0      
+IL_0179: ldloc.s      local(0x0004)
+IL_017B: ldloc.0      
+IL_017C: call         HitScan
+IL_0181: stfld        UnityEngine.Vector3::z
+IL_0186: ldloc.0      
+IL_0187: ldfld        InstanceMatrices
+IL_018C: ldarg.s      argument(0x0004)
+IL_018E: ldloc.2      
+IL_018F: call         UnityEngine.Quaternion::LookRotation
+IL_0194: ldloc.s      local(0x0006)
+IL_0196: call         UnityEngine.Matrix4x4::TRS
+IL_019B: callvirt     ::Add
+IL_01A0: br.s         431
+IL_01A2: ldloc.0      
+IL_01A3: ldfld        Projectiles
+IL_01A8: ldloc.s      local(0x0004)
+IL_01AA: callvirt     ::Add
+IL_01AF: ldarg.1      
+IL_01B0: call         UnityEngine.Object::op_Implicit
+IL_01B5: brfalse.s    509
+IL_01B7: ldarg.1      
+IL_01B8: callvirt     FishNet.Object.NetworkBehaviour::get_IsDeinitializing
+IL_01BD: brtrue.s     509
+IL_01BF: ldarg.1      
+IL_01C0: callvirt     FishNet.Object.NetworkBehaviour::get_Owner
+IL_01C5: stloc.s      local(0x0007)
+IL_01C7: ldarg.0      
+IL_01C8: ldfld        _playerProjectiles
+IL_01CD: ldloc.s      local(0x0007)
+IL_01CF: callvirt     ::ContainsKey
+IL_01D4: brtrue.s     488
+IL_01D6: ldarg.0      
+IL_01D7: ldfld        _playerProjectiles
+IL_01DC: ldloc.s      local(0x0007)
+IL_01DE: newobj       ::.ctor
+IL_01E3: callvirt     ::Add
+IL_01E8: ldarg.0      
+IL_01E9: ldfld        _playerProjectiles
+IL_01EE: ldloc.s      local(0x0007)
+IL_01F0: callvirt     ::get_Item
+IL_01F5: ldloc.3      
+IL_01F6: ldloc.s      local(0x0004)
+IL_01F8: callvirt     ::Add
+IL_01FD: ldloc.1      
+IL_01FE: ldc.i4.1     
+IL_01FF: add          
+IL_0200: stloc.1      
+IL_0201: ldloc.1      
+IL_0202: ldarg.s      argument(0x0005)
+IL_0204: ldlen        
+IL_0205: conv.i4      
+IL_0206: blt          128
+IL_020B: ret          

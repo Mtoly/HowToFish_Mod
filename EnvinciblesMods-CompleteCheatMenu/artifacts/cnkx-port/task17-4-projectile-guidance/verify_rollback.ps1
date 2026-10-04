@@ -1,0 +1,26 @@
+$ErrorActionPreference = 'Stop'
+$workspace = 'D:\Code\How2fish\EnvinciblesMods-CompleteCheatMenu'
+$artifact = Join-Path $workspace 'artifacts\cnkx-port\task17-4-projectile-guidance'
+$test = [IO.Path]::GetFullPath((Join-Path $artifact 'rollback-test-ps-20260825'))
+if (-not $test.StartsWith([IO.Path]::GetFullPath($artifact), [StringComparison]::OrdinalIgnoreCase)) { throw 'Rollback test path escaped artifact directory.' }
+if (Test-Path -LiteralPath $test) { Remove-Item -LiteralPath $test -Recurse -Force }
+New-Item -ItemType Directory -Path $test | Out-Null
+foreach ($directory in @('decompiled-src', 'docs', 'tests', 'tools')) { Copy-Item -LiteralPath (Join-Path $workspace $directory) -Destination $test -Recurse }
+$dll = Join-Path $test 'deployed.dll'
+Copy-Item -LiteralPath (Join-Path $artifact 'CompleteCheatMenu.task17-4.zh-CN.dll') -Destination $dll
+& (Join-Path $artifact 'ROLLBACK_TASK17_4.ps1') -DestinationRoot $test -DestinationDll $dll | Tee-Object -FilePath (Join-Path $artifact 'rollback-ps-run.txt')
+$map = [ordered]@{
+ 'decompiled-src__CompleteCheatMenu__Runtime__CheatState.cs'='decompiled-src\CompleteCheatMenu\Runtime\CheatState.cs'; 'decompiled-src__CompleteCheatMenu__Runtime__Presets.cs'='decompiled-src\CompleteCheatMenu\Runtime\Presets.cs'; 'decompiled-src__CompleteCheatMenu__UI__Tabs__WeaponsTab.cs'='decompiled-src\CompleteCheatMenu\UI\Tabs\WeaponsTab.cs'; 'decompiled-src__CompleteCheatMenu__UI__Tabs__DiagnosticsTab.cs'='decompiled-src\CompleteCheatMenu\UI\Tabs\DiagnosticsTab.cs'; 'decompiled-src__CompleteCheatMenu__Plugin.cs'='decompiled-src\CompleteCheatMenu\Plugin.cs'; 'decompiled-src__CompleteCheatMenu__Targeting__BallisticPredictor.cs'='decompiled-src\CompleteCheatMenu\Targeting\BallisticPredictor.cs'; 'decompiled-src__CompleteCheatMenu__Targeting__InitialVelocityRedirector.cs'='decompiled-src\CompleteCheatMenu\Targeting\InitialVelocityRedirector.cs'; 'decompiled-src__CompleteCheatMenu__Patches__WeaponAddProjectile_Patch.cs'='decompiled-src\CompleteCheatMenu\Patches\WeaponAddProjectile_Patch.cs'; 'decompiled-src__CompleteCheatMenu__Patches__WeaponAddProjectiles_Patch.cs'='decompiled-src\CompleteCheatMenu\Patches\WeaponAddProjectiles_Patch.cs'; 'tests__ballistic_prediction_test.py'='tests\ballistic_prediction_test.py'; 'tests__projectile_initial_velocity_harness.cs'='tests\projectile_initial_velocity_harness.cs'; 'docs__plans__2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md'='docs\plans\2026-08-25-complete-cheat-menu-cnkx-port-implementation-plan.md'
+}
+foreach ($entry in $map.GetEnumerator()) { $expected=(Get-FileHash -LiteralPath (Join-Path $artifact ('original\'+$entry.Key)) -Algorithm SHA256).Hash; $actual=(Get-FileHash -LiteralPath (Join-Path $test $entry.Value) -Algorithm SHA256).Hash; Write-Output "SOURCE_MATCH $($entry.Value)=$($expected -eq $actual)"; if($expected-ne$actual){throw "Source rollback mismatch: $($entry.Value)"} }
+$created=@('decompiled-src\CompleteCheatMenu\Targeting\ProjectileGuidance.cs','decompiled-src\CompleteCheatMenu\Targeting\ProjectileGuidanceMath.cs','decompiled-src\CompleteCheatMenu\Patches\ProjectileUpdateScan_Patch.cs','decompiled-src\CompleteCheatMenu\Patches\ProjectileRemove_Patch.cs','tests\projectile_guidance_test.py','tests\projectile_guidance_harness.cs','tests\projectile_guidance_lifecycle_harness.cs')
+$present=@($created|Where-Object{Test-Path -LiteralPath(Join-Path $test $_)-PathType Leaf});Write-Output "CREATED_FILES_PRESENT=$($present.Count)";if($present.Count-ne0){throw 'Created Task 17.4 files remain.'}
+Push-Location $test
+try {
+ foreach($case in Get-ChildItem '.\tests' -Filter '*_test.py'|Sort-Object Name){$output=& python $case.FullName 2>&1;Write-Output "$($case.Name): $($output-join' | ') EXIT=$LASTEXITCODE";if($LASTEXITCODE-ne0){throw "Rollback regression failed: $($case.Name)"}}
+ $csc='D:\Code\How2fish\Kai935-FishAimbot\.tools\roslyn\tasks\net472\csc.exe'
+ $life=Join-Path $test 'projectile_lifecycle_harness.exe';&$csc /nologo /target:exe /optimize+ "/out:$life" '.\tests\projectile_lifecycle_harness.cs' '.\decompiled-src\CompleteCheatMenu\Targeting\ProjectileOwnership.cs' '.\decompiled-src\CompleteCheatMenu\Targeting\ProjectileTracker.cs' '.\decompiled-src\CompleteCheatMenu\Targeting\MagicShotContext.cs';if($LASTEXITCODE-ne0){throw 'Lifecycle harness build failed'};&$life;if($LASTEXITCODE-ne0){throw 'Lifecycle harness failed'}
+ $initial=Join-Path $test 'projectile_initial_velocity_harness.exe';&$csc /nologo /target:exe /optimize+ "/out:$initial" '.\tests\projectile_initial_velocity_harness.cs' '.\decompiled-src\CompleteCheatMenu\Targeting\InitialVelocityRedirector.cs';if($LASTEXITCODE-ne0){throw 'Initial harness build failed'};&$initial;if($LASTEXITCODE-ne0){throw 'Initial harness failed'}
+ $raw=Join-Path $test 'rollback-task17-3.raw.dll';&'.\decompiled-src\build.ps1' -GameRoot 'E:\SteamLibrary\steamapps\common\How to Fish\How to Fish' -OutputPath $raw;if($LASTEXITCODE-ne0){throw 'Rollback build failed'}
+} finally { Pop-Location }
+$restored=(Get-FileHash $dll -Algorithm SHA256).Hash;Write-Output "RESTORED_BASELINE_DLL_SHA256=$restored";if($restored-ne'71C880055D706399932994C8CC1F9D46F5F5E9EDDDC5E7BFB8C030A73EA8E72C'){throw 'Restored DLL mismatch'};Write-Output 'ROLLBACK_PS_VERIFICATION=PASS'
